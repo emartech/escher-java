@@ -36,7 +36,8 @@ class Helper {
         return headers
                 .stream()
                 .map(array -> array[0].toLowerCase())
-                .sorted().reduce((s1, s2) -> s1 + ';' + s2)
+                .sorted()
+                .reduce((s1, s2) -> s1 + ';' + s2)
                 .get();
     }
 
