@@ -12,6 +12,14 @@ public class Request {
     private Map<String, String> queryParameters;
     private String body;
 
+    public Request(String httpMethod, Map<String, String> headers, String host, String path, Map<String, String> queryParameters, String body) {
+        this.httpMethod = httpMethod;
+        this.headers = headers;
+        this.host = host;
+        this.path = path;
+        this.queryParameters = queryParameters;
+        this.body = body;
+    }
 
     public String getHttpMethod() {
         return httpMethod;
