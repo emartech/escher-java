@@ -2,7 +2,9 @@ package com.emarsys.escher;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -11,9 +13,9 @@ public class HelperTest {
 
     @Test
     public void testCanonicalize() throws Exception{
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Date", "Mon, 09 Sep 2011 23:36:00 GMT");
-        headers.put("Host", "host.foo.com");
+        List<String[]> headers = new ArrayList<>();
+        headers.add(new String[] {"Date", "Mon, 09 Sep 2011 23:36:00 GMT"});
+        headers.add(new String[] {"Host", "host.foo.com"});
 
         Map<String, String> params = new HashMap<>();
 

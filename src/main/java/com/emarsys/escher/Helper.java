@@ -1,12 +1,8 @@
 package com.emarsys.escher;
 
-import org.apache.commons.lang3.StringUtils;
-
 import javax.xml.bind.DatatypeConverter;
-import java.lang.*;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.List;
 
 class Helper {
 
@@ -27,24 +23,21 @@ class Helper {
                 bodyHash;
     }
 
-    private static String canonicalizeHeaders(Map<String, String> headers) {
-        List<String> resultLines = new ArrayList<>();
-        headers.forEach((key, value) -> {
-            resultLines.add(key.toLowerCase() + ":" + value);
-        });
-
-        Collections.sort(resultLines);
-
-        return StringUtils.join(resultLines, NEW_LINE);
+    private static String canonicalizeHeaders(List<String[]> headers) {
+        return headers
+                .stream()
+                .map(array -> array[0].toLowerCase() + ":" + array[1])
+                .sorted()
+                .reduce((s1, s2) -> s1 + NEW_LINE + s2)
+                .get();
     }
 
-    private static String signedHeaders(Map<String, String> headers) {
-        TreeSet<String> headersToSign = new TreeSet<>();
-        headers.forEach((key, value) -> {
-            headersToSign.add(key.toLowerCase());
-        });
-
-        return StringUtils.join(headersToSign, ';');
+    private static String signedHeaders(List<String[]> headers) {
+        return headers
+                .stream()
+                .map(array -> array[0].toLowerCase())
+                .sorted().reduce((s1, s2) -> s1 + ';' + s2)
+                .get();
     }
 
     private static String bodyHash(String body) throws EscherException {
