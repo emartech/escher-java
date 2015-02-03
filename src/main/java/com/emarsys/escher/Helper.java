@@ -9,18 +9,13 @@ class Helper {
     private static final char NEW_LINE = '\n';
 
     static String canonicalize(Request request) throws EscherException {
-
-        String canonicalizedHeaders = canonicalizeHeaders(request.getHeaders());
-        String signedHeaders = signedHeaders(request.getHeaders());
-        String bodyHash = bodyHash(request.getBody());
-
         return request.getHttpMethod() + NEW_LINE +
                 request.getPath() + NEW_LINE +
                 "" + NEW_LINE +
-                canonicalizedHeaders + NEW_LINE +
+                canonicalizeHeaders(request.getHeaders()) + NEW_LINE +
                 NEW_LINE +
-                signedHeaders + NEW_LINE +
-                bodyHash;
+                signedHeaders(request.getHeaders()) + NEW_LINE +
+                bodyHash(request.getBody());
     }
 
     private static String canonicalizeHeaders(List<String[]> headers) {
