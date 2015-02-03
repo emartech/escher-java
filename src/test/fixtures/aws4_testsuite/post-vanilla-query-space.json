@@ -7,7 +7,7 @@
     "request": {
         "host": "host.foo.com",
         "method": "POST",
-        "url": "/?f",
+        "url": "/?f oo=b ar",
         "headers": [
             [
                 "Date",
@@ -35,7 +35,7 @@
         "request": {
             "host": "host.foo.com",
             "method": "POST",
-            "url": "/?f",
+            "url": "/?f oo=b ar",
             "headers": [
                 [
                     "Date",
