@@ -2,6 +2,8 @@ package com.emarsys.escher;
 
 import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 class Helper {
@@ -15,7 +17,7 @@ class Helper {
                 canonicalizeHeaders(request.getHeaders()) + NEW_LINE +
                 NEW_LINE +
                 signedHeaders(request.getHeaders()) + NEW_LINE +
-                bodyHash(request.getBody());
+                hash(request.getBody());
     }
 
     private static String canonicalizeHeaders(List<String[]> headers) {
@@ -36,10 +38,10 @@ class Helper {
                 .get();
     }
 
-    private static String bodyHash(String body) throws EscherException {
+    private static String hash(String text) throws EscherException {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(body.getBytes("utf-8"));
+            md.update(text.getBytes("utf-8"));
             byte[] bytes = md.digest();
             return DatatypeConverter.printHexBinary(bytes).toLowerCase();
         } catch (Exception e) {
@@ -47,4 +49,11 @@ class Helper {
         }
     }
 
+
+    public static String calculateStringToSign(String credentialScope, String canonicalizedRequest, Date date, String hashAlgo, String algoPrefix) throws EscherException{
+        return algoPrefix + "-HMAC-" + hashAlgo + NEW_LINE
+                + new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'").format(date) + NEW_LINE
+                + new SimpleDateFormat("yyyyMMdd").format(date) + "/" + credentialScope + NEW_LINE
+                + hash(canonicalizedRequest);
+    }
 }
