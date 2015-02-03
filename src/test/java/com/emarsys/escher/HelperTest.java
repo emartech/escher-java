@@ -42,7 +42,7 @@ public class HelperTest {
                 "post-header-key-sort",
                 "post-header-value-case",
 
-//                "get-vanilla-query-order-value",
+                "get-vanilla-query-order-value",
 //                "get-vanilla-query-order-key-case",
 //                "get-unreserved",
 //                "get-vanilla-query-unreserved",

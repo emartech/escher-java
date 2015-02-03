@@ -26,6 +26,7 @@ class Helper {
         return request.getQueryParameters()
                 .stream()
                 .map(entry -> entry.getName() + "=" + entry.getValue())
+                .sorted()
                 .reduce(byJoiningWith('&'))
                 .orElseGet(() -> "");
     }
