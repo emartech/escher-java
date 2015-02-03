@@ -55,16 +55,15 @@ class Helper {
     public static String calculateStringToSign(String credentialScope, String canonicalizedRequest, Date date, String hashAlgo, String algoPrefix) throws EscherException{
         return algoPrefix + "-HMAC-" + hashAlgo + NEW_LINE
                 + new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'").format(date) + NEW_LINE
-                + new SimpleDateFormat("yyyyMMdd").format(date) + "/" + credentialScope + NEW_LINE
+                + shortDate(date) + "/" + credentialScope + NEW_LINE
                 + hash(canonicalizedRequest);
     }
 
 
     public static byte[] calculateSigningKey(String secret, Date date, String credentialScope, String hashAlgo, String algoPrefix) throws EscherException{
-        hashAlgo = "Hmac" + hashAlgo.toUpperCase();
         byte[] key = (algoPrefix + secret).getBytes();
 
-        byte[] data = new SimpleDateFormat("yyyyMMdd").format(date).getBytes();
+        byte[] data = shortDate(date).getBytes();
 
         key = sign(hashAlgo, key, data);
 
@@ -76,8 +75,14 @@ class Helper {
     }
 
 
+    private static String shortDate(Date date) {
+        return new SimpleDateFormat("yyyyMMdd").format(date);
+    }
+
+
     private static byte[] sign(String hashAlgo, byte[] key, byte[] data) throws EscherException {
         try {
+            hashAlgo = "Hmac" + hashAlgo.toUpperCase();
             Mac mac = Mac.getInstance(hashAlgo);
             mac.init(new SecretKeySpec(key, hashAlgo));
             return mac.doFinal(data);
@@ -86,5 +91,14 @@ class Helper {
                     "Unable to calculate a request signature: "
                             + e.getMessage(), e);
         }
+    }
+
+
+    public static String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, byte[] signingKey, String hashAlgo, String algoPrefix, List<String> signedHeaders, String stringToSign) throws EscherException {
+        String signature = DatatypeConverter.printHexBinary(sign(hashAlgo, signingKey, stringToSign.getBytes())).toLowerCase();
+        return algoPrefix + "-HMAC-" + hashAlgo +
+                " Credential=" + accessKeyId + "/" + shortDate(date) + "/" + credentialScope +
+                ", SignedHeaders=" + signedHeaders.stream().reduce((s1, s2) -> s1 + ";" + s2).get().toLowerCase() +
+                ", Signature=" + signature;
     }
 }
