@@ -18,7 +18,7 @@ public class Request {
 
 
     public Request(String httpMethod, URI uri, List<String[]> headers, String body) {
-        this(httpMethod, headers, uri.getHost(), uri.getPath(), URLEncodedUtils.parse(uri, "utf-8"), body);
+        this(httpMethod, headers, uri.getHost(), uri.getRawPath(), URLEncodedUtils.parse(uri, "utf-8"), body);
     }
 
 
