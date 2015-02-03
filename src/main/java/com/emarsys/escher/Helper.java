@@ -4,6 +4,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.function.BinaryOperator;
 
 class Helper {
 
@@ -13,29 +14,45 @@ class Helper {
     static String canonicalize(Request request) throws EscherException {
         return request.getHttpMethod() + NEW_LINE +
                 request.getPath() + NEW_LINE +
-                "" + NEW_LINE +
+                canonicalizeQueryParameters(request) + NEW_LINE +
                 canonicalizeHeaders(request.getHeaders()) + NEW_LINE +
                 NEW_LINE +
                 signedHeaders(request.getHeaders()) + NEW_LINE +
                 Hmac.hash(request.getBody());
     }
 
+
+    private static String canonicalizeQueryParameters(Request request) {
+        return request.getQueryParameters().entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .reduce(byJoiningWith('&'))
+                .orElseGet(() -> "");
+    }
+
+
     private static String canonicalizeHeaders(List<String[]> headers) {
         return headers
                 .stream()
                 .map(array -> array[0].toLowerCase() + ":" + array[1])
                 .sorted()
-                .reduce((s1, s2) -> s1 + NEW_LINE + s2)
+                .reduce(byJoiningWith(NEW_LINE))
                 .get();
     }
+
 
     private static String signedHeaders(List<String[]> headers) {
         return headers
                 .stream()
                 .map(array -> array[0].toLowerCase())
                 .sorted()
-                .reduce((s1, s2) -> s1 + ';' + s2)
+                .reduce(byJoiningWith(';'))
                 .get();
+    }
+
+
+    private static BinaryOperator<String> byJoiningWith(char separator) {
+        return (s1, s2) -> s1 + separator + s2;
     }
 
 

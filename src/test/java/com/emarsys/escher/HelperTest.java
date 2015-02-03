@@ -1,5 +1,7 @@
 package com.emarsys.escher;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,6 +10,7 @@ import org.junit.runners.Parameterized;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.File;
+import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -24,12 +27,20 @@ public class HelperTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         String[] fileList = new String[] {
-                "src/test/fixtures/aws4_testsuite/get-vanilla.json"
+                "get-vanilla",
+                "post-vanilla",
+                "get-vanilla-query",
+                "post-vanilla-query",
+//                "get-vanilla-empty-query-key",
+//                "post-vanilla-empty-query-value",
+//                "get-vanilla-query-order-key",
+//                "post-x-www-form-urlencoded",
+//                "post-x-www-form-urlencoded-parameters"
         };
 
         ArrayList<Object[]> testCases = new ArrayList<>();
         for (String fileName : fileList) {
-            testCases.add(new String[] { fileName });
+            testCases.add(new String[] { "src/test/fixtures/aws4_testsuite/" + fileName + ".json" });
         }
         return testCases;
     }
@@ -49,6 +60,7 @@ public class HelperTest {
 
     @Test
     public void testCanonicalize() throws Exception {
+
         TestParam.Request paramRequest = param.getRequest();
 
         List<String[]> headers = new ArrayList<>();
@@ -56,9 +68,15 @@ public class HelperTest {
             headers.add(new String[] {header.get(0), header.get(1)});
         }
 
+
         Map<String, String> params = new HashMap<>();
 
-        Request request = new Request(paramRequest.getMethod(), headers, paramRequest.getHost(), paramRequest.getUrl(), params, paramRequest.getBody());
+        URI uri = new URI(paramRequest.getUrl());
+        for (NameValuePair nameValuePair : URLEncodedUtils.parse(uri, "UTF-8")) {
+            params.put(nameValuePair.getName(), nameValuePair.getValue());
+        }
+
+        Request request = new Request(paramRequest.getMethod(), headers, paramRequest.getHost(), uri.getPath(), params, paramRequest.getBody());
 
         String canonicalised = Helper.canonicalize(request);
 
