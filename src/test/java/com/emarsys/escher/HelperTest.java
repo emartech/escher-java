@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -83,7 +84,7 @@ public class HelperTest {
 
     @Test
     public void testCalculateAuthHeader() throws Exception {
-        byte[] signingKey = Helper.calculateSigningKey(
+        String signingKey = Helper.calculateSigningKey(
                 param.getConfig().getApiSecret(),
                 getConfigDate(),
                 param.getConfig().getCredentialScope(),
@@ -94,7 +95,7 @@ public class HelperTest {
                 param.getConfig().getAccessKeyId(),
                 getConfigDate(),
                 param.getConfig().getCredentialScope(),
-                signingKey,
+                DatatypeConverter.parseHexBinary(signingKey),
                 param.getConfig().getHashAlgo(),
                 param.getConfig().getAlgoPrefix(),
                 param.getHeadersToSign(),
