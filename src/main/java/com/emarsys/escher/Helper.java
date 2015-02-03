@@ -1,5 +1,7 @@
 package com.emarsys.escher;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
@@ -55,5 +57,34 @@ class Helper {
                 + new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'").format(date) + NEW_LINE
                 + new SimpleDateFormat("yyyyMMdd").format(date) + "/" + credentialScope + NEW_LINE
                 + hash(canonicalizedRequest);
+    }
+
+
+    public static byte[] calculateSigningKey(String secret, Date date, String credentialScope, String hashAlgo, String algoPrefix) throws EscherException{
+        hashAlgo = "Hmac" + hashAlgo.toUpperCase();
+        byte[] key = (algoPrefix + secret).getBytes();
+
+        byte[] data = new SimpleDateFormat("yyyyMMdd").format(date).getBytes();
+
+        key = sign(hashAlgo, key, data);
+
+        for (String credentialPart : credentialScope.split("/")) {
+            key = sign(hashAlgo, key, credentialPart.getBytes());
+        }
+
+        return key;
+    }
+
+
+    private static byte[] sign(String hashAlgo, byte[] key, byte[] data) throws EscherException {
+        try {
+            Mac mac = Mac.getInstance(hashAlgo);
+            mac.init(new SecretKeySpec(key, hashAlgo));
+            return mac.doFinal(data);
+        } catch (Exception e) {
+            throw new EscherException(
+                    "Unable to calculate a request signature: "
+                            + e.getMessage(), e);
+        }
     }
 }
