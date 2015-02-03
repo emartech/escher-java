@@ -31,11 +31,33 @@ public class HelperTest {
                 "post-vanilla",
                 "get-vanilla-query",
                 "post-vanilla-query",
-//                "get-vanilla-empty-query-key",
-//                "post-vanilla-empty-query-value",
-//                "get-vanilla-query-order-key",
-//                "post-x-www-form-urlencoded",
-//                "post-x-www-form-urlencoded-parameters"
+                "get-vanilla-empty-query-key",
+                "post-vanilla-empty-query-value",
+                "get-vanilla-query-order-key",
+                "post-x-www-form-urlencoded",
+                "post-x-www-form-urlencoded-parameters",
+
+                "get-header-value-trim",
+//                "post-header-key-case",
+//                "post-header-key-sort",
+//                "post-header-value-case",
+//
+//                "get-vanilla-query-order-value",
+//                "get-vanilla-query-order-key-case",
+//                "get-unreserved",
+//                "get-vanilla-query-unreserved",
+//                "get-vanilla-ut8-query",
+//                "get-utf8",
+//                "get-space",
+//                "post-vanilla-query-space",
+//                "post-vanilla-query-nonunreserved",
+//
+//                "get-slash",
+//                "get-slashes",
+//                "get-slash-dot-slash",
+//                "get-slash-pointless-dot",
+//                "get-relative",
+//                "get-relative-relative",
         };
 
         ArrayList<Object[]> testCases = new ArrayList<>();
@@ -72,7 +94,7 @@ public class HelperTest {
         Map<String, String> params = new HashMap<>();
 
         URI uri = new URI(paramRequest.getUrl());
-        for (NameValuePair nameValuePair : URLEncodedUtils.parse(uri, "UTF-8")) {
+        for (NameValuePair nameValuePair : URLEncodedUtils.parse(uri, "utf-8")) {
             params.put(nameValuePair.getName(), nameValuePair.getValue());
         }
 
@@ -80,7 +102,7 @@ public class HelperTest {
 
         String canonicalised = Helper.canonicalize(request);
 
-        assertEquals(param.getExpected().getCanonicalizedRequest(), canonicalised);
+        assertEquals(fileName, param.getExpected().getCanonicalizedRequest(), canonicalised);
     }
 
 
@@ -91,7 +113,7 @@ public class HelperTest {
                 getConfigDate(),
                 param.getConfig().getHashAlgo(),
                 param.getConfig().getAlgoPrefix());
-        assertEquals(param.getExpected().getStringToSign(), stringToSign);
+        assertEquals(fileName, param.getExpected().getStringToSign(), stringToSign);
     }
 
 
@@ -119,7 +141,7 @@ public class HelperTest {
                 param.getHeadersToSign(),
                 param.getExpected().getStringToSign()
         );
-        assertEquals(param.getExpected().getAuthHeader(), authHeader);
+        assertEquals(fileName, param.getExpected().getAuthHeader(), authHeader);
     }
 
 }

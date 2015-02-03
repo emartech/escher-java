@@ -34,7 +34,7 @@ class Helper {
     private static String canonicalizeHeaders(List<String[]> headers) {
         return headers
                 .stream()
-                .map(array -> array[0].toLowerCase() + ":" + array[1])
+                .map(array -> array[0].toLowerCase() + ":" + array[1].trim())
                 .sorted()
                 .reduce(byJoiningWith(NEW_LINE))
                 .get();
