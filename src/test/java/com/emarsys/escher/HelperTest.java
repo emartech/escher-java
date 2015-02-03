@@ -38,10 +38,10 @@ public class HelperTest {
                 "post-x-www-form-urlencoded-parameters",
 
                 "get-header-value-trim",
-//                "post-header-key-case",
-//                "post-header-key-sort",
-//                "post-header-value-case",
-//
+                "post-header-key-case",
+                "post-header-key-sort",
+                "post-header-value-case",
+
 //                "get-vanilla-query-order-value",
 //                "get-vanilla-query-order-key-case",
 //                "get-unreserved",
@@ -93,12 +93,12 @@ public class HelperTest {
 
         Map<String, String> params = new HashMap<>();
 
-        URI uri = new URI(paramRequest.getUrl());
+        URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
         for (NameValuePair nameValuePair : URLEncodedUtils.parse(uri, "utf-8")) {
             params.put(nameValuePair.getName(), nameValuePair.getValue());
         }
 
-        Request request = new Request(paramRequest.getMethod(), headers, paramRequest.getHost(), uri.getPath(), params, paramRequest.getBody());
+        Request request = new Request(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
 
         String canonicalised = Helper.canonicalize(request);
 

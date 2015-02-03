@@ -1,8 +1,11 @@
 package com.emarsys.escher;
 
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+
+import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 public class Request {
 
@@ -10,10 +13,16 @@ public class Request {
     private List<String[]> headers;
     private String host;
     private String path;
-    private Map<String, String> queryParameters;
+    private List<NameValuePair> queryParameters;
     private String body;
 
-    public Request(String httpMethod, List<String[]> headers, String host, String path, Map<String, String> queryParameters, String body) {
+
+    public Request(String httpMethod, URI uri, List<String[]> headers, String body) {
+        this(httpMethod, headers, uri.getHost(), uri.getPath(), URLEncodedUtils.parse(uri, "utf-8"), body);
+    }
+
+
+    public Request(String httpMethod, List<String[]> headers, String host, String path,  List<NameValuePair> queryParameters, String body) {
         this.httpMethod = httpMethod;
         this.headers = headers;
         this.host = host;
@@ -62,11 +71,11 @@ public class Request {
         this.path = path;
     }
 
-    public Map<String, String> getQueryParameters() {
+    public List<NameValuePair> getQueryParameters() {
         return queryParameters;
     }
 
-    public void setQueryParameters(Map<String, String> queryParameters) {
+    public void setQueryParameters(List<NameValuePair> queryParameters) {
         this.queryParameters = queryParameters;
     }
 

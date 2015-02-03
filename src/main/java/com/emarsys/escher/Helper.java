@@ -23,9 +23,9 @@ class Helper {
 
 
     private static String canonicalizeQueryParameters(Request request) {
-        return request.getQueryParameters().entrySet()
+        return request.getQueryParameters()
                 .stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .map(entry -> entry.getName() + "=" + entry.getValue())
                 .reduce(byJoiningWith('&'))
                 .orElseGet(() -> "");
     }
