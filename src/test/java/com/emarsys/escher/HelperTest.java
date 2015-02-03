@@ -17,7 +17,6 @@ public class HelperTest {
 
     private String fileName;
     private TestParam param;
-    private Request request;
 
 
     @Parameterized.Parameters
@@ -43,6 +42,11 @@ public class HelperTest {
     public void setUp() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         param = mapper.readValue(new File(this.fileName), TestParam.class);
+    }
+
+
+    @Test
+    public void testCanonicalize() throws Exception {
         TestParam.Request paramRequest = param.getRequest();
 
         List<String[]> headers = new ArrayList<>();
@@ -52,13 +56,10 @@ public class HelperTest {
 
         Map<String, String> params = new HashMap<>();
 
-        request = new Request(paramRequest.getMethod(), headers, paramRequest.getHost(), paramRequest.getUrl(), params, paramRequest.getBody());
-    }
+        Request request = new Request(paramRequest.getMethod(), headers, paramRequest.getHost(), paramRequest.getUrl(), params, paramRequest.getBody());
 
-
-    @Test
-    public void testCanonicalize() throws Exception {
         String canonicalised = Helper.canonicalize(request);
+
         assertEquals(param.getExpected().getCanonicalizedRequest(), canonicalised);
     }
 
