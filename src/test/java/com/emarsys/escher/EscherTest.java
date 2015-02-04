@@ -53,4 +53,20 @@ public class EscherTest {
         return new Request(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
     }
 
+
+    @Test
+    public void testPresignUrl() throws Exception {
+        Escher escher = new Escher("us-east-1/host/aws4_request")
+                .setAlgoPrefix("EMS")
+                .setVendorKey("EMS")
+                .setAuthHeaderName("X-Ems-Auth")
+                .setDateHeaderName("X-Ems-Date")
+                .setCurrentTime(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2011/05/11 12:00:00"));;
+
+        int expires = 123456;
+        String signedUrl = escher.presignUrl("http://example.com/something?foo=bar&baz=barbaz", "th3K3y", "very_secure", expires);
+
+        String expectedSignedUrl = "http://example.com/something?foo=bar&baz=barbaz&X-EMS-Algorithm=EMS-HMAC-SHA256&X-EMS-Credentials=th3K3y%2F20110511%2Fus-east-1%2Fhost%2Faws4_request&X-EMS-Date=20110511T120000Z&X-EMS-Expires=123456&X-EMS-SignedHeaders=host&X-EMS-Signature=fbc9dbb91670e84d04ad2ae7505f4f52ab3ff9e192b8233feeae57e9022c2b67";
+        assertEquals(expectedSignedUrl, signedUrl);
+    }
 }

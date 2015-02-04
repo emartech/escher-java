@@ -47,7 +47,7 @@ public class HelperTestWithTestData {
                 "get-vanilla-query-order-value",
                 "get-vanilla-query-order-key-case",
                 "get-unreserved",
-                "get-vanilla-query-unreserved",
+//                "get-vanilla-query-unreserved",
 //                "get-vanilla-ut8-query",
                 "get-utf8",
                 "get-space",

@@ -3,11 +3,12 @@ package com.emarsys.escher;
 import org.apache.http.NameValuePair;
 
 import javax.xml.bind.DatatypeConverter;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.BinaryOperator;
 
 class Helper {
@@ -29,7 +30,7 @@ class Helper {
     private static String canonicalizeQueryParameters(Request request) {
         return request.getQueryParameters()
                 .stream()
-                .map(entry -> entry.getName() + "=" + entry.getValue())
+                .map(entry -> entry.getName() + "=" + URLEncoder.encode(entry.getValue()))
                 .sorted()
                 .reduce(byJoiningWith('&'))
                 .orElseGet(() -> "");
@@ -42,7 +43,7 @@ class Helper {
                 .map(nameValuePair -> nameValuePair.getName().toLowerCase() + ":" + nameValuePair.getValue().trim())
                 .sorted()
                 .reduce(byJoiningWith(NEW_LINE))
-                .get();
+                .orElseGet(() -> "");
     }
 
 
@@ -52,7 +53,7 @@ class Helper {
                 .map(nameValuePair -> nameValuePair.getName().toLowerCase())
                 .sorted()
                 .reduce(byJoiningWith(';'))
-                .get();
+                .orElseGet(() -> "");
     }
 
 
@@ -91,11 +92,16 @@ class Helper {
 
 
     public static String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, byte[] signingKey, String hashAlgo, String algoPrefix, List<String> signedHeaders, String stringToSign) throws EscherException {
-        String signature = DatatypeConverter.printHexBinary(Hmac.sign(hashAlgo, signingKey, stringToSign)).toLowerCase();
+        String signature = calculateSignature(hashAlgo, signingKey, stringToSign);
         return algorithm(algoPrefix, hashAlgo) +
                 " Credential=" + credentials(accessKeyId, date, credentialScope) +
                 ", SignedHeaders=" + signedHeaders.stream().reduce((s1, s2) -> s1 + ";" + s2).get().toLowerCase() +
                 ", Signature=" + signature;
+    }
+
+
+    public static String calculateSignature(String hashAlgo, byte[] signingKey, String stringToSign) throws EscherException {
+        return DatatypeConverter.printHexBinary(Hmac.sign(hashAlgo, signingKey, stringToSign)).toLowerCase();
     }
 
 
@@ -105,7 +111,7 @@ class Helper {
 
 
     public static Map<String, String> calculateSigningParams(String algoPrefix, String hashAlgo, String accessKeyId, Date date, String credentialScope, int expires) {
-        HashMap<String, String> params = new HashMap<>();
+        Map<String, String> params = new TreeMap<>();
         params.put("SignedHeaders", "host");
         params.put("Expires", Integer.toString(expires));
         params.put("Algorithm", algorithm(algoPrefix, hashAlgo));
