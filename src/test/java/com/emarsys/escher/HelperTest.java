@@ -48,10 +48,10 @@ public class HelperTest {
                 "get-vanilla-query-unreserved",
 //                "get-vanilla-ut8-query",
                 "get-utf8",
-//                "get-space",
+                "get-space",
 //                "post-vanilla-query-space",
 //                "post-vanilla-query-nonunreserved",
-//
+
 //                "get-slash",
 //                "get-slashes",
 //                "get-slash-dot-slash",
