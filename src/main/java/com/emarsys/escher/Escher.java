@@ -2,6 +2,7 @@ package com.emarsys.escher;
 
 
 import java.util.Date;
+import java.util.List;
 
 public class Escher {
 
@@ -16,6 +17,17 @@ public class Escher {
 
     public Escher(String credentialScope) {
         this.credentialScope = credentialScope;
+    }
+
+    public Request signRequest(Request request, String accessKeyId, String secret, List<String> signedHeaders) throws EscherException {
+        String canonicalizedRequest = Helper.canonicalize(request);
+        String stringToSign = Helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime, hashAlgo, algoPrefix);
+        byte[] signingKey = Helper.calculateSigningKey(secret, currentTime, credentialScope, hashAlgo, algoPrefix);
+        String authHeader = Helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, signingKey, hashAlgo, algoPrefix, signedHeaders, stringToSign);
+
+        request.addHeader(authHeaderName, authHeader);
+
+        return request;
     }
 
     public Escher setAlgoPrefix(String algoPrefix) {
@@ -48,9 +60,9 @@ public class Escher {
         return this;
     }
 
+
     public Escher setClockSkew(int clockSkew) {
         this.clockSkew = clockSkew;
         return this;
     }
-
 }

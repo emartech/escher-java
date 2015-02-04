@@ -1,19 +1,21 @@
 package com.emarsys.escher;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -85,18 +87,12 @@ public class HelperTest {
 
         TestParam.Request paramRequest = param.getRequest();
 
-        List<String[]> headers = new ArrayList<>();
+        List<NameValuePair> headers = new ArrayList<>();
         for (List<String> header : paramRequest.getHeaders()) {
-            headers.add(new String[] {header.get(0), header.get(1)});
+            headers.add(new BasicNameValuePair(header.get(0), header.get(1)));
         }
-
-
-        Map<String, String> params = new HashMap<>();
 
         URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
-        for (NameValuePair nameValuePair : URLEncodedUtils.parse(uri, "utf-8")) {
-            params.put(nameValuePair.getName(), nameValuePair.getValue());
-        }
 
         Request request = new Request(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
 
@@ -124,7 +120,7 @@ public class HelperTest {
 
     @Test
     public void testCalculateAuthHeader() throws Exception {
-        String signingKey = Helper.calculateSigningKey(
+        byte[] signingKey = Helper.calculateSigningKey(
                 param.getConfig().getApiSecret(),
                 getConfigDate(),
                 param.getConfig().getCredentialScope(),
@@ -135,7 +131,7 @@ public class HelperTest {
                 param.getConfig().getAccessKeyId(),
                 getConfigDate(),
                 param.getConfig().getCredentialScope(),
-                DatatypeConverter.parseHexBinary(signingKey),
+                signingKey,
                 param.getConfig().getHashAlgo(),
                 param.getConfig().getAlgoPrefix(),
                 param.getHeadersToSign(),

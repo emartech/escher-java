@@ -1,5 +1,7 @@
 package com.emarsys.escher;
 
+import org.apache.http.NameValuePair;
+
 import javax.xml.bind.DatatypeConverter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -11,7 +13,7 @@ class Helper {
     private static final char NEW_LINE = '\n';
 
 
-    static String canonicalize(Request request) throws EscherException {
+    public static String canonicalize(Request request) throws EscherException {
         return request.getHttpMethod() + NEW_LINE +
                 request.getPath() + NEW_LINE +
                 canonicalizeQueryParameters(request) + NEW_LINE +
@@ -32,20 +34,20 @@ class Helper {
     }
 
 
-    private static String canonicalizeHeaders(List<String[]> headers) {
+    private static String canonicalizeHeaders(List<NameValuePair> headers) {
         return headers
                 .stream()
-                .map(array -> array[0].toLowerCase() + ":" + array[1].trim())
+                .map(nameValuePair -> nameValuePair.getName().toLowerCase() + ":" + nameValuePair.getValue().trim())
                 .sorted()
                 .reduce(byJoiningWith(NEW_LINE))
                 .get();
     }
 
 
-    private static String signedHeaders(List<String[]> headers) {
+    private static String signedHeaders(List<NameValuePair> headers) {
         return headers
                 .stream()
-                .map(array -> array[0].toLowerCase())
+                .map(nameValuePair -> nameValuePair.getName().toLowerCase())
                 .sorted()
                 .reduce(byJoiningWith(';'))
                 .get();
@@ -65,14 +67,14 @@ class Helper {
     }
 
 
-    public static String calculateSigningKey(String secret, Date date, String credentialScope, String hashAlgo, String algoPrefix) throws EscherException{
+    public static byte[] calculateSigningKey(String secret, Date date, String credentialScope, String hashAlgo, String algoPrefix) throws EscherException{
         byte[] key = Hmac.sign(hashAlgo, (algoPrefix + secret), shortDate(date));
 
         for (String credentialPart : credentialScope.split("/")) {
             key = Hmac.sign(hashAlgo, key, credentialPart);
         }
 
-        return DatatypeConverter.printHexBinary(key).toLowerCase();
+        return key;
     }
 
 

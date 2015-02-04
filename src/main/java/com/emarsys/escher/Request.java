@@ -3,6 +3,7 @@ package com.emarsys.escher;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.net.URI;
 import java.util.List;
@@ -10,19 +11,19 @@ import java.util.List;
 public class Request {
 
     private String httpMethod;
-    private List<String[]> headers;
+    private List<NameValuePair> headers;
     private String host;
     private String path;
     private List<NameValuePair> queryParameters;
     private String body;
 
 
-    public Request(String httpMethod, URI uri, List<String[]> headers, String body) {
+    public Request(String httpMethod, URI uri, List<NameValuePair> headers, String body) {
         this(httpMethod, headers, uri.getHost(), uri.getRawPath(), URLEncodedUtils.parse(uri, "utf-8"), body);
     }
 
 
-    public Request(String httpMethod, List<String[]> headers, String host, String path,  List<NameValuePair> queryParameters, String body) {
+    public Request(String httpMethod, List<NameValuePair> headers, String host, String path,  List<NameValuePair> queryParameters, String body) {
         this.httpMethod = httpMethod;
         this.headers = headers;
         this.host = host;
@@ -39,20 +40,20 @@ public class Request {
         this.httpMethod = httpMethod;
     }
 
-    public List<String[]> getHeaders() {
+    public List<NameValuePair> getHeaders() {
         return headers;
     }
 
-    public void setHeaders(List<String[]> headers) {
+    public void setHeaders(List<NameValuePair> headers) {
         this.headers = headers;
     }
 
     public void addHeader(String key, String value) {
-        this.headers.add(new String[]{key, value});
+        this.headers.add(new BasicNameValuePair(key, value));
     }
 
     public boolean hasHeader(String key) {
-        return this.headers.stream().anyMatch((array) -> array[0].equals(key));
+        return this.headers.stream().anyMatch((nameValuePair) -> nameValuePair.getName().equals(key));
     }
 
     public String getHost() {
