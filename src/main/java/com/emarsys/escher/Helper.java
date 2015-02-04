@@ -5,7 +5,9 @@ import org.apache.http.NameValuePair;
 import javax.xml.bind.DatatypeConverter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BinaryOperator;
 
 class Helper {
@@ -60,7 +62,7 @@ class Helper {
 
 
     public static String calculateStringToSign(String credentialScope, String canonicalizedRequest, Date date, String hashAlgo, String algoPrefix) throws EscherException{
-        return algoPrefix + "-HMAC-" + hashAlgo + NEW_LINE
+        return algorithm(algoPrefix, hashAlgo) + NEW_LINE
                 + longDate(date) + NEW_LINE
                 + shortDate(date) + "/" + credentialScope + NEW_LINE
                 + Hmac.hash(canonicalizedRequest);
@@ -90,9 +92,32 @@ class Helper {
 
     public static String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, byte[] signingKey, String hashAlgo, String algoPrefix, List<String> signedHeaders, String stringToSign) throws EscherException {
         String signature = DatatypeConverter.printHexBinary(Hmac.sign(hashAlgo, signingKey, stringToSign)).toLowerCase();
-        return algoPrefix + "-HMAC-" + hashAlgo +
-                " Credential=" + accessKeyId + "/" + shortDate(date) + "/" + credentialScope +
+        return algorithm(algoPrefix, hashAlgo) +
+                " Credential=" + credentials(accessKeyId, date, credentialScope) +
                 ", SignedHeaders=" + signedHeaders.stream().reduce((s1, s2) -> s1 + ";" + s2).get().toLowerCase() +
                 ", Signature=" + signature;
     }
+
+
+    private static String credentials(String accessKeyId, Date date, String credentialScope) {
+        return accessKeyId + "/" + shortDate(date) + "/" + credentialScope;
+    }
+
+
+    public static Map<String, String> calculateSigningParams(String algoPrefix, String hashAlgo, String accessKeyId, Date date, String credentialScope, int expires) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("SignedHeaders", "host");
+        params.put("Expires", Integer.toString(expires));
+        params.put("Algorithm", algorithm(algoPrefix, hashAlgo));
+        params.put("Credentials", credentials(accessKeyId, date, credentialScope));
+        params.put("Date", longDate(date));
+
+        return params;
+    }
+
+
+    private static String algorithm(String algoPrefix, String hashAlgo) {
+        return algoPrefix + "-HMAC-" + hashAlgo;
+    }
+
 }
