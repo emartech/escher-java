@@ -5,10 +5,7 @@ import org.apache.http.NameValuePair;
 import javax.xml.bind.DatatypeConverter;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.BinaryOperator;
 
 class Helper {
@@ -81,13 +78,17 @@ class Helper {
     }
 
 
-    private static String longDate(Date date) {
-        return new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'").format(date);
+    public static String longDate(Date date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormat.format(date);
     }
 
 
     private static String shortDate(Date date) {
-        return new SimpleDateFormat("yyyyMMdd").format(date);
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return format.format(date);
     }
 
 
