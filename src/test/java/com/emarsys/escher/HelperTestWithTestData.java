@@ -9,8 +9,10 @@ import org.junit.runners.Parameterized;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -57,11 +59,10 @@ public class HelperTestWithTestData extends TestBase {
 //                "get-relative-relative",
         };
 
-        ArrayList<Object[]> testCases = new ArrayList<>();
-        for (String fileName : fileList) {
-            testCases.add(new String[] { fileName });
-        }
-        return testCases;
+        return Arrays.asList(fileList)
+                .stream()
+                .map(file -> new String[]{file})
+                .collect(Collectors.toList());
     }
 
 
