@@ -4,8 +4,10 @@ package com.emarsys.escher;
 import org.junit.Test;
 
 import javax.xml.bind.DatatypeConverter;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,11 +15,9 @@ public class HelperTest extends TestBase {
 
     @Test
     public void testCalculateSigningKey() throws Exception {
-        GregorianCalendar calendar = new GregorianCalendar(2011, 8, 9);
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         byte[] signingKey = Helper.calculateSigningKey(
                 "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
-                calendar.getTime(),
+                createDate(2011, Calendar.SEPTEMBER, 9),
                 "us-east-1/iam/aws4_request",
                 "sha256",
                 "AWS4"
@@ -32,10 +32,7 @@ public class HelperTest extends TestBase {
 
     @Test
     public void testSigningParams() throws Exception {
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date date = dateFormat.parse("2011-05-11 12:00:00");
+        Date date = createDate(2011, Calendar.MAY, 11, 12, 0, 0);
 
         Map<String, String> params = Helper.calculateSigningParams("EMS", "SHA256", "th3K3y", date, "us-east-1/host/aws4_request", 12345);
 
@@ -48,4 +45,5 @@ public class HelperTest extends TestBase {
 
         assertEquals(expectedParams, params);
     }
+
 }

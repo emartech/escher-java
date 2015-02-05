@@ -8,9 +8,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.net.URI;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -100,17 +100,10 @@ public class HelperTestWithTestData extends TestBase {
     public void testCalculateStringToSign() throws Exception {
         String stringToSign = Helper.calculateStringToSign(param.getConfig().getCredentialScope(),
                 param.getExpected().getCanonicalizedRequest(),
-                getConfigDate(),
+                getConfigDate(param),
                 param.getConfig().getHashAlgo(),
                 param.getConfig().getAlgoPrefix());
         assertEquals(fileName, param.getExpected().getStringToSign(), stringToSign);
-    }
-
-
-    private Date getConfigDate() throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return dateFormat.parse(param.getConfig().getDate());
     }
 
 
@@ -118,14 +111,14 @@ public class HelperTestWithTestData extends TestBase {
     public void testCalculateAuthHeader() throws Exception {
         byte[] signingKey = Helper.calculateSigningKey(
                 param.getConfig().getApiSecret(),
-                getConfigDate(),
+                getConfigDate(param),
                 param.getConfig().getCredentialScope(),
                 param.getConfig().getHashAlgo(),
                 param.getConfig().getAlgoPrefix()
         );
         String authHeader = Helper.calculateAuthHeader(
                 param.getConfig().getAccessKeyId(),
-                getConfigDate(),
+                getConfigDate(param),
                 param.getConfig().getCredentialScope(),
                 signingKey,
                 param.getConfig().getHashAlgo(),
