@@ -2,13 +2,11 @@ package com.emarsys.escher;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.File;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,7 +15,7 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class HelperTestWithTestData {
+public class HelperTestWithTestData extends TestBase {
 
     private String fileName;
     private TestParam param;
@@ -61,7 +59,7 @@ public class HelperTestWithTestData {
 
         ArrayList<Object[]> testCases = new ArrayList<>();
         for (String fileName : fileList) {
-            testCases.add(new String[] { "src/test/fixtures/aws4_testsuite/" + fileName + ".json" });
+            testCases.add(new String[] { fileName });
         }
         return testCases;
     }
@@ -74,8 +72,7 @@ public class HelperTestWithTestData {
 
     @Before
     public void setUp() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        param = mapper.readValue(new File(this.fileName), TestParam.class);
+        param = parseTestData(fileName);
     }
 
 

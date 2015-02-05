@@ -2,10 +2,8 @@ package com.emarsys.escher;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -14,13 +12,11 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
-public class EscherTest {
+public class EscherTest extends TestBase {
 
     @Test
     public void testSignRequest() throws Exception {
-
-        ObjectMapper mapper = new ObjectMapper();
-        TestParam param = mapper.readValue(new File("src/test/fixtures/aws4_testsuite/get-vanilla.json"), TestParam.class);
+        TestParam param = parseTestData("get-vanilla");
 
         Request request = createRequest(param.getRequest());
 
@@ -66,14 +62,14 @@ public class EscherTest {
     @Test
     public void testPresignUrl() throws Exception {
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.set(2011, 4, 11, 12, 0, 0);
+        calendar.set(2011, Calendar.MAY, 11, 12, 0, 0);
 
         Escher escher = new Escher("us-east-1/host/aws4_request")
                 .setAlgoPrefix("EMS")
                 .setVendorKey("EMS")
                 .setAuthHeaderName("X-Ems-Auth")
                 .setDateHeaderName("X-Ems-Date")
-                .setCurrentTime(calendar.getTime());;
+                .setCurrentTime(calendar.getTime());
 
         int expires = 123456;
         String signedUrl = escher.presignUrl("http://example.com/something?foo=bar&baz=barbaz", "th3K3y", "very_secure", expires);

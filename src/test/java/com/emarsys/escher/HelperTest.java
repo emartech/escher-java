@@ -9,7 +9,7 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
-public class HelperTest {
+public class HelperTest extends TestBase {
 
     @Test
     public void testCalculateSigningKey() throws Exception {
