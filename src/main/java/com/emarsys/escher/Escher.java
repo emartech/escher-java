@@ -31,7 +31,9 @@ public class Escher {
 
 
     public Request signRequest(Request request, String accessKeyId, String secret, List<String> signedHeaders) throws EscherException {
-        request.addHeader(dateHeaderName, Helper.longDate(currentTime));
+        if (!request.hasHeader(dateHeaderName)) {
+            request.addHeader(dateHeaderName, Helper.longDate(currentTime));
+        }
         String canonicalizedRequest = Helper.canonicalize(request);
         String stringToSign = Helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime, hashAlgo, algoPrefix);
         byte[] signingKey = Helper.calculateSigningKey(secret, currentTime, credentialScope, hashAlgo, algoPrefix);
