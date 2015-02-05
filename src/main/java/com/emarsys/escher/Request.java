@@ -1,90 +1,65 @@
 package com.emarsys.escher;
 
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
-
 import java.net.URI;
 import java.util.List;
 
-public class Request {
+public interface Request {
 
-    private String httpMethod;
-    private List<NameValuePair> headers;
-    private String host;
-    private String path;
-    private List<NameValuePair> queryParameters;
-    private String body;
+    public String getHttpMethod();
+    public URI getURI();
+    public List<Header> getRequestHeaders();
+    public void addHeader(String fieldName, String fieldValue);
+    public boolean hasHeader(String fieldName);
+    public String getBody();
 
 
-    public Request(String httpMethod, URI uri, List<NameValuePair> headers, String body) {
-        this(httpMethod, headers, uri.getHost(), uri.getRawPath(), URLEncodedUtils.parse(uri, "utf-8"), body);
+    public static class Header {
+        private String fieldName;
+        private String fieldValue;
+
+        public Header(String fieldName, String fieldValue) {
+            this.fieldName = fieldName;
+            this.fieldValue = fieldValue;
+        }
+
+
+        public String getFieldName() {
+            return fieldName;
+        }
+
+
+        public String getFieldValue() {
+            return fieldValue;
+        }
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Header header = (Header) o;
+
+            if (!fieldName.equals(header.fieldName)) return false;
+            if (!fieldValue.equals(header.fieldValue)) return false;
+
+            return true;
+        }
+
+
+        @Override
+        public int hashCode() {
+            int result = fieldName.hashCode();
+            result = 31 * result + fieldValue.hashCode();
+            return result;
+        }
+
+
+        @Override
+        public String toString() {
+            return fieldName + "=" + fieldValue;
+        }
     }
 
-
-    public Request(String httpMethod, List<NameValuePair> headers, String host, String path,  List<NameValuePair> queryParameters, String body) {
-        this.httpMethod = httpMethod;
-        this.headers = headers;
-        this.host = host;
-        this.path = path;
-        this.queryParameters = queryParameters;
-        this.body = body;
-    }
-
-    public String getHttpMethod() {
-        return httpMethod;
-    }
-
-    public void setHttpMethod(String httpMethod) {
-        this.httpMethod = httpMethod;
-    }
-
-    public List<NameValuePair> getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(List<NameValuePair> headers) {
-        this.headers = headers;
-    }
-
-    public void addHeader(String key, String value) {
-        this.headers.add(new BasicNameValuePair(key, value));
-    }
-
-    public boolean hasHeader(String key) {
-        return this.headers.stream().anyMatch((nameValuePair) -> nameValuePair.getName().equals(key));
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public List<NameValuePair> getQueryParameters() {
-        return queryParameters;
-    }
-
-    public void setQueryParameters(List<NameValuePair> queryParameters) {
-        this.queryParameters = queryParameters;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-    }
 }

@@ -89,7 +89,7 @@ public class HelperTestWithTestData extends TestBase {
 
         URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
 
-        Request request = new Request(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
+        RequestImpl request = new RequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
 
         String canonicalised = Helper.canonicalize(request);
 

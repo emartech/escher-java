@@ -1,6 +1,7 @@
 package com.emarsys.escher;
 
 import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.Test;
 
@@ -18,7 +19,7 @@ public class EscherTest extends TestBase {
     public void testSignRequest() throws Exception {
         TestParam param = parseTestData("get-vanilla");
 
-        Request request = createRequest(param.getRequest());
+        RequestImpl request = createRequest(param.getRequest());
 
         TestParam.Config config = param.getConfig();
 
@@ -30,17 +31,17 @@ public class EscherTest extends TestBase {
 
         Request signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
 
-        Request expectedSignedRequest = createRequest(param.getExpected().getRequest());
-        assertEquals("host", expectedSignedRequest.getHost(), signedRequest.getHost());
+        RequestImpl expectedSignedRequest = createRequest(param.getExpected().getRequest());
+        assertEquals("host", expectedSignedRequest.getHost(), signedRequest.getURI().getHost());
         assertEquals("method", expectedSignedRequest.getHttpMethod(), signedRequest.getHttpMethod());
-        assertEquals("path", expectedSignedRequest.getPath(), signedRequest.getPath());
-        assertEquals("queryParams", expectedSignedRequest.getQueryParameters(), signedRequest.getQueryParameters());
+        assertEquals("path", expectedSignedRequest.getPath(), signedRequest.getURI().getPath());
+        assertEquals("queryParams", expectedSignedRequest.getQueryParameters(), URLEncodedUtils.parse(signedRequest.getURI(), "utf-8"));
         assertEquals("body", expectedSignedRequest.getBody(), signedRequest.getBody());
-        assertEquals("headers", expectedSignedRequest.getHeaders(), signedRequest.getHeaders());
+        assertEquals("headers", expectedSignedRequest.getRequestHeaders(), signedRequest.getRequestHeaders());
     }
 
 
-    private Request createRequest(TestParam.Request paramRequest) throws URISyntaxException {
+    private RequestImpl createRequest(TestParam.Request paramRequest) throws URISyntaxException {
         List<NameValuePair> headers = new ArrayList<>();
         for (List<String> header : paramRequest.getHeaders()) {
             headers.add(new BasicNameValuePair(header.get(0), header.get(1)));
@@ -48,7 +49,7 @@ public class EscherTest extends TestBase {
 
         URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
 
-        return new Request(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
+        return new RequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
     }
 
 

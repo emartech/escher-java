@@ -2,6 +2,7 @@ package com.emarsys.escher.demo;
 
 import com.emarsys.escher.Escher;
 import com.emarsys.escher.Request;
+import com.emarsys.escher.RequestImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -25,7 +26,7 @@ public class ClientTest {
             List<NameValuePair> headers = new ArrayList<>();
             headers.add(new BasicNameValuePair("host", "trunk.suite.ett.local"));
             headers.add(new BasicNameValuePair("Content-Type", ContentType.APPLICATION_JSON.toString()));
-            Request escherRequest = new Request("GET", new URI(url), headers, "");
+            RequestImpl escherRequest = new RequestImpl("GET", new URI(url), headers, "");
 
             Request signedRequest = new Escher("eu/suite/ems_request")
                     .setAuthHeaderName("X-Ems-Auth")
@@ -37,8 +38,8 @@ public class ClientTest {
             HttpClient client = HttpClientBuilder.create().build();
             HttpGet request = new HttpGet(url);
 
-            for (NameValuePair header : signedRequest.getHeaders()) {
-                request.addHeader(header.getName(), header.getValue());
+            for (Request.Header header : signedRequest.getRequestHeaders()) {
+                request.addHeader(header.getFieldName(), header.getFieldValue());
             }
 
             HttpResponse response = client.execute(request);

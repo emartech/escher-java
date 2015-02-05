@@ -56,7 +56,7 @@ public class Escher {
             ArrayList<NameValuePair> headers = new ArrayList<>();
             headers.add(new BasicNameValuePair("host", uri.getHost()));
 
-            Request request = new Request("GET", uriBuilder.build(), headers, UNSIGNED_PAYLOAD);
+            RequestImpl request = new RequestImpl("GET", uriBuilder.build(), headers, UNSIGNED_PAYLOAD);
             String canonicalizedRequest = Helper.canonicalize(request);
             String stringToSign = Helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime, hashAlgo, algoPrefix);
             byte[] signingKey = Helper.calculateSigningKey(secret, currentTime, credentialScope, hashAlgo, algoPrefix);

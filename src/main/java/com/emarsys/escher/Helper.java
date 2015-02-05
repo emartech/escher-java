@@ -1,6 +1,6 @@
 package com.emarsys.escher;
 
-import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import javax.xml.bind.DatatypeConverter;
 import java.net.URLEncoder;
@@ -15,17 +15,17 @@ class Helper {
 
     public static String canonicalize(Request request) throws EscherException {
         return request.getHttpMethod() + NEW_LINE +
-                request.getPath() + NEW_LINE +
+                request.getURI().getPath() + NEW_LINE +
                 canonicalizeQueryParameters(request) + NEW_LINE +
-                canonicalizeHeaders(request.getHeaders()) + NEW_LINE +
+                canonicalizeHeaders(request.getRequestHeaders()) + NEW_LINE +
                 NEW_LINE +
-                signedHeaders(request.getHeaders()) + NEW_LINE +
+                signedHeaders(request.getRequestHeaders()) + NEW_LINE +
                 Hmac.hash(request.getBody());
     }
 
 
     private static String canonicalizeQueryParameters(Request request) {
-        return request.getQueryParameters()
+        return URLEncodedUtils.parse(request.getURI(), "utf-8")
                 .stream()
                 .map(entry -> entry.getName() + "=" + URLEncoder.encode(entry.getValue()))
                 .sorted()
@@ -34,20 +34,20 @@ class Helper {
     }
 
 
-    private static String canonicalizeHeaders(List<NameValuePair> headers) {
+    private static String canonicalizeHeaders(List<Request.Header> headers) {
         return headers
                 .stream()
-                .map(nameValuePair -> nameValuePair.getName().toLowerCase() + ":" + nameValuePair.getValue().trim())
+                .map(header -> header.getFieldName().toLowerCase() + ":" + header.getFieldValue().trim())
                 .sorted()
                 .reduce(byJoiningWith(NEW_LINE))
                 .orElseGet(() -> "");
     }
 
 
-    private static String signedHeaders(List<NameValuePair> headers) {
+    private static String signedHeaders(List<Request.Header> headers) {
         return headers
                 .stream()
-                .map(nameValuePair -> nameValuePair.getName().toLowerCase())
+                .map(header -> header.getFieldName().toLowerCase())
                 .sorted()
                 .reduce(byJoiningWith(';'))
                 .orElseGet(() -> "");
