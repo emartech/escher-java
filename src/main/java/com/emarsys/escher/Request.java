@@ -41,10 +41,8 @@ public interface Request {
 
             Header header = (Header) o;
 
-            if (!fieldName.equals(header.fieldName)) return false;
-            if (!fieldValue.equals(header.fieldValue)) return false;
+            return fieldName.equals(header.fieldName) && fieldValue.equals(header.fieldValue);
 
-            return true;
         }
 
 

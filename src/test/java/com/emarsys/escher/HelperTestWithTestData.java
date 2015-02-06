@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -85,10 +84,10 @@ public class HelperTestWithTestData extends TestBase {
 
         TestParam.Request paramRequest = param.getRequest();
 
-        List<NameValuePair> headers = new ArrayList<>();
-        for (List<String> header : paramRequest.getHeaders()) {
-            headers.add(new BasicNameValuePair(header.get(0), header.get(1)));
-        }
+        List<NameValuePair> headers = paramRequest.getHeaders()
+                .stream()
+                .map(header -> new BasicNameValuePair(header.get(0), header.get(1)))
+                .collect(Collectors.toList());
 
         URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
 

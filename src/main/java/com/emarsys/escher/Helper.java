@@ -12,7 +12,7 @@ class Helper {
 
     private static final char NEW_LINE = '\n';
 
-    private Config config;
+    private final Config config;
 
 
     public Helper (Config config) {

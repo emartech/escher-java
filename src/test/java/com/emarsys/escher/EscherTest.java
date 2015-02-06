@@ -7,9 +7,9 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -42,10 +42,10 @@ public class EscherTest extends TestBase {
 
 
     private RequestImpl createRequest(TestParam.Request paramRequest) throws URISyntaxException {
-        List<NameValuePair> headers = new ArrayList<>();
-        for (List<String> header : paramRequest.getHeaders()) {
-            headers.add(new BasicNameValuePair(header.get(0), header.get(1)));
-        }
+        List<NameValuePair> headers = paramRequest.getHeaders()
+                .stream()
+                .map(header -> new BasicNameValuePair(header.get(0), header.get(1)))
+                .collect(Collectors.toList());
 
         URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
 
