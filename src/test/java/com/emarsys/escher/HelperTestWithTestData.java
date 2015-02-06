@@ -117,16 +117,9 @@ public class HelperTestWithTestData extends TestBase {
                 param.getConfig().getHashAlgo(),
                 param.getConfig().getAlgoPrefix()
         );
-        String authHeader = Helper.calculateAuthHeader(
-                param.getConfig().getAccessKeyId(),
-                getConfigDate(param),
-                param.getConfig().getCredentialScope(),
-                signingKey,
-                param.getConfig().getHashAlgo(),
-                param.getConfig().getAlgoPrefix(),
-                param.getHeadersToSign(),
-                param.getExpected().getStringToSign()
-        );
+        String hashAlgo = param.getConfig().getHashAlgo();
+        String signature = Helper.calculateSignature(hashAlgo, signingKey, param.getExpected().getStringToSign());
+        String authHeader = Helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), getConfigDate(param), param.getConfig().getCredentialScope(), hashAlgo, param.getConfig().getAlgoPrefix(), param.getHeadersToSign(), signature);
         assertEquals(fileName, param.getExpected().getAuthHeader(), authHeader);
     }
 

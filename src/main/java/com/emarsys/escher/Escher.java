@@ -37,7 +37,8 @@ public class Escher {
         String canonicalizedRequest = Helper.canonicalize(request);
         String stringToSign = Helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime, hashAlgo, algoPrefix);
         byte[] signingKey = Helper.calculateSigningKey(secret, currentTime, credentialScope, hashAlgo, algoPrefix);
-        String authHeader = Helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, signingKey, hashAlgo, algoPrefix, signedHeaders, stringToSign);
+        String signature = Helper.calculateSignature(hashAlgo, signingKey, stringToSign);
+        String authHeader = Helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, hashAlgo, algoPrefix, signedHeaders, signature);
 
         request.addHeader(authHeaderName, authHeader);
 

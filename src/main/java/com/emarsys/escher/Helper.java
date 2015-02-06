@@ -92,8 +92,7 @@ class Helper {
     }
 
 
-    public static String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, byte[] signingKey, String hashAlgo, String algoPrefix, List<String> signedHeaders, String stringToSign) throws EscherException {
-        String signature = calculateSignature(hashAlgo, signingKey, stringToSign);
+    public static String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, String hashAlgo, String algoPrefix, List<String> signedHeaders, String signature) {
         return algorithm(algoPrefix, hashAlgo) +
                 " Credential=" + credentials(accessKeyId, date, credentialScope) +
                 ", SignedHeaders=" + signedHeaders.stream().reduce((s1, s2) -> s1 + ";" + s2).get().toLowerCase() +
