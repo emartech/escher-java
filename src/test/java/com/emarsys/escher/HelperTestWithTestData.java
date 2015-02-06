@@ -76,7 +76,7 @@ public class HelperTestWithTestData extends TestBase {
     public void setUp() throws Exception {
         param = parseTestData(fileName);
 
-        helper = new Helper();
+        helper = new Helper(getConfig(param));
     }
 
 
@@ -102,28 +102,23 @@ public class HelperTestWithTestData extends TestBase {
 
     @Test
     public void testCalculateStringToSign() throws Exception {
-        Config config = getConfig(param);
-
         String stringToSign = helper.calculateStringToSign(param.getConfig().getCredentialScope(),
                 param.getExpected().getCanonicalizedRequest(),
-                getConfigDate(param),
-                config);
+                getConfigDate(param)
+        );
         assertEquals(fileName, param.getExpected().getStringToSign(), stringToSign);
     }
 
 
     @Test
     public void testCalculateAuthHeader() throws Exception {
-        Config config = getConfig(param);
-
         byte[] signingKey = helper.calculateSigningKey(
                 param.getConfig().getApiSecret(),
                 getConfigDate(param),
-                param.getConfig().getCredentialScope(),
-                config
+                param.getConfig().getCredentialScope()
         );
-        String signature = helper.calculateSignature(config, signingKey, param.getExpected().getStringToSign());
-        String authHeader = helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), getConfigDate(param), param.getConfig().getCredentialScope(), config, param.getHeadersToSign(), signature);
+        String signature = helper.calculateSignature(signingKey, param.getExpected().getStringToSign());
+        String authHeader = helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), getConfigDate(param), param.getConfig().getCredentialScope(), param.getHeadersToSign(), signature);
         assertEquals(fileName, param.getExpected().getAuthHeader(), authHeader);
     }
 

@@ -12,6 +12,13 @@ class Helper {
 
     private static final char NEW_LINE = '\n';
 
+    private Config config;
+
+
+    public Helper (Config config) {
+        this.config = config;
+    }
+
 
     public String canonicalize(Request request) throws EscherException {
         return request.getHttpMethod() + NEW_LINE +
@@ -59,7 +66,7 @@ class Helper {
     }
 
 
-    public String calculateStringToSign(String credentialScope, String canonicalizedRequest, Date date, Config config) throws EscherException{
+    public String calculateStringToSign(String credentialScope, String canonicalizedRequest, Date date) throws EscherException{
         return algorithm(config.getAlgoPrefix(), config.getHashAlgo()) + NEW_LINE
                 + longDate(date) + NEW_LINE
                 + shortDate(date) + "/" + credentialScope + NEW_LINE
@@ -67,7 +74,7 @@ class Helper {
     }
 
 
-    public byte[] calculateSigningKey(String secret, Date date, String credentialScope, Config config) throws EscherException{
+    public byte[] calculateSigningKey(String secret, Date date, String credentialScope) throws EscherException{
         byte[] key = Hmac.sign(config.getHashAlgo(), (config.getAlgoPrefix() + secret), shortDate(date));
 
         for (String credentialPart : credentialScope.split("/")) {
@@ -92,7 +99,7 @@ class Helper {
     }
 
 
-    public String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, Config config, List<String> signedHeaders, String signature) {
+    public String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, List<String> signedHeaders, String signature) {
         return algorithm(config.getAlgoPrefix(), config.getHashAlgo()) +
                 " Credential=" + credentials(accessKeyId, date, credentialScope) +
                 ", SignedHeaders=" + signedHeaders.stream().reduce((s1, s2) -> s1 + ";" + s2).get().toLowerCase() +
@@ -100,7 +107,7 @@ class Helper {
     }
 
 
-    public String calculateSignature(Config config, byte[] signingKey, String stringToSign) throws EscherException {
+    public String calculateSignature(byte[] signingKey, String stringToSign) throws EscherException {
         return DatatypeConverter.printHexBinary(Hmac.sign(config.getHashAlgo(), signingKey, stringToSign)).toLowerCase();
     }
 
@@ -110,7 +117,7 @@ class Helper {
     }
 
 
-    public Map<String, String> calculateSigningParams(Config config, String accessKeyId, Date date, String credentialScope, int expires) {
+    public Map<String, String> calculateSigningParams(String accessKeyId, Date date, String credentialScope, int expires) {
         Map<String, String> params = new TreeMap<>();
         params.put("SignedHeaders", "host");
         params.put("Expires", Integer.toString(expires));
