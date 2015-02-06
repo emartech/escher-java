@@ -99,28 +99,36 @@ public class HelperTestWithTestData extends TestBase {
 
     @Test
     public void testCalculateStringToSign() throws Exception {
+        Config config = getConfig(param);
+
         String stringToSign = Helper.calculateStringToSign(param.getConfig().getCredentialScope(),
                 param.getExpected().getCanonicalizedRequest(),
                 getConfigDate(param),
-                param.getConfig().getHashAlgo(),
-                param.getConfig().getAlgoPrefix());
+                config);
         assertEquals(fileName, param.getExpected().getStringToSign(), stringToSign);
     }
 
 
     @Test
     public void testCalculateAuthHeader() throws Exception {
+        Config config = getConfig(param);
+
         byte[] signingKey = Helper.calculateSigningKey(
                 param.getConfig().getApiSecret(),
                 getConfigDate(param),
                 param.getConfig().getCredentialScope(),
-                param.getConfig().getHashAlgo(),
-                param.getConfig().getAlgoPrefix()
+                config
         );
-        String hashAlgo = param.getConfig().getHashAlgo();
-        String signature = Helper.calculateSignature(hashAlgo, signingKey, param.getExpected().getStringToSign());
-        String authHeader = Helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), getConfigDate(param), param.getConfig().getCredentialScope(), hashAlgo, param.getConfig().getAlgoPrefix(), param.getHeadersToSign(), signature);
+        String signature = Helper.calculateSignature(config, signingKey, param.getExpected().getStringToSign());
+        String authHeader = Helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), getConfigDate(param), param.getConfig().getCredentialScope(), config, param.getHeadersToSign(), signature);
         assertEquals(fileName, param.getExpected().getAuthHeader(), authHeader);
+    }
+
+
+    private Config getConfig(TestParam param) {
+        return Config.create()
+                    .setAlgoPrefix(param.getConfig().getAlgoPrefix())
+                    .setHashAlgo(param.getConfig().getHashAlgo());
     }
 
 }

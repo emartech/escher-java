@@ -19,8 +19,9 @@ public class HelperTest extends TestBase {
                 "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
                 createDate(2011, Calendar.SEPTEMBER, 9),
                 "us-east-1/iam/aws4_request",
-                "sha256",
-                "AWS4"
+                Config.create()
+                        .setHashAlgo("sha256")
+                        .setAlgoPrefix("AWS4")
         );
 
         assertEquals(
@@ -33,8 +34,11 @@ public class HelperTest extends TestBase {
     @Test
     public void testSigningParams() throws Exception {
         Date date = createDate(2011, Calendar.MAY, 11, 12, 0, 0);
+        Config config = Config.create()
+                .setAlgoPrefix("EMS")
+                .setHashAlgo("SHA256");
 
-        Map<String, String> params = Helper.calculateSigningParams("EMS", "SHA256", "th3K3y", date, "us-east-1/host/aws4_request", 12345);
+        Map<String, String> params = Helper.calculateSigningParams(config, "th3K3y", date, "us-east-1/host/aws4_request", 12345);
 
         Map<String, String> expectedParams = new HashMap<>();
         expectedParams.put("Algorithm", "EMS-HMAC-SHA256");

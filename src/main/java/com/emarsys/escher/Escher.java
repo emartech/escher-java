@@ -31,14 +31,16 @@ public class Escher {
 
 
     public Request signRequest(Request request, String accessKeyId, String secret, List<String> signedHeaders) throws EscherException {
+        Config config = getConfig();
+
         if (!request.hasHeader(dateHeaderName)) {
             request.addHeader(dateHeaderName, Helper.longDate(currentTime));
         }
         String canonicalizedRequest = Helper.canonicalize(request);
-        String stringToSign = Helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime, hashAlgo, algoPrefix);
-        byte[] signingKey = Helper.calculateSigningKey(secret, currentTime, credentialScope, hashAlgo, algoPrefix);
-        String signature = Helper.calculateSignature(hashAlgo, signingKey, stringToSign);
-        String authHeader = Helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, hashAlgo, algoPrefix, signedHeaders, signature);
+        String stringToSign = Helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime, config);
+        byte[] signingKey = Helper.calculateSigningKey(secret, currentTime, credentialScope, config);
+        String signature = Helper.calculateSignature(config, signingKey, stringToSign);
+        String authHeader = Helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, config, signedHeaders, signature);
 
         request.addHeader(authHeaderName, authHeader);
 
@@ -48,10 +50,12 @@ public class Escher {
 
     public String presignUrl(String url, String accessKeyId, String secret, int expires) throws EscherException{
         try {
+            Config config = getConfig();
+
             URI uri = new URI(url);
             URIBuilder uriBuilder = new URIBuilder(uri);
 
-            Map<String, String> params = Helper.calculateSigningParams(algoPrefix, hashAlgo, accessKeyId, currentTime, credentialScope, expires);
+            Map<String, String> params = Helper.calculateSigningParams(config, accessKeyId, currentTime, credentialScope, expires);
             params.forEach((key, value) -> uriBuilder.addParameter("X-" + vendorKey + "-" + key, value));
 
             ArrayList<NameValuePair> headers = new ArrayList<>();
@@ -59,9 +63,9 @@ public class Escher {
 
             RequestImpl request = new RequestImpl("GET", uriBuilder.build(), headers, UNSIGNED_PAYLOAD);
             String canonicalizedRequest = Helper.canonicalize(request);
-            String stringToSign = Helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime, hashAlgo, algoPrefix);
-            byte[] signingKey = Helper.calculateSigningKey(secret, currentTime, credentialScope, hashAlgo, algoPrefix);
-            String signature = Helper.calculateSignature(hashAlgo, signingKey, stringToSign);
+            String stringToSign = Helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime, config);
+            byte[] signingKey = Helper.calculateSigningKey(secret, currentTime, credentialScope, config);
+            String signature = Helper.calculateSignature(config, signingKey, stringToSign);
 
             uriBuilder.addParameter("X-" + vendorKey + "-" + "Signature", signature);
 
@@ -69,6 +73,13 @@ public class Escher {
         } catch (URISyntaxException e) {
             throw new EscherException(e);
         }
+    }
+
+
+    private Config getConfig() {
+        return Config.create()
+                .setAlgoPrefix(algoPrefix)
+                .setHashAlgo(hashAlgo);
     }
 
 
