@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class HelperTestWithTestData extends TestBase {
 
+    private Helper helper;
     private String fileName;
     private TestParam param;
 
@@ -74,6 +75,8 @@ public class HelperTestWithTestData extends TestBase {
     @Before
     public void setUp() throws Exception {
         param = parseTestData(fileName);
+
+        helper = new Helper();
     }
 
 
@@ -91,7 +94,7 @@ public class HelperTestWithTestData extends TestBase {
 
         RequestImpl request = new RequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
 
-        String canonicalised = Helper.canonicalize(request);
+        String canonicalised = helper.canonicalize(request);
 
         assertEquals(fileName, param.getExpected().getCanonicalizedRequest(), canonicalised);
     }
@@ -101,7 +104,7 @@ public class HelperTestWithTestData extends TestBase {
     public void testCalculateStringToSign() throws Exception {
         Config config = getConfig(param);
 
-        String stringToSign = Helper.calculateStringToSign(param.getConfig().getCredentialScope(),
+        String stringToSign = helper.calculateStringToSign(param.getConfig().getCredentialScope(),
                 param.getExpected().getCanonicalizedRequest(),
                 getConfigDate(param),
                 config);
@@ -113,14 +116,14 @@ public class HelperTestWithTestData extends TestBase {
     public void testCalculateAuthHeader() throws Exception {
         Config config = getConfig(param);
 
-        byte[] signingKey = Helper.calculateSigningKey(
+        byte[] signingKey = helper.calculateSigningKey(
                 param.getConfig().getApiSecret(),
                 getConfigDate(param),
                 param.getConfig().getCredentialScope(),
                 config
         );
-        String signature = Helper.calculateSignature(config, signingKey, param.getExpected().getStringToSign());
-        String authHeader = Helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), getConfigDate(param), param.getConfig().getCredentialScope(), config, param.getHeadersToSign(), signature);
+        String signature = helper.calculateSignature(config, signingKey, param.getExpected().getStringToSign());
+        String authHeader = helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), getConfigDate(param), param.getConfig().getCredentialScope(), config, param.getHeadersToSign(), signature);
         assertEquals(fileName, param.getExpected().getAuthHeader(), authHeader);
     }
 
