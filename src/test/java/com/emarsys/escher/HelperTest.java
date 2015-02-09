@@ -18,7 +18,7 @@ public class HelperTest extends TestBase {
         Config config = Config.create()
                 .setHashAlgo("sha256")
                 .setAlgoPrefix("AWS4")
-                .setCurrentTime(createDate(2011, Calendar.SEPTEMBER, 9));
+                .setDate(createDate(2011, Calendar.SEPTEMBER, 9));
 
         Helper helper = new Helper(config);
 
@@ -40,7 +40,7 @@ public class HelperTest extends TestBase {
         Config config = Config.create()
                 .setAlgoPrefix("EMS")
                 .setHashAlgo("SHA256")
-                .setCurrentTime(date);
+                .setDate(date);
 
         Helper helper = new Helper(config);
 

@@ -80,7 +80,7 @@ public class Escher {
                 .setHashAlgo(hashAlgo)
                 .setDateHeaderName(dateHeaderName)
                 .setAuthHeaderName(authHeaderName)
-                .setCurrentTime(currentTime);
+                .setDate(currentTime);
     }
 
 

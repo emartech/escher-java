@@ -5,10 +5,8 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import javax.xml.bind.DatatypeConverter;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.function.BinaryOperator;
 
@@ -76,34 +74,20 @@ class Helper {
 
     public String calculateStringToSign(String credentialScope, String canonicalizedRequest) throws EscherException {
         return config.getFullAlgorithm() + NEW_LINE
-                + longDate() + NEW_LINE
-                + shortDate() + "/" + credentialScope + NEW_LINE
+                + config.getLongFormatDate() + NEW_LINE
+                + config.getShortFormatDate() + "/" + credentialScope + NEW_LINE
                 + Hmac.hash(canonicalizedRequest);
     }
 
 
     public byte[] calculateSigningKey(String secret, String credentialScope) throws EscherException {
-        byte[] key = Hmac.sign(config.getHashAlgo(), (config.getAlgoPrefix() + secret), shortDate());
+        byte[] key = Hmac.sign(config.getHashAlgo(), (config.getAlgoPrefix() + secret), config.getShortFormatDate());
 
         for (String credentialPart : credentialScope.split("/")) {
             key = Hmac.sign(config.getHashAlgo(), key, credentialPart);
         }
 
         return key;
-    }
-
-
-    private String longDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return dateFormat.format(config.getCurrentTime());
-    }
-
-
-    private String shortDate() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return format.format(config.getCurrentTime());
     }
 
 
@@ -121,7 +105,7 @@ class Helper {
 
 
     private String credentials(String accessKeyId, String credentialScope) {
-        return accessKeyId + "/" + shortDate() + "/" + credentialScope;
+        return accessKeyId + "/" + config.getShortFormatDate() + "/" + credentialScope;
     }
 
 
@@ -131,7 +115,7 @@ class Helper {
         params.put("Expires", Integer.toString(expires));
         params.put("Algorithm", config.getFullAlgorithm());
         params.put("Credentials", credentials(accessKeyId, credentialScope));
-        params.put("Date", longDate());
+        params.put("Date", config.getLongFormatDate());
 
         return params;
     }
@@ -139,7 +123,7 @@ class Helper {
 
     public void addDateHeader(Request request) {
         if (!request.hasHeader(config.getDateHeaderName())) {
-            request.addHeader(config.getDateHeaderName(), longDate());
+            request.addHeader(config.getDateHeaderName(), config.getLongFormatDate());
         }
     }
 

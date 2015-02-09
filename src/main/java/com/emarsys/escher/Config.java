@@ -1,15 +1,20 @@
 package com.emarsys.escher;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class Config {
+
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
 
     private String algoPrefix = "ESR";
     private String vendorKey = "Escher";
     private String hashAlgo = "SHA256";
     private String authHeaderName = "X-Escher-Auth";
     private String dateHeaderName = "X-Escher-Date";
-    private Date currentTime;
+    private Date date;
     private int clockSkew = 900;
 
 
@@ -76,13 +81,8 @@ public class Config {
     }
 
 
-    public Date getCurrentTime() {
-        return currentTime;
-    }
-
-
-    public Config setCurrentTime(Date currentTime) {
-        this.currentTime = currentTime;
+    public Config setDate(Date date) {
+        this.date = date;
         return this;
     }
 
@@ -98,8 +98,21 @@ public class Config {
     }
 
 
-    String getFullAlgorithm() {
+    public String getFullAlgorithm() {
         return algoPrefix + "-HMAC-" + hashAlgo;
     }
 
+
+    public String getLongFormatDate() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+        dateFormat.setTimeZone(UTC);
+        return dateFormat.format(date);
+    }
+
+
+    public String getShortFormatDate() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        format.setTimeZone(UTC);
+        return format.format(date);
+    }
 }

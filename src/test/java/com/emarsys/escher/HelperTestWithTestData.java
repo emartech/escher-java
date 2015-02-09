@@ -122,7 +122,7 @@ public class HelperTestWithTestData extends TestBase {
         return Config.create()
                     .setAlgoPrefix(param.getConfig().getAlgoPrefix())
                     .setHashAlgo(param.getConfig().getHashAlgo())
-                    .setCurrentTime(getConfigDate(param));
+                    .setDate(getConfigDate(param));
     }
 
 }
