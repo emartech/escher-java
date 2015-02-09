@@ -1,7 +1,5 @@
 package com.emarsys.escher;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,9 +82,9 @@ public class HelperTestWithTestData extends TestBase {
 
         TestParam.Request paramRequest = param.getRequest();
 
-        List<NameValuePair> headers = paramRequest.getHeaders()
+        List<Request.Header> headers = paramRequest.getHeaders()
                 .stream()
-                .map(header -> new BasicNameValuePair(header.get(0), header.get(1)))
+                .map(header -> new Request.Header(header.get(0), header.get(1)))
                 .collect(Collectors.toList());
 
         URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());

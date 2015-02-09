@@ -1,8 +1,5 @@
 package com.emarsys.escher;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
 import org.junit.Test;
 
 import java.net.URI;
@@ -32,19 +29,19 @@ public class EscherTest extends TestBase {
         Request signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
 
         RequestImpl expectedSignedRequest = createRequest(param.getExpected().getRequest());
-        assertEquals("host", expectedSignedRequest.getHost(), signedRequest.getURI().getHost());
+        assertEquals("host", expectedSignedRequest.getURI().getHost(), signedRequest.getURI().getHost());
         assertEquals("method", expectedSignedRequest.getHttpMethod(), signedRequest.getHttpMethod());
-        assertEquals("path", expectedSignedRequest.getPath(), signedRequest.getURI().getPath());
-        assertEquals("queryParams", expectedSignedRequest.getQueryParameters(), URLEncodedUtils.parse(signedRequest.getURI(), "utf-8"));
+        assertEquals("path", expectedSignedRequest.getURI().getPath(), signedRequest.getURI().getPath());
+        assertEquals("queryParams", expectedSignedRequest.getURI().getQuery(), signedRequest.getURI().getQuery());
         assertEquals("body", expectedSignedRequest.getBody(), signedRequest.getBody());
         assertEquals("headers", expectedSignedRequest.getRequestHeaders(), signedRequest.getRequestHeaders());
     }
 
 
     private RequestImpl createRequest(TestParam.Request paramRequest) throws URISyntaxException {
-        List<NameValuePair> headers = paramRequest.getHeaders()
+        List<Request.Header> headers = paramRequest.getHeaders()
                 .stream()
-                .map(header -> new BasicNameValuePair(header.get(0), header.get(1)))
+                .map(header -> new Request.Header(header.get(0), header.get(1)))
                 .collect(Collectors.toList());
 
         URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());

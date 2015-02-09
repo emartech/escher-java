@@ -3,6 +3,7 @@ package com.emarsys.escher;
 import org.apache.http.client.utils.URLEncodedUtils;
 
 import javax.xml.bind.DatatypeConverter;
+import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -21,13 +22,17 @@ class Helper {
 
 
     public String canonicalize(Request request) throws EscherException {
-        return request.getHttpMethod() + NEW_LINE +
-                request.getURI().getPath() + NEW_LINE +
-                canonicalizeQueryParameters(request) + NEW_LINE +
-                canonicalizeHeaders(request.getRequestHeaders()) + NEW_LINE +
-                NEW_LINE +
-                signedHeaders(request.getRequestHeaders()) + NEW_LINE +
-                Hmac.hash(request.getBody());
+        try {
+            return request.getHttpMethod() + NEW_LINE +
+                    request.getURI().toURL().getPath() + NEW_LINE +
+                    canonicalizeQueryParameters(request) + NEW_LINE +
+                    canonicalizeHeaders(request.getRequestHeaders()) + NEW_LINE +
+                    NEW_LINE +
+                    signedHeaders(request.getRequestHeaders()) + NEW_LINE +
+                    Hmac.hash(request.getBody());
+        } catch (MalformedURLException e) {
+            throw new EscherException(e);
+        }
     }
 
 
