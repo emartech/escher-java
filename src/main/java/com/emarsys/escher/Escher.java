@@ -1,13 +1,10 @@
 package com.emarsys.escher;
 
 
-import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.message.BasicNameValuePair;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -56,10 +53,7 @@ public class Escher {
             Map<String, String> params = helper.calculateSigningParams(accessKeyId, currentTime, credentialScope, expires);
             params.forEach((key, value) -> uriBuilder.addParameter("X-" + vendorKey + "-" + key, value));
 
-            ArrayList<NameValuePair> headers = new ArrayList<>();
-            headers.add(new BasicNameValuePair("host", uri.getHost()));
-
-            RequestImpl request = new RequestImpl("GET", uriBuilder.build(), headers, UNSIGNED_PAYLOAD);
+            Request request = new PresignUrlDummyRequest(uriBuilder.build());
 
             String signature = calculateSignature(request, helper, secret);
 
