@@ -85,7 +85,7 @@ class Helper {
     }
 
 
-    public String longDate(Date date) {
+    private String longDate(Date date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(date);
@@ -131,6 +131,18 @@ class Helper {
 
     private String algorithm(String algoPrefix, String hashAlgo) {
         return algoPrefix + "-HMAC-" + hashAlgo;
+    }
+
+
+    public void addDateHeader(Request request, Date date) {
+        if (!request.hasHeader(config.getDateHeaderName())) {
+            request.addHeader(config.getDateHeaderName(), longDate(date));
+        }
+    }
+
+
+    public void addAuthHeader(Request request, String header) {
+        request.addHeader(config.getAuthHeaderName(), header);
     }
 
 }

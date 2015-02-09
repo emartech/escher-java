@@ -34,14 +34,12 @@ public class Escher {
         Config config = getConfig();
         Helper helper = new Helper(config);
 
-        if (!request.hasHeader(dateHeaderName)) {
-            request.addHeader(dateHeaderName, helper.longDate(currentTime));
-        }
+        helper.addDateHeader(request, currentTime);
 
         String signature = calculateSignature(request, helper, secret);
         String authHeader = helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, signedHeaders, signature);
 
-        request.addHeader(authHeaderName, authHeader);
+        helper.addAuthHeader(request, authHeader);
 
         return request;
     }
@@ -85,7 +83,9 @@ public class Escher {
     private Config getConfig() {
         return Config.create()
                 .setAlgoPrefix(algoPrefix)
-                .setHashAlgo(hashAlgo);
+                .setHashAlgo(hashAlgo)
+                .setDateHeaderName(dateHeaderName)
+                .setAuthHeaderName(authHeaderName);
     }
 
 
