@@ -83,4 +83,9 @@ public class Config {
         return this;
     }
 
+
+    String getFullAlgorithm() {
+        return algoPrefix + "-HMAC-" + hashAlgo;
+    }
+
 }

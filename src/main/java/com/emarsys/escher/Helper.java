@@ -72,7 +72,7 @@ class Helper {
 
 
     public String calculateStringToSign(String credentialScope, String canonicalizedRequest, Date date) throws EscherException{
-        return algorithm(config.getAlgoPrefix(), config.getHashAlgo()) + NEW_LINE
+        return config.getFullAlgorithm() + NEW_LINE
                 + longDate(date) + NEW_LINE
                 + shortDate(date) + "/" + credentialScope + NEW_LINE
                 + Hmac.hash(canonicalizedRequest);
@@ -105,7 +105,7 @@ class Helper {
 
 
     public String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, List<String> signedHeaders, String signature) {
-        return algorithm(config.getAlgoPrefix(), config.getHashAlgo()) +
+        return config.getFullAlgorithm() +
                 " Credential=" + credentials(accessKeyId, date, credentialScope) +
                 ", SignedHeaders=" + signedHeaders.stream().reduce((s1, s2) -> s1 + ";" + s2).get().toLowerCase() +
                 ", Signature=" + signature;
@@ -126,16 +126,11 @@ class Helper {
         Map<String, String> params = new TreeMap<>();
         params.put("SignedHeaders", "host");
         params.put("Expires", Integer.toString(expires));
-        params.put("Algorithm", algorithm(config.getAlgoPrefix(), config.getHashAlgo()));
+        params.put("Algorithm", config.getFullAlgorithm());
         params.put("Credentials", credentials(accessKeyId, date, credentialScope));
         params.put("Date", longDate(date));
 
         return params;
-    }
-
-
-    private String algorithm(String algoPrefix, String hashAlgo) {
-        return algoPrefix + "-HMAC-" + hashAlgo;
     }
 
 
