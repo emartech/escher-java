@@ -6,7 +6,10 @@ import javax.xml.bind.DatatypeConverter;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.TreeMap;
 import java.util.function.BinaryOperator;
 
 class Helper {
@@ -71,16 +74,16 @@ class Helper {
     }
 
 
-    public String calculateStringToSign(String credentialScope, String canonicalizedRequest, Date date) throws EscherException{
+    public String calculateStringToSign(String credentialScope, String canonicalizedRequest) throws EscherException {
         return config.getFullAlgorithm() + NEW_LINE
-                + longDate(date) + NEW_LINE
-                + shortDate(date) + "/" + credentialScope + NEW_LINE
+                + longDate() + NEW_LINE
+                + shortDate() + "/" + credentialScope + NEW_LINE
                 + Hmac.hash(canonicalizedRequest);
     }
 
 
-    public byte[] calculateSigningKey(String secret, Date date, String credentialScope) throws EscherException{
-        byte[] key = Hmac.sign(config.getHashAlgo(), (config.getAlgoPrefix() + secret), shortDate(date));
+    public byte[] calculateSigningKey(String secret, String credentialScope) throws EscherException {
+        byte[] key = Hmac.sign(config.getHashAlgo(), (config.getAlgoPrefix() + secret), shortDate());
 
         for (String credentialPart : credentialScope.split("/")) {
             key = Hmac.sign(config.getHashAlgo(), key, credentialPart);
@@ -90,23 +93,23 @@ class Helper {
     }
 
 
-    private String longDate(Date date) {
+    private String longDate() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return dateFormat.format(date);
+        return dateFormat.format(config.getCurrentTime());
     }
 
 
-    private String shortDate(Date date) {
+    private String shortDate() {
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return format.format(date);
+        return format.format(config.getCurrentTime());
     }
 
 
-    public String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, List<String> signedHeaders, String signature) {
+    public String calculateAuthHeader(String accessKeyId, String credentialScope, List<String> signedHeaders, String signature) {
         return config.getFullAlgorithm() +
-                " Credential=" + credentials(accessKeyId, date, credentialScope) +
+                " Credential=" + credentials(accessKeyId, credentialScope) +
                 ", SignedHeaders=" + signedHeaders.stream().reduce((s1, s2) -> s1 + ";" + s2).get().toLowerCase() +
                 ", Signature=" + signature;
     }
@@ -117,26 +120,26 @@ class Helper {
     }
 
 
-    private String credentials(String accessKeyId, Date date, String credentialScope) {
-        return accessKeyId + "/" + shortDate(date) + "/" + credentialScope;
+    private String credentials(String accessKeyId, String credentialScope) {
+        return accessKeyId + "/" + shortDate() + "/" + credentialScope;
     }
 
 
-    public Map<String, String> calculateSigningParams(String accessKeyId, Date date, String credentialScope, int expires) {
+    public Map<String, String> calculateSigningParams(String accessKeyId, String credentialScope, int expires) {
         Map<String, String> params = new TreeMap<>();
         params.put("SignedHeaders", "host");
         params.put("Expires", Integer.toString(expires));
         params.put("Algorithm", config.getFullAlgorithm());
-        params.put("Credentials", credentials(accessKeyId, date, credentialScope));
-        params.put("Date", longDate(date));
+        params.put("Credentials", credentials(accessKeyId, credentialScope));
+        params.put("Date", longDate());
 
         return params;
     }
 
 
-    public void addDateHeader(Request request, Date date) {
+    public void addDateHeader(Request request) {
         if (!request.hasHeader(config.getDateHeaderName())) {
-            request.addHeader(config.getDateHeaderName(), longDate(date));
+            request.addHeader(config.getDateHeaderName(), longDate());
         }
     }
 

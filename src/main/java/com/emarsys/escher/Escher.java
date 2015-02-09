@@ -28,13 +28,13 @@ public class Escher {
 
 
     public Request signRequest(Request request, String accessKeyId, String secret, List<String> signedHeaders) throws EscherException {
-        Config config = getConfig();
+        Config config = createConfig();
         Helper helper = new Helper(config);
 
-        helper.addDateHeader(request, currentTime);
+        helper.addDateHeader(request);
 
         String signature = calculateSignature(request, helper, secret);
-        String authHeader = helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, signedHeaders, signature);
+        String authHeader = helper.calculateAuthHeader(accessKeyId, credentialScope, signedHeaders, signature);
 
         helper.addAuthHeader(request, authHeader);
 
@@ -44,13 +44,13 @@ public class Escher {
 
     public String presignUrl(String url, String accessKeyId, String secret, int expires) throws EscherException{
         try {
-            Config config = getConfig();
+            Config config = createConfig();
             Helper helper = new Helper(config);
 
             URI uri = new URI(url);
             URIBuilder uriBuilder = new URIBuilder(uri);
 
-            Map<String, String> params = helper.calculateSigningParams(accessKeyId, currentTime, credentialScope, expires);
+            Map<String, String> params = helper.calculateSigningParams(accessKeyId, credentialScope, expires);
             params.forEach((key, value) -> uriBuilder.addParameter("X-" + vendorKey + "-" + key, value));
 
             Request request = new PresignUrlDummyRequest(uriBuilder.build());
@@ -68,18 +68,19 @@ public class Escher {
 
     private String calculateSignature(Request request, Helper helper, String secret) throws EscherException {
         String canonicalizedRequest = helper.canonicalize(request);
-        String stringToSign = helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime);
-        byte[] signingKey = helper.calculateSigningKey(secret, currentTime, credentialScope);
+        String stringToSign = helper.calculateStringToSign(credentialScope, canonicalizedRequest);
+        byte[] signingKey = helper.calculateSigningKey(secret, credentialScope);
         return helper.calculateSignature(signingKey, stringToSign);
     }
 
 
-    private Config getConfig() {
+    private Config createConfig() {
         return Config.create()
                 .setAlgoPrefix(algoPrefix)
                 .setHashAlgo(hashAlgo)
                 .setDateHeaderName(dateHeaderName)
-                .setAuthHeaderName(authHeaderName);
+                .setAuthHeaderName(authHeaderName)
+                .setCurrentTime(currentTime);
     }
 
 

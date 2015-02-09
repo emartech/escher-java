@@ -100,8 +100,7 @@ public class HelperTestWithTestData extends TestBase {
     @Test
     public void testCalculateStringToSign() throws Exception {
         String stringToSign = helper.calculateStringToSign(param.getConfig().getCredentialScope(),
-                param.getExpected().getCanonicalizedRequest(),
-                getConfigDate(param)
+                param.getExpected().getCanonicalizedRequest()
         );
         assertEquals(fileName, param.getExpected().getStringToSign(), stringToSign);
     }
@@ -111,19 +110,19 @@ public class HelperTestWithTestData extends TestBase {
     public void testCalculateAuthHeader() throws Exception {
         byte[] signingKey = helper.calculateSigningKey(
                 param.getConfig().getApiSecret(),
-                getConfigDate(param),
                 param.getConfig().getCredentialScope()
         );
         String signature = helper.calculateSignature(signingKey, param.getExpected().getStringToSign());
-        String authHeader = helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), getConfigDate(param), param.getConfig().getCredentialScope(), param.getHeadersToSign(), signature);
+        String authHeader = helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), param.getConfig().getCredentialScope(), param.getHeadersToSign(), signature);
         assertEquals(fileName, param.getExpected().getAuthHeader(), authHeader);
     }
 
 
-    private Config getConfig(TestParam param) {
+    private Config getConfig(TestParam param) throws Exception{
         return Config.create()
                     .setAlgoPrefix(param.getConfig().getAlgoPrefix())
-                    .setHashAlgo(param.getConfig().getHashAlgo());
+                    .setHashAlgo(param.getConfig().getHashAlgo())
+                    .setCurrentTime(getConfigDate(param));
     }
 
 }
