@@ -1,8 +1,10 @@
 package com.emarsys.escher;
 
+import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 
 import javax.xml.bind.DatatypeConverter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.function.BinaryOperator;
 class Helper {
 
     private static final char NEW_LINE = '\n';
+    private static final String CHARSET = "UTF-8";
 
     private final Config config;
 
@@ -38,12 +41,21 @@ class Helper {
 
 
     private String canonicalizeQueryParameters(Request request) {
-        return URLEncodedUtils.parse(request.getURI(), "utf-8")
+        return URLEncodedUtils.parse(request.getURI(), CHARSET)
                 .stream()
-                .map(entry -> entry.getName() + "=" + URLEncoder.encode(entry.getValue()))
+                .map(this::queryParameterToString)
                 .sorted()
                 .reduce(byJoiningWith('&'))
                 .orElseGet(() -> "");
+    }
+
+
+    private String queryParameterToString(NameValuePair entry) {
+        try {
+            return entry.getName() + "=" + URLEncoder.encode(entry.getValue(), CHARSET);
+        } catch (UnsupportedEncodingException shouldNeverHappen) {
+            throw new RuntimeException(shouldNeverHappen);
+        }
     }
 
 
