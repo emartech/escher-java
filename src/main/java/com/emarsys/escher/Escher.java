@@ -37,10 +37,8 @@ public class Escher {
         if (!request.hasHeader(dateHeaderName)) {
             request.addHeader(dateHeaderName, helper.longDate(currentTime));
         }
-        String canonicalizedRequest = helper.canonicalize(request);
-        String stringToSign = helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime);
-        byte[] signingKey = helper.calculateSigningKey(secret, currentTime, credentialScope);
-        String signature = helper.calculateSignature(signingKey, stringToSign);
+
+        String signature = calculateSignature(request, helper, secret);
         String authHeader = helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, signedHeaders, signature);
 
         request.addHeader(authHeaderName, authHeader);
@@ -64,10 +62,8 @@ public class Escher {
             headers.add(new BasicNameValuePair("host", uri.getHost()));
 
             RequestImpl request = new RequestImpl("GET", uriBuilder.build(), headers, UNSIGNED_PAYLOAD);
-            String canonicalizedRequest = helper.canonicalize(request);
-            String stringToSign = helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime);
-            byte[] signingKey = helper.calculateSigningKey(secret, currentTime, credentialScope);
-            String signature = helper.calculateSignature(signingKey, stringToSign);
+
+            String signature = calculateSignature(request, helper, secret);
 
             uriBuilder.addParameter("X-" + vendorKey + "-" + "Signature", signature);
 
@@ -75,6 +71,14 @@ public class Escher {
         } catch (URISyntaxException e) {
             throw new EscherException(e);
         }
+    }
+
+
+    private String calculateSignature(Request request, Helper helper, String secret) throws EscherException {
+        String canonicalizedRequest = helper.canonicalize(request);
+        String stringToSign = helper.calculateStringToSign(credentialScope, canonicalizedRequest, currentTime);
+        byte[] signingKey = helper.calculateSigningKey(secret, currentTime, credentialScope);
+        return helper.calculateSignature(signingKey, stringToSign);
     }
 
 
