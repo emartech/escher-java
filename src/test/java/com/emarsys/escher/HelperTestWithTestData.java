@@ -23,44 +23,39 @@ public class HelperTestWithTestData extends TestBase {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        String[] fileList = new String[] {
-                "get-vanilla",
-                "post-vanilla",
-                "get-vanilla-query",
-                "post-vanilla-query",
-                "get-vanilla-empty-query-key",
-                "post-vanilla-empty-query-value",
-                "get-vanilla-query-order-key",
-                "post-x-www-form-urlencoded",
-                "post-x-www-form-urlencoded-parameters",
+        return Arrays.asList(new Object[][] {
+                { "get-vanilla" },
+                { "post-vanilla" },
+                { "get-vanilla-query" },
+                { "post-vanilla-query" },
+                { "get-vanilla-empty-query-key" },
+                { "post-vanilla-empty-query-value" },
+                { "get-vanilla-query-order-key" },
+                { "post-x-www-form-urlencoded" },
+                { "post-x-www-form-urlencoded-parameters" },
 
-                "get-header-value-trim",
-                "post-header-key-case",
-                "post-header-key-sort",
-                "post-header-value-case",
+                { "get-header-value-trim" },
+                { "post-header-key-case" },
+                { "post-header-key-sort" },
+                { "post-header-value-case" },
 
-                "get-vanilla-query-order-value",
-                "get-vanilla-query-order-key-case",
-                "get-unreserved",
-//                "get-vanilla-query-unreserved",
-//                "get-vanilla-ut8-query",
-                "get-utf8",
-                "get-space",
-//                "post-vanilla-query-space",
-//                "post-vanilla-query-nonunreserved",
+                { "get-vanilla-query-order-value" },
+                { "get-vanilla-query-order-key-case" },
+                { "get-unreserved" },
+//                { "get-vanilla-query-unreserved" },
+//                { "get-vanilla-ut8-query" },
+                { "get-utf8" },
+                { "get-space" },
+//                { "post-vanilla-query-space" },
+//                { "post-vanilla-query-nonunreserved" },
 
-//                "get-slash",
-//                "get-slashes",
-//                "get-slash-dot-slash",
-//                "get-slash-pointless-dot",
-//                "get-relative",
-//                "get-relative-relative",
-        };
-
-        return Arrays.asList(fileList)
-                .stream()
-                .map(file -> new String[]{file})
-                .collect(Collectors.toList());
+//                { "get-slash" },
+//                { "get-slashes" },
+//                { "get-slash-dot-slash" },
+//                { "get-slash-pointless-dot" },
+//                { "get-relative" },
+//                { "get-relative-relative" },
+        });
     }
 
 
