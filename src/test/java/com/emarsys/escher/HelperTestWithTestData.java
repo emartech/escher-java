@@ -73,7 +73,7 @@ public class HelperTestWithTestData extends TestBase {
     public void setUp() throws Exception {
         param = parseTestData(fileName);
 
-        helper = new Helper(getConfig(param));
+        helper = new Helper(createConfig(param));
     }
 
 
@@ -118,7 +118,7 @@ public class HelperTestWithTestData extends TestBase {
     }
 
 
-    private Config getConfig(TestParam param) throws Exception{
+    private Config createConfig(TestParam param) throws Exception{
         return Config.create()
                     .setAlgoPrefix(param.getConfig().getAlgoPrefix())
                     .setHashAlgo(param.getConfig().getHashAlgo())

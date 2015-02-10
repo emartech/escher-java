@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class Config {
+class Config {
 
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 

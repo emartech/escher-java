@@ -6,7 +6,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
-public class Hmac {
+class Hmac {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
