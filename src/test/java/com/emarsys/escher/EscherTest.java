@@ -135,4 +135,30 @@ public class EscherTest extends TestBase {
         };
     }
 
+
+    @Test
+    public void testAuthenticateInvalidDateFormat() throws Exception {
+        List<EscherRequest.Header> headers = Arrays.asList(
+                new EscherRequest.Header("X_EMS_DATE", "NOT_A_DATE"),
+                new EscherRequest.Header("X_EMS_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("host", "iam.amazonaws.com")
+        );
+        EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
+
+        Escher escher = new Escher("us-east-1/iam/aws4_request")
+                .setAlgoPrefix("EMS")
+                .setVendorKey("EMS")
+                .setAuthHeaderName("X-Ems-Auth")
+                .setDateHeaderName("X-Ems-Date");
+
+        try {
+            escher.authenticate(request, new HashMap<>());
+
+            fail("exception should have been thrown");
+        } catch (EscherException e) {
+            assertEquals("Invalid date format", e.getMessage());
+        }
+    }
+
 }

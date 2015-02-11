@@ -5,6 +5,8 @@ import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -106,6 +108,14 @@ public class Escher {
 
         if (authHeader == null) {
             throw new EscherException("Missing header: " + authHeaderName);
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat(Config.LONG_DATE_FORMAT);
+        dateFormat.setTimeZone(Config.TIMEZONE);
+        try {
+            dateFormat.parse(dateHeader.getFieldValue());
+        } catch (ParseException e) {
+            throw new EscherException("Invalid date format");
         }
 
         AuthHeader authHeader1 = AuthHeader.parse(authHeader.getFieldValue());

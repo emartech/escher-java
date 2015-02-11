@@ -6,7 +6,9 @@ import java.util.TimeZone;
 
 class Config {
 
-    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    public static final TimeZone TIMEZONE = TimeZone.getTimeZone("UTC");
+    public static final String LONG_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'";
+    public static final String SHORT_DATE_FORMAT = "yyyyMMdd";
 
 
     private String algoPrefix = "ESR";
@@ -104,15 +106,15 @@ class Config {
 
 
     public String getLongFormatDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-        dateFormat.setTimeZone(UTC);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(LONG_DATE_FORMAT);
+        dateFormat.setTimeZone(TIMEZONE);
         return dateFormat.format(date);
     }
 
 
     public String getShortFormatDate() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
-        format.setTimeZone(UTC);
+        SimpleDateFormat format = new SimpleDateFormat(SHORT_DATE_FORMAT);
+        format.setTimeZone(TIMEZONE);
         return format.format(date);
     }
 }
