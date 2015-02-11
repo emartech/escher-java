@@ -3,6 +3,7 @@ package com.emarsys.escher;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -16,6 +17,16 @@ import static org.junit.Assert.fail;
 
 @RunWith(DataProviderRunner.class)
 public class EscherTest extends TestBase {
+
+
+    private Escher escher;
+
+
+    @Before
+    public void setUp() throws Exception {
+        escher = new Escher("us-east-1/iam/aws4_request");
+    }
+
 
     @Test
     public void testSignRequest() throws Exception {
@@ -85,8 +96,7 @@ public class EscherTest extends TestBase {
         Map<String, String> keyDb = new HashMap<>();
         keyDb.put("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY");
 
-        Escher escher = new Escher("us-east-1/iam/aws4_request")
-                .setAlgoPrefix("EMS")
+        escher.setAlgoPrefix("EMS")
                 .setVendorKey("EMS")
                 .setAuthHeaderName("X-Ems-Auth")
                 .setDateHeaderName("X-Ems-Date");
@@ -114,15 +124,7 @@ public class EscherTest extends TestBase {
 
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
-        Escher escher = new Escher("us-east-1/iam/aws4_request");
-
-        try {
-            escher.authenticate(request, new HashMap<>());
-
-            fail("exception should have been thrown");
-        } catch (EscherException e) {
-            assertEquals(expectedErrorMessage, e.getMessage());
-        }
+        assertAuthenticationError(expectedErrorMessage, request);
     }
 
 
@@ -139,25 +141,24 @@ public class EscherTest extends TestBase {
     @Test
     public void testAuthenticateInvalidDateFormat() throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X_EMS_DATE", "NOT_A_DATE"),
-                new EscherRequest.Header("X_EMS_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("X_ESCHER_DATE", "NOT_A_DATE"),
+                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
                 new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
                 new EscherRequest.Header("host", "iam.amazonaws.com")
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
-        Escher escher = new Escher("us-east-1/iam/aws4_request")
-                .setAlgoPrefix("EMS")
-                .setVendorKey("EMS")
-                .setAuthHeaderName("X-Ems-Auth")
-                .setDateHeaderName("X-Ems-Date");
+        assertAuthenticationError("Invalid date format", request);
+    }
 
+
+    private void assertAuthenticationError(String expectedErrorMessage, EscherRequest request) {
         try {
             escher.authenticate(request, new HashMap<>());
 
             fail("exception should have been thrown");
         } catch (EscherException e) {
-            assertEquals("Invalid date format", e.getMessage());
+            assertEquals(expectedErrorMessage, e.getMessage());
         }
     }
 
