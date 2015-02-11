@@ -7,9 +7,9 @@ import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.function.BinaryOperator;
 
 class Helper {
@@ -144,4 +144,37 @@ class Helper {
         request.addHeader(config.getAuthHeaderName(), header);
     }
 
+
+    public String parseHostHeader(EscherRequest request) throws EscherException {
+        return findHeader(request, "host").getFieldValue();
+    }
+
+    public AuthHeader parseAuthHeader(EscherRequest request) throws EscherException {
+        return AuthHeader.parse(findHeader(request, config.getAuthHeaderName()).getFieldValue());
+    }
+
+
+    public Date parseDateHeader(EscherRequest request) throws EscherException {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat(Config.LONG_DATE_FORMAT);
+            dateFormat.setTimeZone(Config.TIMEZONE);
+            return dateFormat.parse(findHeader(request, config.getDateHeaderName()).getFieldValue());
+        } catch (ParseException e) {
+            throw new EscherException("Invalid date format");
+        }
+    }
+
+
+    private EscherRequest.Header findHeader(EscherRequest request, String headerName) throws EscherException {
+        try {
+
+            return request.getRequestHeaders()
+                    .stream()
+                    .filter(header -> header.getFieldName().replace('_', '-').equalsIgnoreCase(headerName))
+                    .findFirst().get();
+
+        } catch (NoSuchElementException e) {
+            throw new EscherException("Missing header: " + headerName);
+        }
+    }
 }

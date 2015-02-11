@@ -5,8 +5,6 @@ import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -87,39 +85,13 @@ public class Escher {
 
 
     public String authenticate(EscherRequest request, Map<String, String> keyDb) throws EscherException {
-        EscherRequest.Header hostHeader = null;
-        EscherRequest.Header authHeader = null;
-        EscherRequest.Header dateHeader = null;
+        Helper helper = new Helper(createConfig());
 
-        for (EscherRequest.Header header : request.getRequestHeaders()) {
-            String fieldName = header.getFieldName().replace('_', '-');
-            if (fieldName.equalsIgnoreCase("host")) hostHeader = header;
-            if (fieldName.equalsIgnoreCase(authHeaderName)) authHeader = header;
-            if (fieldName.equalsIgnoreCase(dateHeaderName)) dateHeader = header;
-        }
+        AuthHeader authHeader = helper.parseAuthHeader(request);
+        helper.parseDateHeader(request);
+        helper.parseHostHeader(request);
 
-        if (hostHeader == null) {
-            throw new EscherException("Missing header: host");
-        }
-
-        if (dateHeader == null) {
-            throw new EscherException("Missing header: " + dateHeaderName);
-        }
-
-        if (authHeader == null) {
-            throw new EscherException("Missing header: " + authHeaderName);
-        }
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat(Config.LONG_DATE_FORMAT);
-        dateFormat.setTimeZone(Config.TIMEZONE);
-        try {
-            dateFormat.parse(dateHeader.getFieldValue());
-        } catch (ParseException e) {
-            throw new EscherException("Invalid date format");
-        }
-
-        AuthHeader authHeader1 = AuthHeader.parse(authHeader.getFieldValue());
-        return authHeader1.getAccessKeyId();
+        return authHeader.getAccessKeyId();
     }
 
 
