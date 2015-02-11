@@ -4,12 +4,12 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
-class PresignUrlDummyRequest implements Request {
+class PresignUrlDummyEscherRequest implements EscherRequest {
 
     private URI uri;
 
 
-    public PresignUrlDummyRequest(URI uri) {
+    public PresignUrlDummyEscherRequest(URI uri) {
         this.uri = uri;
     }
 

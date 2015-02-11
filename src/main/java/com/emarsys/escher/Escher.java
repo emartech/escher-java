@@ -27,7 +27,7 @@ public class Escher {
     }
 
 
-    public Request signRequest(Request request, String accessKeyId, String secret, List<String> signedHeaders) throws EscherException {
+    public EscherRequest signRequest(EscherRequest request, String accessKeyId, String secret, List<String> signedHeaders) throws EscherException {
         Config config = createConfig();
         Helper helper = new Helper(config);
 
@@ -53,7 +53,7 @@ public class Escher {
             Map<String, String> params = helper.calculateSigningParams(accessKeyId, credentialScope, expires);
             params.forEach((key, value) -> uriBuilder.addParameter("X-" + vendorKey + "-" + key, value));
 
-            Request request = new PresignUrlDummyRequest(uriBuilder.build());
+            EscherRequest request = new PresignUrlDummyEscherRequest(uriBuilder.build());
 
             String signature = calculateSignature(request, helper, secret);
 
@@ -66,7 +66,7 @@ public class Escher {
     }
 
 
-    private String calculateSignature(Request request, Helper helper, String secret) throws EscherException {
+    private String calculateSignature(EscherRequest request, Helper helper, String secret) throws EscherException {
         String canonicalizedRequest = helper.canonicalize(request);
         String stringToSign = helper.calculateStringToSign(credentialScope, canonicalizedRequest);
         byte[] signingKey = helper.calculateSigningKey(secret, credentialScope);

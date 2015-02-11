@@ -25,7 +25,7 @@ class Helper {
     }
 
 
-    public String canonicalize(Request request) throws EscherException {
+    public String canonicalize(EscherRequest request) throws EscherException {
         try {
             return request.getHttpMethod() + NEW_LINE +
                     request.getURI().toURL().getPath() + NEW_LINE +
@@ -40,7 +40,7 @@ class Helper {
     }
 
 
-    private String canonicalizeQueryParameters(Request request) {
+    private String canonicalizeQueryParameters(EscherRequest request) {
         return URLEncodedUtils.parse(request.getURI(), CHARSET)
                 .stream()
                 .map(this::queryParameterToString)
@@ -59,7 +59,7 @@ class Helper {
     }
 
 
-    private String canonicalizeHeaders(List<Request.Header> headers) {
+    private String canonicalizeHeaders(List<EscherRequest.Header> headers) {
         return headers
                 .stream()
                 .map(header -> header.getFieldName().toLowerCase() + ":" + header.getFieldValue().trim())
@@ -69,7 +69,7 @@ class Helper {
     }
 
 
-    private String signedHeaders(List<Request.Header> headers) {
+    private String signedHeaders(List<EscherRequest.Header> headers) {
         return headers
                 .stream()
                 .map(header -> header.getFieldName().toLowerCase())
@@ -133,14 +133,14 @@ class Helper {
     }
 
 
-    public void addDateHeader(Request request) {
+    public void addDateHeader(EscherRequest request) {
         if (!request.hasHeader(config.getDateHeaderName())) {
             request.addHeader(config.getDateHeaderName(), config.getLongFormatDate());
         }
     }
 
 
-    public void addAuthHeader(Request request, String header) {
+    public void addAuthHeader(EscherRequest request, String header) {
         request.addHeader(config.getAuthHeaderName(), header);
     }
 

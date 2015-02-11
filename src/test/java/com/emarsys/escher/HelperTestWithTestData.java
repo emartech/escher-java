@@ -77,14 +77,14 @@ public class HelperTestWithTestData extends TestBase {
 
         TestParam.Request paramRequest = param.getRequest();
 
-        List<Request.Header> headers = paramRequest.getHeaders()
+        List<EscherRequest.Header> headers = paramRequest.getHeaders()
                 .stream()
-                .map(header -> new Request.Header(header.get(0), header.get(1)))
+                .map(header -> new EscherRequest.Header(header.get(0), header.get(1)))
                 .collect(Collectors.toList());
 
         URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
 
-        RequestImpl request = new RequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
+        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
 
         String canonicalised = helper.canonicalize(request);
 

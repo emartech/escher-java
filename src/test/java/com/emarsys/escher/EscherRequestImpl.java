@@ -4,7 +4,7 @@ package com.emarsys.escher;
 import java.net.URI;
 import java.util.List;
 
-public class RequestImpl implements Request {
+public class EscherRequestImpl implements EscherRequest {
 
     private String httpMethod;
     private URI uri;
@@ -12,7 +12,7 @@ public class RequestImpl implements Request {
     private String body;
 
 
-    public RequestImpl(String httpMethod, URI uri, List<Header> headers, String body) {
+    public EscherRequestImpl(String httpMethod, URI uri, List<Header> headers, String body) {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.headers = headers;

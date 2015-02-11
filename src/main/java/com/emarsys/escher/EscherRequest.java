@@ -4,7 +4,7 @@ package com.emarsys.escher;
 import java.net.URI;
 import java.util.List;
 
-public interface Request {
+public interface EscherRequest {
 
     public String getHttpMethod();
     public URI getURI();

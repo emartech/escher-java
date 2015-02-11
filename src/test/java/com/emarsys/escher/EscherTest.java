@@ -16,7 +16,7 @@ public class EscherTest extends TestBase {
     public void testSignRequest() throws Exception {
         TestParam param = parseTestData("get-vanilla");
 
-        RequestImpl request = createRequest(param.getRequest());
+        EscherRequestImpl request = createRequest(param.getRequest());
 
         TestParam.Config config = param.getConfig();
 
@@ -26,9 +26,9 @@ public class EscherTest extends TestBase {
                 .setAlgoPrefix(config.getAlgoPrefix())
                 .setCurrentTime(getConfigDate(param));
 
-        Request signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
+        EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
 
-        RequestImpl expectedSignedRequest = createRequest(param.getExpected().getRequest());
+        EscherRequestImpl expectedSignedRequest = createRequest(param.getExpected().getRequest());
         assertEquals("host", expectedSignedRequest.getURI().getHost(), signedRequest.getURI().getHost());
         assertEquals("method", expectedSignedRequest.getHttpMethod(), signedRequest.getHttpMethod());
         assertEquals("path", expectedSignedRequest.getURI().getPath(), signedRequest.getURI().getPath());
@@ -38,15 +38,15 @@ public class EscherTest extends TestBase {
     }
 
 
-    private RequestImpl createRequest(TestParam.Request paramRequest) throws URISyntaxException {
-        List<Request.Header> headers = paramRequest.getHeaders()
+    private EscherRequestImpl createRequest(TestParam.Request paramRequest) throws URISyntaxException {
+        List<EscherRequest.Header> headers = paramRequest.getHeaders()
                 .stream()
-                .map(header -> new Request.Header(header.get(0), header.get(1)))
+                .map(header -> new EscherRequest.Header(header.get(0), header.get(1)))
                 .collect(Collectors.toList());
 
         URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
 
-        return new RequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
+        return new EscherRequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
     }
 
 
