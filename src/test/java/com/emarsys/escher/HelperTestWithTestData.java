@@ -86,9 +86,9 @@ public class HelperTestWithTestData extends TestBase {
 
         EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
 
-        String canonicalised = helper.canonicalize(request);
+        String canonicalized = helper.canonicalize(request);
 
-        assertEquals(fileName, param.getExpected().getCanonicalizedRequest(), canonicalised);
+        assertEquals(fileName, param.getExpected().getCanonicalizedRequest(), canonicalized);
     }
 
 
