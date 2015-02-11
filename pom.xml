@@ -6,7 +6,32 @@
 
     <groupId>com.emarsys</groupId>
     <artifactId>escher</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1</version>
+    <packaging>jar</packaging>
+
+    <name>Escher</name>
+    <description>Stateless HTTP Request Signing</description>
+    <url>http://escherauth.io</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Robert Gargya</name>
+            <email>robert.gargya@emarsys.com</email>
+            <organization>Emarsys</organization>
+            <organizationUrl>http://www.emarsys.com</organizationUrl>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git@github.com:emartech/escher-java.git</connection>
+        <developerConnection>scm:git:git@github.com:emartech/escher-java.git</developerConnection>
+        <url>git@github.com:emartech/escher-java.git</url>
+    </scm>
 
     <build>
         <plugins>
@@ -17,6 +42,18 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
