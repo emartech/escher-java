@@ -2,7 +2,7 @@ package com.emarsys.escher.demo;
 
 import com.emarsys.escher.Escher;
 import com.emarsys.escher.EscherException;
-import com.emarsys.escher.Request;
+import com.emarsys.escher.EscherRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -45,7 +45,7 @@ public class ClientTest {
 
 
     private static HttpRequestBase signRequest(HttpRequestBase request) throws EscherException {
-        EscherRequest escherRequest = new EscherRequest(request, "");
+        MyEscherRequest escherRequest = new MyEscherRequest(request, "");
 
         Escher escher = new Escher("eu/suite/ems_request")
                 .setAuthHeaderName("X-Ems-Auth")
@@ -72,13 +72,13 @@ public class ClientTest {
 }
 
 
-class EscherRequest implements Request {
+class MyEscherRequest implements EscherRequest {
 
     private HttpRequestBase httpRequest;
     private String body;
 
 
-    public EscherRequest(HttpRequestBase httpRequest, String body) {
+    public MyEscherRequest(HttpRequestBase httpRequest, String body) {
         this.httpRequest = httpRequest;
         this.body = body;
     }
@@ -97,10 +97,10 @@ class EscherRequest implements Request {
 
 
     @Override
-    public List<Request.Header> getRequestHeaders() {
+    public List<EscherRequest.Header> getRequestHeaders() {
         return Arrays.asList(httpRequest.getAllHeaders())
                 .stream()
-                .map(header -> new Request.Header(header.getName(), header.getValue()))
+                .map(header -> new EscherRequest.Header(header.getName(), header.getValue()))
                 .collect(Collectors.toList());
     }
 
