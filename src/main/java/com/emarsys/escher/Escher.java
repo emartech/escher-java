@@ -84,6 +84,35 @@ public class Escher {
     }
 
 
+    public String authenticate(EscherRequest request, Map<String, String> keyDb) throws EscherException {
+        EscherRequest.Header hostHeader = null;
+        EscherRequest.Header authHeader = null;
+        EscherRequest.Header dateHeader = null;
+
+        for (EscherRequest.Header header : request.getRequestHeaders()) {
+            String fieldName = header.getFieldName().replace('_', '-');
+            if (fieldName.equalsIgnoreCase("host")) hostHeader = header;
+            if (fieldName.equalsIgnoreCase(authHeaderName)) authHeader = header;
+            if (fieldName.equalsIgnoreCase(dateHeaderName)) dateHeader = header;
+        }
+
+        if (hostHeader == null) {
+            throw new EscherException("Missing header: host");
+        }
+
+        if (dateHeader == null) {
+            throw new EscherException("Missing header: " + dateHeaderName);
+        }
+
+        if (authHeader == null) {
+            throw new EscherException("Missing header: " + authHeaderName);
+        }
+
+        AuthHeader authHeader1 = AuthHeader.parse(authHeader.getFieldValue());
+        return authHeader1.getAccessKeyId();
+    }
+
+
     public Escher setAlgoPrefix(String algoPrefix) {
         this.algoPrefix = algoPrefix;
         return this;
