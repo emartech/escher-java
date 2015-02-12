@@ -23,7 +23,7 @@ public class AuthHeaderTest {
         assertEquals("algoPrefix", "EMS", header.getAlgoPrefix());
         assertEquals("hashAlgo", "SHA256", header.getHashAlgo());
         assertEquals("accessKeyId", "AKID-EXAMPLE", header.getAccessKeyId());
-        assertEquals("date", "20110909", header.getShortFormatDate());
+        assertEquals("date", "20110909", header.getCredentialDate());
         assertEquals("credentialScope", "us-east-1/iam/aws4_request", header.getCredentialScope());
         assertEquals("signedHeaders", Arrays.asList("content-type", "host", "x-ems-date"), header.getSignedHeaders());
         assertEquals("signature", "f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd", header.getSignature());

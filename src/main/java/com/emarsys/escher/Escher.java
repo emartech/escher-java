@@ -105,7 +105,7 @@ public class Escher {
             throw new EscherException("Only SHA256 and SHA512 hash algorithms are allowed");
         }
 
-        Date credentialDate = DateTime.parseShortString(authHeader.getShortFormatDate());
+        Date credentialDate = DateTime.parseShortString(authHeader.getCredentialDate());
 
         if (!DateTime.sameDay(requestDate, credentialDate)) {
             throw new EscherException("The request date and credential date do not match");

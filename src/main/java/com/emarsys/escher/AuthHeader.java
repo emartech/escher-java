@@ -11,7 +11,7 @@ class AuthHeader {
     private String algoPrefix;
     private String hashAlgo;
     private String accessKeyId;
-    private String shortFormatDate;
+    private String credentialDate;
     private String credentialScope;
     private List<String> signedHeaders = new ArrayList<>();
     private String signature;
@@ -28,7 +28,7 @@ class AuthHeader {
             header.algoPrefix = matcher.group("algoPrefix");
             header.hashAlgo = matcher.group("hashAlgo");
             header.accessKeyId = matcher.group("accessKeyId");
-            header.shortFormatDate = matcher.group("date");
+            header.credentialDate = matcher.group("date");
             header.credentialScope = matcher.group("credentialScope");
             header.signedHeaders.addAll(Arrays.asList(matcher.group("signedHeaders").split(";")));
             header.signature = matcher.group("signature");
@@ -56,8 +56,8 @@ class AuthHeader {
     }
 
 
-    public String getShortFormatDate() {
-        return shortFormatDate;
+    public String getCredentialDate() {
+        return credentialDate;
     }
 
 
