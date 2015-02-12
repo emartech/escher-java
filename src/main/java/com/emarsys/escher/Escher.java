@@ -5,6 +5,7 @@ import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +98,10 @@ public class Escher {
 
         if (authHeader.getSignedHeaders().stream().noneMatch(header -> header.equalsIgnoreCase(dateHeaderName))) {
             throw new EscherException("Date header is not signed");
+        }
+
+        if (!Arrays.asList("SHA256", "SHA512").contains(authHeader.getHashAlgo().toUpperCase())) {
+            throw new EscherException("Only SHA256 and SHA512 hash algorithms are allowed.");
         }
 
         return authHeader.getAccessKeyId();
