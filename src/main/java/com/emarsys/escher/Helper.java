@@ -1,5 +1,6 @@
 package com.emarsys.escher;
 
+import com.emarsys.escher.util.Hmac;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 

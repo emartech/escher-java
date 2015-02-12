@@ -1,4 +1,6 @@
-package com.emarsys.escher;
+package com.emarsys.escher.util;
+
+import com.emarsys.escher.EscherException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -6,12 +8,12 @@ import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
-class Hmac {
+public class Hmac {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
 
-    static String hash(String text) throws EscherException {
+    public static String hash(String text) throws EscherException {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(text.getBytes(UTF8));
@@ -23,12 +25,12 @@ class Hmac {
     }
 
 
-    static byte[] sign(String hashAlgo, String key, String data) throws EscherException {
+    public static byte[] sign(String hashAlgo, String key, String data) throws EscherException {
         return  sign(hashAlgo, key.getBytes(UTF8), data);
     }
 
 
-    static byte[] sign(String hashAlgo, byte[] key, String data) throws EscherException {
+    public static byte[] sign(String hashAlgo, byte[] key, String data) throws EscherException {
         try {
             hashAlgo = "Hmac" + hashAlgo.toUpperCase();
             Mac mac = Mac.getInstance(hashAlgo);
