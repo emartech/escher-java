@@ -25,6 +25,7 @@ public class EscherTest extends TestBase {
     @Before
     public void setUp() throws Exception {
         escher = new Escher("us-east-1/iam/aws4_request");
+        escher.setCurrentTime(createDate(2011, Calendar.SEPTEMBER, 9, 23, 36, 0));
     }
 
 
@@ -202,6 +203,35 @@ public class EscherTest extends TestBase {
 
         assertAuthenticationError("The request date and credential date do not match", request);
     }
+
+
+    @Test
+    @UseDataProvider("getAuthenticateOutsideAcceptedTimeIntervalCases")
+    public void testAuthenticateOutsideAcceptedTimeInterval(int clockSkew, int minute) throws Exception {
+        List<EscherRequest.Header> headers = Arrays.asList(
+                new EscherRequest.Header("X_ESCHER_DATE", "20110909T233600Z"),
+                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("host", "iam.amazonaws.com")
+        );
+        EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
+        escher.setClockSkew(clockSkew);
+        escher.setCurrentTime(createDate(2011, Calendar.SEPTEMBER, 9, 23, minute, 0));
+
+        assertAuthenticationError("Request date is not within the accepted time interval", request);
+    }
+
+
+    @DataProvider
+    public static Object[][] getAuthenticateOutsideAcceptedTimeIntervalCases() {
+        return new Object[][] {
+                { 900, 52 },     // clockSkew: 15 min; request is 16 min old
+                { 900, 10 },     // clockSkew: 15 min; request is 16 min from the future
+                {  60, 38 },     // clockSkew:  1 min; request is  2 min old
+                {  60, 34 },     // clockSkew:  1 min; request is  2 min from the future
+        };
+    }
+
 
 
     private void assertAuthenticationError(String expectedErrorMessage, EscherRequest request) {

@@ -59,6 +59,18 @@ public class DateTime {
     }
 
 
+    public static Date subtractSeconds(Date date, int seconds) {
+        return addSeconds(date, -seconds);
+    }
+
+
+    public static Date addSeconds(Date date, int seconds) {
+        Calendar calendar = toCalendar(date);
+        calendar.add(Calendar.SECOND, seconds);
+        return calendar.getTime();
+    }
+
+
     private static Calendar toCalendar(Date date) {
         Calendar calendar = Calendar.getInstance(DateTime.TIMEZONE);
         calendar.setTime(date);

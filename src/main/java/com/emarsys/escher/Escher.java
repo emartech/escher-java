@@ -111,6 +111,11 @@ public class Escher {
             throw new EscherException("The request date and credential date do not match");
         }
 
+        if (requestDate.before(DateTime.subtractSeconds(currentTime, clockSkew)) ||
+                requestDate.after(DateTime.addSeconds(currentTime, clockSkew))) {
+            throw new EscherException("Request date is not within the accepted time interval");
+        }
+
         return authHeader.getAccessKeyId();
     }
 
