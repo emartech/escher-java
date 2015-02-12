@@ -1,13 +1,15 @@
 package com.emarsys.escher;
 
 
+import com.emarsys.escher.util.DateTime;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class Escher {
 
@@ -103,24 +105,9 @@ public class Escher {
             throw new EscherException("Only SHA256 and SHA512 hash algorithms are allowed");
         }
 
-        Calendar requestCalendar = Calendar.getInstance(Config.TIMEZONE);
-        requestCalendar.setTime(requestDate);
+        Date credentialDate = DateTime.parseShortString(authHeader.getShortFormatDate());
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat(Config.SHORT_DATE_FORMAT);
-        dateFormat.setTimeZone(Config.TIMEZONE);
-        Date credentialDate;
-        try {
-            credentialDate = dateFormat.parse(authHeader.getShortFormatDate());
-        } catch (ParseException e) {
-            throw new EscherException(e);
-        }
-        Calendar credentialCalendar = Calendar.getInstance(Config.TIMEZONE);
-        credentialCalendar.setTime(credentialDate);
-
-        boolean sameDay = requestCalendar.get(Calendar.YEAR) == credentialCalendar.get(Calendar.YEAR) &&
-                requestCalendar.get(Calendar.DAY_OF_YEAR) == credentialCalendar.get(Calendar.DAY_OF_YEAR);
-
-        if (!sameDay) {
+        if (!DateTime.sameDay(requestDate, credentialDate)) {
             throw new EscherException("The request date and credential date do not match");
         }
 

@@ -1,5 +1,6 @@
 package com.emarsys.escher;
 
+import com.emarsys.escher.util.DateTime;
 import com.emarsys.escher.util.Hmac;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -8,8 +9,6 @@ import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.BinaryOperator;
 
@@ -87,14 +86,14 @@ class Helper {
 
     public String calculateStringToSign(String credentialScope, String canonicalizedRequest) throws EscherException {
         return config.getFullAlgorithm() + NEW_LINE
-                + config.getLongFormatDate() + NEW_LINE
-                + config.getShortFormatDate() + "/" + credentialScope + NEW_LINE
+                + DateTime.toLongString(config.getDate()) + NEW_LINE
+                + DateTime.toShortString(config.getDate()) + "/" + credentialScope + NEW_LINE
                 + Hmac.hash(canonicalizedRequest);
     }
 
 
     public byte[] calculateSigningKey(String secret, String credentialScope) throws EscherException {
-        byte[] key = Hmac.sign(config.getHashAlgo(), (config.getAlgoPrefix() + secret), config.getShortFormatDate());
+        byte[] key = Hmac.sign(config.getHashAlgo(), (config.getAlgoPrefix() + secret), DateTime.toShortString(config.getDate()));
 
         for (String credentialPart : credentialScope.split("/")) {
             key = Hmac.sign(config.getHashAlgo(), key, credentialPart);
@@ -118,7 +117,7 @@ class Helper {
 
 
     private String credentials(String accessKeyId, String credentialScope) {
-        return accessKeyId + "/" + config.getShortFormatDate() + "/" + credentialScope;
+        return accessKeyId + "/" + DateTime.toShortString(config.getDate()) + "/" + credentialScope;
     }
 
 
@@ -128,7 +127,7 @@ class Helper {
         params.put("Expires", Integer.toString(expires));
         params.put("Algorithm", config.getFullAlgorithm());
         params.put("Credentials", credentials(accessKeyId, credentialScope));
-        params.put("Date", config.getLongFormatDate());
+        params.put("Date", DateTime.toLongString(config.getDate()));
 
         return params;
     }
@@ -136,7 +135,7 @@ class Helper {
 
     public void addDateHeader(EscherRequest request) {
         if (!request.hasHeader(config.getDateHeaderName())) {
-            request.addHeader(config.getDateHeaderName(), config.getLongFormatDate());
+            request.addHeader(config.getDateHeaderName(), DateTime.toLongString(config.getDate()));
         }
     }
 
@@ -156,13 +155,7 @@ class Helper {
 
 
     public Date parseDateHeader(EscherRequest request) throws EscherException {
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat(Config.LONG_DATE_FORMAT);
-            dateFormat.setTimeZone(Config.TIMEZONE);
-            return dateFormat.parse(findHeader(request, config.getDateHeaderName()).getFieldValue());
-        } catch (ParseException e) {
-            throw new EscherException("Invalid date format");
-        }
+        return DateTime.parseLongString(findHeader(request, config.getDateHeaderName()).getFieldValue());
     }
 
 

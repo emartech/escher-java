@@ -1,15 +1,8 @@
 package com.emarsys.escher;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 class Config {
-
-    public static final TimeZone TIMEZONE = TimeZone.getTimeZone("UTC");
-    public static final String LONG_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'";
-    public static final String SHORT_DATE_FORMAT = "yyyyMMdd";
-
 
     private String algoPrefix = "ESR";
     private String vendorKey = "Escher";
@@ -83,6 +76,11 @@ class Config {
     }
 
 
+    public Date getDate() {
+        return date;
+    }
+
+
     public Config setDate(Date date) {
         this.date = date;
         return this;
@@ -104,17 +102,4 @@ class Config {
         return algoPrefix + "-HMAC-" + hashAlgo;
     }
 
-
-    public String getLongFormatDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(LONG_DATE_FORMAT);
-        dateFormat.setTimeZone(TIMEZONE);
-        return dateFormat.format(date);
-    }
-
-
-    public String getShortFormatDate() {
-        SimpleDateFormat format = new SimpleDateFormat(SHORT_DATE_FORMAT);
-        format.setTimeZone(TIMEZONE);
-        return format.format(date);
-    }
 }
