@@ -91,6 +91,14 @@ public class Escher {
         helper.parseDateHeader(request);
         helper.parseHostHeader(request);
 
+        if (authHeader.getSignedHeaders().stream().noneMatch(header -> header.equalsIgnoreCase("host"))) {
+            throw new EscherException("Host header is not signed");
+        }
+
+        if (authHeader.getSignedHeaders().stream().noneMatch(header -> header.equalsIgnoreCase(dateHeaderName))) {
+            throw new EscherException("Date header is not signed");
+        }
+
         return authHeader.getAccessKeyId();
     }
 

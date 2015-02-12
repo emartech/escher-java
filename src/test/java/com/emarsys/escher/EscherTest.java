@@ -152,6 +152,30 @@ public class EscherTest extends TestBase {
     }
 
 
+    @Test
+    @UseDataProvider("getAuthenticateMandatoryHeaderNotSignedCases")
+    public void testAuthenticateMandatoryHeaderNotSigned(String signedHeaders, String expectedErrorMessage) throws Exception {
+        List<EscherRequest.Header> headers = Arrays.asList(
+                new EscherRequest.Header("X_ESCHER_DATE", "20110909T233600Z"),
+                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=" + signedHeaders + ", Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("host", "iam.amazonaws.com")
+        );
+        EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
+
+        assertAuthenticationError(expectedErrorMessage, request);
+    }
+
+
+    @DataProvider
+    public static Object[][] getAuthenticateMandatoryHeaderNotSignedCases() {
+        return new Object[][] {
+                { "content-type;x-ems-date", "Host header is not signed" },
+                { "content-type;host", "Date header is not signed" }
+        };
+    }
+
+
     private void assertAuthenticationError(String expectedErrorMessage, EscherRequest request) {
         try {
             escher.authenticate(request, new HashMap<>());
