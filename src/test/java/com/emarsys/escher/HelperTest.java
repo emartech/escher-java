@@ -9,7 +9,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 public class HelperTest extends TestBase {
 
@@ -27,9 +28,9 @@ public class HelperTest extends TestBase {
                 "us-east-1/iam/aws4_request"
         );
 
-        assertEquals(
-                "98f1d889fec4f4421adc522bab0ce1f82e6929c262ed15e5a94c90efd1e3b0e7",
-                DatatypeConverter.printHexBinary(signingKey).toLowerCase()
+        assertThat(
+                DatatypeConverter.printHexBinary(signingKey).toLowerCase(),
+                is("98f1d889fec4f4421adc522bab0ce1f82e6929c262ed15e5a94c90efd1e3b0e7")
         );
     }
 
@@ -53,7 +54,7 @@ public class HelperTest extends TestBase {
         expectedParams.put("Expires", "12345");
         expectedParams.put("SignedHeaders", "host");
 
-        assertEquals(expectedParams, params);
+        assertThat(params, is(expectedParams));
     }
 
 }

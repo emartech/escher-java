@@ -8,7 +8,8 @@ import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 @RunWith(DataProviderRunner.class)
@@ -20,13 +21,13 @@ public class AuthHeaderTest {
 
         AuthHeader header = AuthHeader.parse(textToParse);
 
-        assertEquals("algoPrefix", "EMS", header.getAlgoPrefix());
-        assertEquals("hashAlgo", "SHA256", header.getHashAlgo());
-        assertEquals("accessKeyId", "AKID-EXAMPLE", header.getAccessKeyId());
-        assertEquals("date", "20110909", header.getCredentialDate());
-        assertEquals("credentialScope", "us-east-1/iam/aws4_request", header.getCredentialScope());
-        assertEquals("signedHeaders", Arrays.asList("content-type", "host", "x-ems-date"), header.getSignedHeaders());
-        assertEquals("signature", "f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd", header.getSignature());
+        assertThat("algoPrefix", header.getAlgoPrefix(), is("EMS"));
+        assertThat("hashAlgo", header.getHashAlgo(), is("SHA256"));
+        assertThat("accessKeyId", header.getAccessKeyId(), is("AKID-EXAMPLE"));
+        assertThat("date", header.getCredentialDate(), is("20110909"));
+        assertThat("credentialScope", header.getCredentialScope(), is("us-east-1/iam/aws4_request"));
+        assertThat("signedHeaders", Arrays.asList("content-type", "host", "x-ems-date"), is(header.getSignedHeaders()));
+        assertThat("signature", header.getSignature(), is("f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"));
     }
 
 

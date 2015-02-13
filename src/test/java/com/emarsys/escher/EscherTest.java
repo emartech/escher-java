@@ -12,7 +12,10 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 @RunWith(DataProviderRunner.class)
 public class EscherTest extends TestBase {
@@ -45,12 +48,12 @@ public class EscherTest extends TestBase {
         EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
 
         EscherRequestImpl expectedSignedRequest = createRequest(param.getExpected().getRequest());
-        assertEquals("Host", expectedSignedRequest.getURI().getHost(), signedRequest.getURI().getHost());
-        assertEquals("method", expectedSignedRequest.getHttpMethod(), signedRequest.getHttpMethod());
-        assertEquals("path", expectedSignedRequest.getURI().getPath(), signedRequest.getURI().getPath());
-        assertEquals("queryParams", expectedSignedRequest.getURI().getQuery(), signedRequest.getURI().getQuery());
-        assertEquals("body", expectedSignedRequest.getBody(), signedRequest.getBody());
-        assertEquals("headers", expectedSignedRequest.getRequestHeaders(), signedRequest.getRequestHeaders());
+        assertThat("host", signedRequest.getURI().getHost(), is(expectedSignedRequest.getURI().getHost()));
+        assertThat("method", signedRequest.getHttpMethod(), is(expectedSignedRequest.getHttpMethod()));
+        assertThat("path", signedRequest.getURI().getPath(), is(expectedSignedRequest.getURI().getPath()));
+        assertThat("queryParams", signedRequest.getURI().getQuery(), is(expectedSignedRequest.getURI().getQuery()));
+        assertThat("body", signedRequest.getBody(), is(expectedSignedRequest.getBody()));
+        assertThat("headers", signedRequest.getRequestHeaders(), is(expectedSignedRequest.getRequestHeaders()));
     }
 
 
@@ -79,7 +82,7 @@ public class EscherTest extends TestBase {
         String signedUrl = escher.presignUrl("http://example.com/something?foo=bar&baz=barbaz", "th3K3y", "very_secure", expires);
 
         String expectedSignedUrl = "http://example.com/something?foo=bar&baz=barbaz&X-EMS-Algorithm=EMS-HMAC-SHA256&X-EMS-Credentials=th3K3y%2F20110511%2Fus-east-1%2Fhost%2Faws4_request&X-EMS-Date=20110511T120000Z&X-EMS-Expires=123456&X-EMS-SignedHeaders=host&X-EMS-Signature=fbc9dbb91670e84d04ad2ae7505f4f52ab3ff9e192b8233feeae57e9022c2b67";
-        assertEquals(expectedSignedUrl, signedUrl);
+        assertThat(signedUrl, is(expectedSignedUrl));
     }
 
 
@@ -103,7 +106,7 @@ public class EscherTest extends TestBase {
 
         String accessKey = escher.authenticate(request, keyDb, "iam.amazonaws.com");
 
-        assertEquals("AKIDEXAMPLE", accessKey);
+        assertThat(accessKey, is("AKIDEXAMPLE"));
     }
 
 
@@ -291,8 +294,7 @@ public class EscherTest extends TestBase {
 
             fail("exception should have been thrown");
         } catch (EscherException e) {
-            String expectation = "The signatures do not match";
-            assertTrue("'" + e.getMessage() + "' does not start with '" + expectation + "'", e.getMessage().startsWith(expectation));
+            assertThat(e.getMessage(), startsWith("The signatures do not match"));
         }
     }
 
@@ -306,7 +308,7 @@ public class EscherTest extends TestBase {
 
             fail("exception should have been thrown");
         } catch (EscherException e) {
-            assertEquals(expectedErrorMessage, e.getMessage());
+            assertThat(e.getMessage(), is(expectedErrorMessage));
         }
     }
 

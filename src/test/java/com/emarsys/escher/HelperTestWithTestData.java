@@ -11,7 +11,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
 public class HelperTestWithTestData extends TestBase {
@@ -88,7 +89,7 @@ public class HelperTestWithTestData extends TestBase {
 
         String canonicalized = helper.canonicalize(request);
 
-        assertEquals(fileName, param.getExpected().getCanonicalizedRequest(), canonicalized);
+        assertThat(fileName, canonicalized, is(param.getExpected().getCanonicalizedRequest()));
     }
 
 
@@ -97,7 +98,7 @@ public class HelperTestWithTestData extends TestBase {
         String stringToSign = helper.calculateStringToSign(param.getConfig().getCredentialScope(),
                 param.getExpected().getCanonicalizedRequest()
         );
-        assertEquals(fileName, param.getExpected().getStringToSign(), stringToSign);
+        assertThat(fileName, stringToSign, is(param.getExpected().getStringToSign()));
     }
 
 
@@ -109,7 +110,7 @@ public class HelperTestWithTestData extends TestBase {
         );
         String signature = helper.calculateSignature(signingKey, param.getExpected().getStringToSign());
         String authHeader = helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), param.getConfig().getCredentialScope(), param.getHeadersToSign(), signature);
-        assertEquals(fileName, param.getExpected().getAuthHeader(), authHeader);
+        assertThat(fileName, authHeader, is(param.getExpected().getAuthHeader()));
     }
 
 
