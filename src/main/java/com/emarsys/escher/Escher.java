@@ -120,6 +120,10 @@ public class Escher {
             throw new EscherException("The host header does not match");
         }
 
+        if (!credentialScope.equals(authHeader.getCredentialScope())) {
+            throw new EscherException("Invalid credentials");
+        }
+
         return authHeader.getAccessKeyId();
     }
 
