@@ -87,7 +87,8 @@ public class Escher {
 
 
     public String authenticate(EscherRequest request, Map<String, String> keyDb, String host) throws EscherException {
-        Helper helper = new Helper(createConfig());
+        Config config = createConfig();
+        Helper helper = new Helper(config);
 
         AuthHeader authHeader = helper.parseAuthHeader(request);
         Date requestDate = helper.parseDateHeader(request);
@@ -122,6 +123,17 @@ public class Escher {
 
         if (!credentialScope.equals(authHeader.getCredentialScope())) {
             throw new EscherException("Invalid credentials");
+        }
+
+        if (!keyDb.containsKey(authHeader.getAccessKeyId())) {
+            throw new EscherException("Invalid access key id");
+        }
+
+        request = new AuthenticationEscherRequest(request, config, host);
+
+        String calculatedSignature = calculateSignature(request, helper, keyDb.get(authHeader.getAccessKeyId()));
+        if (!calculatedSignature.equals(authHeader.getSignature())) {
+            throw new EscherException("The signatures do not match (provided: " + authHeader.getSignature() + ", calculated: " + calculatedSignature + ")");
         }
 
         return authHeader.getAccessKeyId();

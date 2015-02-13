@@ -12,8 +12,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @RunWith(DataProviderRunner.class)
 public class EscherTest extends TestBase {
@@ -46,7 +45,7 @@ public class EscherTest extends TestBase {
         EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
 
         EscherRequestImpl expectedSignedRequest = createRequest(param.getExpected().getRequest());
-        assertEquals("host", expectedSignedRequest.getURI().getHost(), signedRequest.getURI().getHost());
+        assertEquals("Host", expectedSignedRequest.getURI().getHost(), signedRequest.getURI().getHost());
         assertEquals("method", expectedSignedRequest.getHttpMethod(), signedRequest.getHttpMethod());
         assertEquals("path", expectedSignedRequest.getURI().getPath(), signedRequest.getURI().getPath());
         assertEquals("queryParams", expectedSignedRequest.getURI().getQuery(), signedRequest.getURI().getQuery());
@@ -87,12 +86,12 @@ public class EscherTest extends TestBase {
     @Test
     public void testAuthenticateSuccess() throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X_EMS_DATE", "20110909T233600Z"),
-                new EscherRequest.Header("X_EMS_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
-                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
-                new EscherRequest.Header("host", "iam.amazonaws.com")
+                new EscherRequest.Header("X-Ems-Date", "20110909T233600Z"),
+                new EscherRequest.Header("X-Ems-Auth", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.amazonaws.com")
         );
-        EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
+        EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com/"), headers, "Action=ListUsers&Version=2010-05-08");
 
         Map<String, String> keyDb = new HashMap<>();
         keyDb.put("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY");
@@ -112,10 +111,10 @@ public class EscherTest extends TestBase {
     @UseDataProvider("getAuthenticationMissingHeaderCases")
     public void testAuthenticateMissingHeader(String headerToExlude, String expectedErrorMessage) throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X_ESCHER_DATE", "20110909T233600Z"),
-                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
-                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
-                new EscherRequest.Header("host", "iam.amazonaws.com")
+                new EscherRequest.Header("X-Escher-Date", "20110909T233600Z"),
+                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.amazonaws.com")
         );
 
         headers = headers
@@ -132,9 +131,9 @@ public class EscherTest extends TestBase {
     @DataProvider
     public static Object[][] getAuthenticationMissingHeaderCases() {
         return new Object[][] {
-                { "host", "Missing header: host" },
-                { "X_ESCHER_DATE", "Missing header: X-Escher-Date" },
-                { "X_ESCHER_AUTH", "Missing header: X-Escher-Auth" },
+                { "Host", "Missing header: host" },
+                { "X-Escher-Date", "Missing header: X-Escher-Date" },
+                { "X-Escher-Auth", "Missing header: X-Escher-Auth" },
         };
     }
 
@@ -142,10 +141,10 @@ public class EscherTest extends TestBase {
     @Test
     public void testAuthenticateInvalidDateFormat() throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X_ESCHER_DATE", "NOT_A_DATE"),
-                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
-                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
-                new EscherRequest.Header("host", "iam.amazonaws.com")
+                new EscherRequest.Header("X-Escher-Date", "NOT_A_DATE"),
+                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.amazonaws.com")
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
@@ -157,10 +156,10 @@ public class EscherTest extends TestBase {
     @UseDataProvider("getAuthenticateMandatoryHeaderNotSignedCases")
     public void testAuthenticateMandatoryHeaderNotSigned(String signedHeaders, String expectedErrorMessage) throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X_ESCHER_DATE", "20110909T233600Z"),
-                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=" + signedHeaders + ", Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
-                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
-                new EscherRequest.Header("host", "iam.amazonaws.com")
+                new EscherRequest.Header("X-Escher-Date", "20110909T233600Z"),
+                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=" + signedHeaders + ", Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.amazonaws.com")
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
@@ -180,10 +179,10 @@ public class EscherTest extends TestBase {
     @Test
     public void testAuthenticateInvalidHashAlgo() throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X_ESCHER_DATE", "20110909T233600Z"),
-                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA128 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
-                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
-                new EscherRequest.Header("host", "iam.amazonaws.com")
+                new EscherRequest.Header("X-Escher-Date", "20110909T233600Z"),
+                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA128 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.amazonaws.com")
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
@@ -194,10 +193,10 @@ public class EscherTest extends TestBase {
     @Test
     public void testAuthenticateDatesInDateAndAuthHeadersDoNotMatch() throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X_ESCHER_DATE", "20110909T233600Z"),
-                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110901/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
-                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
-                new EscherRequest.Header("host", "iam.amazonaws.com")
+                new EscherRequest.Header("X-Escher-Date", "20110909T233600Z"),
+                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110901/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.amazonaws.com")
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
@@ -209,10 +208,10 @@ public class EscherTest extends TestBase {
     @UseDataProvider("getAuthenticateOutsideAcceptedTimeIntervalCases")
     public void testAuthenticateOutsideAcceptedTimeInterval(int clockSkew, int minute) throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X_ESCHER_DATE", "20110909T233600Z"),
-                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
-                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
-                new EscherRequest.Header("host", "iam.amazonaws.com")
+                new EscherRequest.Header("X-Escher-Date", "20110909T233600Z"),
+                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.amazonaws.com")
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
         escher.setClockSkew(clockSkew);
@@ -236,10 +235,10 @@ public class EscherTest extends TestBase {
     @Test
     public void testAuthenticateInvalidHost() throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X_ESCHER_DATE", "20110909T233600Z"),
-                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
-                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
-                new EscherRequest.Header("host", "iam.not.amazonaws.com")
+                new EscherRequest.Header("X-Escher-Date", "20110909T233600Z"),
+                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.not.amazonaws.com")
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
@@ -250,10 +249,10 @@ public class EscherTest extends TestBase {
     @Test
     public void testAuthenticateInvalidCredentialScope() throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X_ESCHER_DATE", "20110909T233600Z"),
-                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-2/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
-                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
-                new EscherRequest.Header("host", "iam.amazonaws.com")
+                new EscherRequest.Header("X-Escher-Date", "20110909T233600Z"),
+                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-2/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.amazonaws.com")
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
@@ -261,9 +260,49 @@ public class EscherTest extends TestBase {
     }
 
 
-    private void assertAuthenticationError(String expectedErrorMessage, EscherRequest request) {
+    @Test
+    public void testAuthenticateInvalidAccessKeyId() throws Exception {
+        List<EscherRequest.Header> headers = Arrays.asList(
+                new EscherRequest.Header("X-Escher-Date", "20110909T233600Z"),
+                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA256 Credential=UNKNOWN/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.amazonaws.com")
+        );
+        EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
+
+        assertAuthenticationError("Invalid access key id", request);
+    }
+
+
+    @Test
+    public void testAuthenticateInvalidSignature() throws Exception {
+        List<EscherRequest.Header> headers = Arrays.asList(
+                new EscherRequest.Header("X-Escher-Date", "20110909T233600Z"),
+                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=aaac21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("Host", "iam.amazonaws.com")
+        );
+        EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
+        Map<String, String> keyDb = new HashMap<>();
+        keyDb.put("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY");
+
         try {
-            escher.authenticate(request, new HashMap<>(), "iam.amazonaws.com");
+            escher.authenticate(request, keyDb, "iam.amazonaws.com");
+
+            fail("exception should have been thrown");
+        } catch (EscherException e) {
+            String expectation = "The signatures do not match";
+            assertTrue("'" + e.getMessage() + "' does not start with '" + expectation + "'", e.getMessage().startsWith(expectation));
+        }
+    }
+
+
+    private void assertAuthenticationError(String expectedErrorMessage, EscherRequest request) {
+        Map<String, String> keyDb = new HashMap<>();
+        keyDb.put("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY");
+
+        try {
+            escher.authenticate(request, keyDb, "iam.amazonaws.com");
 
             fail("exception should have been thrown");
         } catch (EscherException e) {
