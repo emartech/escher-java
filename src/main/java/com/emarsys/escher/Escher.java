@@ -86,12 +86,12 @@ public class Escher {
     }
 
 
-    public String authenticate(EscherRequest request, Map<String, String> keyDb) throws EscherException {
+    public String authenticate(EscherRequest request, Map<String, String> keyDb, String host) throws EscherException {
         Helper helper = new Helper(createConfig());
 
         AuthHeader authHeader = helper.parseAuthHeader(request);
         Date requestDate = helper.parseDateHeader(request);
-        helper.parseHostHeader(request);
+        String hostHeader = helper.parseHostHeader(request);
 
         if (authHeader.getSignedHeaders().stream().noneMatch(header -> header.equalsIgnoreCase("host"))) {
             throw new EscherException("Host header is not signed");
@@ -114,6 +114,10 @@ public class Escher {
         if (requestDate.before(DateTime.subtractSeconds(currentTime, clockSkew)) ||
                 requestDate.after(DateTime.addSeconds(currentTime, clockSkew))) {
             throw new EscherException("Request date is not within the accepted time interval");
+        }
+
+        if (!host.equals(hostHeader)) {
+            throw new EscherException("The host header does not match");
         }
 
         return authHeader.getAccessKeyId();

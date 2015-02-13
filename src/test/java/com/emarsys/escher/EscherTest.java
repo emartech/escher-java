@@ -102,7 +102,7 @@ public class EscherTest extends TestBase {
                 .setAuthHeaderName("X-Ems-Auth")
                 .setDateHeaderName("X-Ems-Date");
 
-        String accessKey = escher.authenticate(request, keyDb);
+        String accessKey = escher.authenticate(request, keyDb, "iam.amazonaws.com");
 
         assertEquals("AKIDEXAMPLE", accessKey);
     }
@@ -233,10 +233,23 @@ public class EscherTest extends TestBase {
     }
 
 
+    @Test
+    public void testAuthenticateInvalidHost() throws Exception {
+        List<EscherRequest.Header> headers = Arrays.asList(
+                new EscherRequest.Header("X_ESCHER_DATE", "20110909T233600Z"),
+                new EscherRequest.Header("X_ESCHER_AUTH", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
+                new EscherRequest.Header("CONTENT_TYPE", "application/x-www-form-urlencoded; charset=utf-8"),
+                new EscherRequest.Header("host", "iam.not.amazonaws.com")
+        );
+        EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
+
+        assertAuthenticationError("The host header does not match", request);
+    }
+
 
     private void assertAuthenticationError(String expectedErrorMessage, EscherRequest request) {
         try {
-            escher.authenticate(request, new HashMap<>());
+            escher.authenticate(request, new HashMap<>(), "iam.amazonaws.com");
 
             fail("exception should have been thrown");
         } catch (EscherException e) {
