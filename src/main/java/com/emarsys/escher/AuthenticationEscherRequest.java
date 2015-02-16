@@ -3,6 +3,7 @@ package com.emarsys.escher;
 
 import org.apache.http.client.utils.URIBuilder;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -10,12 +11,12 @@ import java.util.List;
 public class AuthenticationEscherRequest implements EscherRequest {
     
     private EscherRequest request;
-    private String host;
+    private InetSocketAddress address;
 
 
-    public AuthenticationEscherRequest(EscherRequest request, String host) {
+    public AuthenticationEscherRequest(EscherRequest request, InetSocketAddress address) {
         this.request = request;
-        this.host = host;
+        this.address = address;
     }
 
 
@@ -29,7 +30,7 @@ public class AuthenticationEscherRequest implements EscherRequest {
     public URI getURI() {
         try {
             URIBuilder uriBuilder = new URIBuilder(request.getURI());
-            uriBuilder.setHost(host);
+            uriBuilder.setHost(address.getHostName());
             return uriBuilder.build();
         } catch (URISyntaxException e) {
             throw new RuntimeException("URI cannot be modified", e);

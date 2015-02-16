@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -126,7 +127,7 @@ public class EscherTest extends TestBase {
                 .setAuthHeaderName("X-Ems-Auth")
                 .setDateHeaderName("X-Ems-Date");
 
-        String accessKey = escher.authenticate(request, keyDb, "iam.amazonaws.com");
+        String accessKey = escher.authenticate(request, keyDb, new InetSocketAddress("iam.amazonaws.com", 80));
 
         assertThat(accessKey, is("AKIDEXAMPLE"));
     }
@@ -312,7 +313,7 @@ public class EscherTest extends TestBase {
         keyDb.put("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY");
 
         try {
-            escher.authenticate(request, keyDb, "iam.amazonaws.com");
+            escher.authenticate(request, keyDb, new InetSocketAddress("iam.amazonaws.com", 80));
 
             fail("exception should have been thrown");
         } catch (EscherException e) {
@@ -326,7 +327,7 @@ public class EscherTest extends TestBase {
         keyDb.put("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY");
 
         try {
-            escher.authenticate(request, keyDb, "iam.amazonaws.com");
+            escher.authenticate(request, keyDb, new InetSocketAddress("iam.amazonaws.com", 80));
 
             fail("exception should have been thrown");
         } catch (EscherException e) {

@@ -4,6 +4,7 @@ package com.emarsys.escher;
 import com.emarsys.escher.util.DateTime;
 import org.apache.http.client.utils.URIBuilder;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -86,7 +87,7 @@ public class Escher {
     }
 
 
-    public String authenticate(EscherRequest request, Map<String, String> keyDb, String host) throws EscherException {
+    public String authenticate(EscherRequest request, Map<String, String> keyDb, InetSocketAddress address) throws EscherException {
         Config config = createConfig();
         Helper helper = new Helper(config);
 
@@ -117,7 +118,7 @@ public class Escher {
             throw new EscherException("Request date is not within the accepted time interval");
         }
 
-        if (!host.equals(hostHeader)) {
+        if (!address.getHostName().equals(hostHeader)) {
             throw new EscherException("The host header does not match");
         }
 
@@ -130,7 +131,7 @@ public class Escher {
         }
 
         config.setDate(requestDate);
-        request = new AuthenticationEscherRequest(request, host);
+        request = new AuthenticationEscherRequest(request, address);
 
         String calculatedSignature = calculateSignature(request, helper, keyDb.get(authHeader.getAccessKeyId()), authHeader.getSignedHeaders());
         if (!calculatedSignature.equals(authHeader.getSignature())) {

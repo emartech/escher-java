@@ -60,7 +60,7 @@ public class ServerTest {
         Map<String, String> keyDb = new HashMap<>();
         keyDb.put("ACCESS_KEY_ID", "SECRET");
 
-        escher.authenticate(request, keyDb, "localhost");
+        escher.authenticate(request, keyDb, new InetSocketAddress("localhost", 8888));
     }
 
 }
