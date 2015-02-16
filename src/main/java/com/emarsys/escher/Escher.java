@@ -129,6 +129,7 @@ public class Escher {
             throw new EscherException("Invalid access key id");
         }
 
+        config.setDate(requestDate);
         request = new AuthenticationEscherRequest(request, config, host);
 
         String calculatedSignature = calculateSignature(request, helper, keyDb.get(authHeader.getAccessKeyId()), authHeader.getSignedHeaders());

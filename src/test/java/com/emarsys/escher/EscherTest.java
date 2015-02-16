@@ -27,7 +27,7 @@ public class EscherTest extends TestBase {
     @Before
     public void setUp() throws Exception {
         escher = new Escher("us-east-1/iam/aws4_request");
-        escher.setCurrentTime(createDate(2011, Calendar.SEPTEMBER, 9, 23, 36, 0));
+        escher.setCurrentTime(createDate(2011, Calendar.SEPTEMBER, 9, 23, 40, 0));
     }
 
 
