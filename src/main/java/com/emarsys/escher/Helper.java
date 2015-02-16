@@ -152,8 +152,9 @@ class Helper {
     }
 
 
-    public void addAuthHeader(EscherRequest request, String header) {
-        request.addHeader(config.getAuthHeaderName(), header);
+    public void addAuthHeader(EscherRequest request, String fieldValue) {
+        request.getRequestHeaders().removeIf(header -> header.getFieldName().equals(config.getAuthHeaderName()));
+        request.addHeader(config.getAuthHeaderName(), fieldValue);
     }
 
 

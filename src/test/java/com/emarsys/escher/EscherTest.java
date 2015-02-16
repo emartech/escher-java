@@ -57,6 +57,28 @@ public class EscherTest extends TestBase {
     }
 
 
+    @Test
+    public void testSignRequestWithAlreadyExistingAuthHeader() throws Exception {
+        TestParam param = parseTestData("get-vanilla");
+
+        TestParam.Config config = param.getConfig();
+
+        EscherRequestImpl request = createRequest(param.getRequest());
+        request.addHeader(config.getAuthHeaderName(), "this should be overwritten");
+
+        Escher escher = new Escher(config.getCredentialScope())
+                .setAuthHeaderName(config.getAuthHeaderName())
+                .setDateHeaderName(config.getDateHeaderName())
+                .setAlgoPrefix(config.getAlgoPrefix())
+                .setCurrentTime(getConfigDate(param));
+
+        EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
+
+        EscherRequestImpl expectedSignedRequest = createRequest(param.getExpected().getRequest());
+        assertThat(signedRequest.getRequestHeaders(), is(expectedSignedRequest.getRequestHeaders()));
+    }
+
+
     private EscherRequestImpl createRequest(TestParam.Request paramRequest) throws URISyntaxException {
         List<EscherRequest.Header> headers = paramRequest.getHeaders()
                 .stream()
