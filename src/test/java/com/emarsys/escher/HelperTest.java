@@ -4,10 +4,9 @@ package com.emarsys.escher;
 import org.junit.Test;
 
 import javax.xml.bind.DatatypeConverter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URI;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -55,6 +54,31 @@ public class HelperTest extends TestBase {
         expectedParams.put("SignedHeaders", "host");
 
         assertThat(params, is(expectedParams));
+    }
+
+
+    @Test
+    public void testCanonicalizeWithMoreHeaderThanHeadersToSign() throws Exception {
+        TestParam param = parseTestData("get-vanilla");
+
+        TestParam.Request paramRequest = param.getRequest();
+
+        List<EscherRequest.Header> headers = paramRequest.getHeaders()
+                .stream()
+                .map(header -> new EscherRequest.Header(header.get(0), header.get(1)))
+                .collect(Collectors.toList());
+
+        URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
+
+        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
+        request.addHeader("Custom-Header", "should-not-be-signed");
+
+        Helper helper = new Helper(createConfig(param));
+
+        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
+
+        assertThat(canonicalized, is(param.getExpected().getCanonicalizedRequest()));
+
     }
 
 }

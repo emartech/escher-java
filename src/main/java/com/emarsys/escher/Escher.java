@@ -35,7 +35,7 @@ public class Escher {
 
         helper.addDateHeader(request);
 
-        String signature = calculateSignature(request, helper, secret);
+        String signature = calculateSignature(request, helper, secret, signedHeaders);
         String authHeader = helper.calculateAuthHeader(accessKeyId, credentialScope, signedHeaders, signature);
 
         helper.addAuthHeader(request, authHeader);
@@ -57,7 +57,7 @@ public class Escher {
 
             EscherRequest request = new PresignUrlDummyEscherRequest(uriBuilder.build());
 
-            String signature = calculateSignature(request, helper, secret);
+            String signature = calculateSignature(request, helper, secret, Arrays.asList("host"));
 
             uriBuilder.addParameter("X-" + vendorKey + "-" + "Signature", signature);
 
@@ -68,8 +68,8 @@ public class Escher {
     }
 
 
-    private String calculateSignature(EscherRequest request, Helper helper, String secret) throws EscherException {
-        String canonicalizedRequest = helper.canonicalize(request);
+    private String calculateSignature(EscherRequest request, Helper helper, String secret, List<String> signedHeaders) throws EscherException {
+        String canonicalizedRequest = helper.canonicalize(request, signedHeaders);
         String stringToSign = helper.calculateStringToSign(credentialScope, canonicalizedRequest);
         byte[] signingKey = helper.calculateSigningKey(secret, credentialScope);
         return helper.calculateSignature(signingKey, stringToSign);
@@ -131,7 +131,7 @@ public class Escher {
 
         request = new AuthenticationEscherRequest(request, config, host);
 
-        String calculatedSignature = calculateSignature(request, helper, keyDb.get(authHeader.getAccessKeyId()));
+        String calculatedSignature = calculateSignature(request, helper, keyDb.get(authHeader.getAccessKeyId()), authHeader.getSignedHeaders());
         if (!calculatedSignature.equals(authHeader.getSignature())) {
             throw new EscherException("The signatures do not match (provided: " + authHeader.getSignature() + ", calculated: " + calculatedSignature + ")");
         }

@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.function.BinaryOperator;
+import java.util.function.Predicate;
 
 class Helper {
 
@@ -25,14 +26,14 @@ class Helper {
     }
 
 
-    public String canonicalize(EscherRequest request) throws EscherException {
+    public String canonicalize(EscherRequest request, List<String> signedHeaders) throws EscherException {
         try {
             return request.getHttpMethod() + NEW_LINE +
                     request.getURI().toURL().getPath() + NEW_LINE +
                     canonicalizeQueryParameters(request) + NEW_LINE +
-                    canonicalizeHeaders(request.getRequestHeaders()) + NEW_LINE +
+                    canonicalizeHeaders(request.getRequestHeaders(), signedHeaders) + NEW_LINE +
                     NEW_LINE +
-                    signedHeaders(request.getRequestHeaders()) + NEW_LINE +
+                    signedHeaders(signedHeaders) + NEW_LINE +
                     Hmac.hash(request.getBody());
         } catch (MalformedURLException e) {
             throw new EscherException(e);
@@ -59,9 +60,10 @@ class Helper {
     }
 
 
-    private String canonicalizeHeaders(List<EscherRequest.Header> headers) {
+    private String canonicalizeHeaders(List<EscherRequest.Header> headers, List<String> signedHeaders) {
         return headers
                 .stream()
+                .filter(shouldHeaderBeSigned(signedHeaders))
                 .map(header -> header.getFieldName().toLowerCase() + ":" + header.getFieldValue().trim())
                 .sorted()
                 .reduce(byJoiningWith(NEW_LINE))
@@ -69,10 +71,17 @@ class Helper {
     }
 
 
-    private String signedHeaders(List<EscherRequest.Header> headers) {
+    private Predicate<EscherRequest.Header> shouldHeaderBeSigned(List<String> signedHeaders) {
+        return header -> signedHeaders
+                .stream()
+                .anyMatch(signedHeader -> signedHeader.equalsIgnoreCase(header.getFieldName()));
+    }
+
+
+    private String signedHeaders(List<String> headers) {
         return headers
                 .stream()
-                .map(header -> header.getFieldName().toLowerCase())
+                .map(String::toLowerCase)
                 .sorted()
                 .reduce(byJoiningWith(';'))
                 .orElseGet(() -> "");

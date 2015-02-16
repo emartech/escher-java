@@ -87,7 +87,7 @@ public class HelperTestWithTestData extends TestBase {
 
         EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
 
-        String canonicalized = helper.canonicalize(request);
+        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
 
         assertThat(fileName, canonicalized, is(param.getExpected().getCanonicalizedRequest()));
     }
@@ -111,14 +111,6 @@ public class HelperTestWithTestData extends TestBase {
         String signature = helper.calculateSignature(signingKey, param.getExpected().getStringToSign());
         String authHeader = helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), param.getConfig().getCredentialScope(), param.getHeadersToSign(), signature);
         assertThat(fileName, authHeader, is(param.getExpected().getAuthHeader()));
-    }
-
-
-    private Config createConfig(TestParam param) throws Exception{
-        return Config.create()
-                    .setAlgoPrefix(param.getConfig().getAlgoPrefix())
-                    .setHashAlgo(param.getConfig().getHashAlgo())
-                    .setDate(getConfigDate(param));
     }
 
 }
