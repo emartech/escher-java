@@ -22,11 +22,15 @@ public class ClientTest {
 
     public static void main(String... args) {
         try {
-            String url = "http://trunk-int.s.emarsys.com/api/v2/internal/215076962/field";
+//            String url = "http://trunk-int.s.emarsys.com/api/v2/internal/215076962/field";
+//            String url = "http://trunk.suite.ett.local/api/v2/internal/114692435/field";
+            String url = "http://localhost:8888/";
 
             HttpClient client = HttpClientBuilder.create().build();
             HttpRequestBase request = new HttpGet(url);
-            request.addHeader("host", "trunk-int.s.emarsys.com");
+//            request.addHeader("host", "trunk-int.s.emarsys.com");
+//            request.addHeader("host", "trunk.suite.ett.local");
+            request.addHeader("host", "localhost");
             request.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
 
 
@@ -52,7 +56,7 @@ public class ClientTest {
                 .setDateHeaderName("X-Ems-Date")
                 .setAlgoPrefix("EMS");
 
-        escher.signRequest(escherRequest, "[ACCESS_KEY_ID]", "[SECRET]", Arrays.asList("Content-Type", "X-Ems-Date", "host"));
+        escher.signRequest(escherRequest, "ACCESS_KEY_ID", "SECRET", Arrays.asList("Content-Type", "X-Ems-Date", "host"));
 
         return escherRequest.getHttpRequest();
     }
@@ -65,7 +69,7 @@ public class ClientTest {
         String result = "";
         String line;
         while ((line = rd.readLine()) != null) {
-            result += line;
+            result += line + "\n";
         }
         return result;
     }
