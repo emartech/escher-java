@@ -44,12 +44,6 @@ public class EscherRequestImpl implements EscherRequest {
     }
 
 
-    @Override
-    public boolean hasHeader(String key) {
-        return this.headers.stream().anyMatch((nameValuePair) -> nameValuePair.getFieldName().equals(key));
-    }
-
-
     public String getBody() {
         return body;
     }

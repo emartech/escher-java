@@ -143,7 +143,10 @@ class Helper {
 
 
     public void addDateHeader(EscherRequest request) {
-        if (!request.hasHeader(config.getDateHeaderName())) {
+        boolean requestHasDateHeader = request.getRequestHeaders()
+                .stream()
+                .anyMatch(header -> header.getFieldName().equals(config.getDateHeaderName()));
+        if (!requestHasDateHeader) {
             request.addHeader(config.getDateHeaderName(), DateTime.toLongString(config.getDate()));
         }
     }

@@ -56,12 +56,6 @@ public class AuthenticationEscherRequest implements EscherRequest {
 
 
     @Override
-    public boolean hasHeader(String fieldName) {
-        return request.hasHeader(fieldName);
-    }
-
-
-    @Override
     public String getBody() {
         return request.getBody();
     }

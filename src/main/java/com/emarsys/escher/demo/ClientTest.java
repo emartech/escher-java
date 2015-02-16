@@ -116,12 +116,6 @@ class MyEscherRequest implements EscherRequest {
 
 
     @Override
-    public boolean hasHeader(String fieldName) {
-        return httpRequest.getFirstHeader(fieldName) != null;
-    }
-
-
-    @Override
     public String getBody() {
         return body;
     }

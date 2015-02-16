@@ -113,12 +113,6 @@ class MyServerEscherRequest implements EscherRequest {
 
 
     @Override
-    public boolean hasHeader(String fieldName) {
-        return exchange.getRequestHeaders().containsKey(fieldName);
-    }
-
-
-    @Override
     public String getBody() {
         try {
             String body = "";

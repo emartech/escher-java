@@ -10,7 +10,6 @@ public interface EscherRequest {
     public URI getURI();
     public List<Header> getRequestHeaders();
     public void addHeader(String fieldName, String fieldValue);
-    public boolean hasHeader(String fieldName);
     public String getBody();
 
 

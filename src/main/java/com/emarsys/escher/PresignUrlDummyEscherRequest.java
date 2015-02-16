@@ -37,12 +37,6 @@ class PresignUrlDummyEscherRequest implements EscherRequest {
 
 
     @Override
-    public boolean hasHeader(String fieldName) {
-        return fieldName.equals("host");
-    }
-
-
-    @Override
     public String getBody() {
         return Escher.UNSIGNED_PAYLOAD;
     }
