@@ -6,18 +6,15 @@ import org.apache.http.client.utils.URIBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AuthenticationEscherRequest implements EscherRequest {
     
     private EscherRequest request;
-    private Config config;
     private String host;
 
 
-    public AuthenticationEscherRequest(EscherRequest request, Config config, String host) {
+    public AuthenticationEscherRequest(EscherRequest request, String host) {
         this.request = request;
-        this.config = config;
         this.host = host;
     }
 
@@ -42,10 +39,7 @@ public class AuthenticationEscherRequest implements EscherRequest {
 
     @Override
     public List<Header> getRequestHeaders() {
-        return request.getRequestHeaders()
-                .stream()
-                .filter(header -> !header.getFieldName().equalsIgnoreCase(config.getAuthHeaderName()))
-                .collect(Collectors.toList());
+        return request.getRequestHeaders();
     }
 
 

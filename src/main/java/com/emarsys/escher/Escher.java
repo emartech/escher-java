@@ -130,7 +130,7 @@ public class Escher {
         }
 
         config.setDate(requestDate);
-        request = new AuthenticationEscherRequest(request, config, host);
+        request = new AuthenticationEscherRequest(request, host);
 
         String calculatedSignature = calculateSignature(request, helper, keyDb.get(authHeader.getAccessKeyId()), authHeader.getSignedHeaders());
         if (!calculatedSignature.equals(authHeader.getSignature())) {
