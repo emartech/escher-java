@@ -97,11 +97,11 @@ class MyServerEscherRequest implements EscherRequest {
     @Override
     public List<Header> getRequestHeaders() {
         List<Header> headers = new ArrayList<>();
-        exchange.getRequestHeaders().forEach((fieldName, fieldValues) -> {
-            fieldValues.forEach(fieldValue -> {
-                headers.add(new Header(fieldName, fieldValue));
-            });
-        });
+        exchange.getRequestHeaders().forEach((fieldName, fieldValues) ->
+                fieldValues.forEach(fieldValue ->
+                        headers.add(new Header(fieldName, fieldValue))
+                )
+        );
         return headers;
     }
 
