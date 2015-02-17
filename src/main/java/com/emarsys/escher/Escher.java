@@ -83,7 +83,8 @@ public class Escher {
                 .setHashAlgo(hashAlgo)
                 .setDateHeaderName(dateHeaderName)
                 .setAuthHeaderName(authHeaderName)
-                .setDate(currentTime);
+                .setDate(currentTime)
+                .setClockSkew(clockSkew);
     }
 
 
@@ -95,48 +96,25 @@ public class Escher {
         Date requestDate = helper.parseDateHeader(request);
         String hostHeader = helper.parseHostHeader(request);
 
-        if (authHeader.getSignedHeaders().stream().noneMatch(header -> header.equalsIgnoreCase("host"))) {
-            throw new EscherException("Host header is not signed");
-        }
+        AuthenticationValidator validator = new AuthenticationValidator(config);
 
-        if (authHeader.getSignedHeaders().stream().noneMatch(header -> header.equalsIgnoreCase(dateHeaderName))) {
-            throw new EscherException("Date header is not signed");
-        }
+        validator.validateMandatorySignedHeaders(authHeader.getSignedHeaders());
+        validator.validateHashAlgo(authHeader.getHashAlgo());
+        validator.validateDates(requestDate, DateTime.parseShortString(authHeader.getCredentialDate()));
+        validator.validateHost(address, hostHeader);
+        validator.validateCredentialScope(credentialScope, authHeader.getCredentialScope());
 
-        if (!Arrays.asList("SHA256", "SHA512").contains(authHeader.getHashAlgo().toUpperCase())) {
-            throw new EscherException("Only SHA256 and SHA512 hash algorithms are allowed");
-        }
+        String secret = keyDb.get(authHeader.getAccessKeyId());
 
-        Date credentialDate = DateTime.parseShortString(authHeader.getCredentialDate());
-
-        if (!DateTime.sameDay(requestDate, credentialDate)) {
-            throw new EscherException("The request date and credential date do not match");
-        }
-
-        if (requestDate.before(DateTime.subtractSeconds(currentTime, clockSkew)) ||
-                requestDate.after(DateTime.addSeconds(currentTime, clockSkew))) {
-            throw new EscherException("Request date is not within the accepted time interval");
-        }
-
-        if (!address.getHostName().equals(hostHeader)) {
-            throw new EscherException("The host header does not match");
-        }
-
-        if (!credentialScope.equals(authHeader.getCredentialScope())) {
-            throw new EscherException("Invalid credentials");
-        }
-
-        if (!keyDb.containsKey(authHeader.getAccessKeyId())) {
+        if (secret == null) {
             throw new EscherException("Invalid access key id");
         }
 
         config.setDate(requestDate);
         request = new AuthenticationEscherRequest(request, address);
 
-        String calculatedSignature = calculateSignature(request, helper, keyDb.get(authHeader.getAccessKeyId()), authHeader.getSignedHeaders());
-        if (!calculatedSignature.equals(authHeader.getSignature())) {
-            throw new EscherException("The signatures do not match (provided: " + authHeader.getSignature() + ", calculated: " + calculatedSignature + ")");
-        }
+        String calculatedSignature = calculateSignature(request, helper, secret, authHeader.getSignedHeaders());
+        validator.validateSignature(calculatedSignature, authHeader.getSignature());
 
         return authHeader.getAccessKeyId();
     }
