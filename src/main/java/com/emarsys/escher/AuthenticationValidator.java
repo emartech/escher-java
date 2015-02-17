@@ -35,13 +35,13 @@ public class AuthenticationValidator {
     }
 
 
-    public void validateDates(Date requestDate, Date credentialDate) throws EscherException {
+    public void validateDates(Date requestDate, Date credentialDate, Date currentTime) throws EscherException {
         if (!DateTime.sameDay(requestDate, credentialDate)) {
             throw new EscherException("The request date and credential date do not match");
         }
 
-        if (requestDate.before(DateTime.subtractSeconds(config.getDate(), config.getClockSkew())) ||
-                requestDate.after(DateTime.addSeconds(config.getDate(), config.getClockSkew()))) {
+        if (requestDate.before(DateTime.subtractSeconds(currentTime, config.getClockSkew())) ||
+                requestDate.after(DateTime.addSeconds(currentTime, config.getClockSkew()))) {
             throw new EscherException("Request date is not within the accepted time interval");
         }
     }

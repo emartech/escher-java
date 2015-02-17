@@ -42,8 +42,7 @@ public class TestBase {
     protected Config createConfig(TestParam param) throws Exception{
         return Config.create()
                     .setAlgoPrefix(param.getConfig().getAlgoPrefix())
-                    .setHashAlgo(param.getConfig().getHashAlgo())
-                    .setDate(getConfigDate(param));
+                    .setHashAlgo(param.getConfig().getHashAlgo());
     }
 
 }

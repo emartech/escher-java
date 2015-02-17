@@ -1,7 +1,5 @@
 package com.emarsys.escher;
 
-import java.util.Date;
-
 class Config {
 
     private String algoPrefix = "ESR";
@@ -9,7 +7,6 @@ class Config {
     private String hashAlgo = "SHA256";
     private String authHeaderName = "X-Escher-Auth";
     private String dateHeaderName = "X-Escher-Date";
-    private Date date;
     private int clockSkew = 900;
 
 
@@ -72,17 +69,6 @@ class Config {
 
     public Config setDateHeaderName(String dateHeaderName) {
         this.dateHeaderName = dateHeaderName;
-        return this;
-    }
-
-
-    public Date getDate() {
-        return date;
-    }
-
-
-    public Config setDate(Date date) {
-        this.date = date;
         return this;
     }
 

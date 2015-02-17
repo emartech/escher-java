@@ -34,10 +34,10 @@ public class Escher {
         Config config = createConfig();
         Helper helper = new Helper(config);
 
-        helper.addDateHeader(request);
+        helper.addDateHeader(request, currentTime);
 
-        String signature = calculateSignature(request, helper, secret, signedHeaders);
-        String authHeader = helper.calculateAuthHeader(accessKeyId, credentialScope, signedHeaders, signature);
+        String signature = calculateSignature(helper, request, secret, signedHeaders, currentTime);
+        String authHeader = helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, signedHeaders, signature);
 
         helper.addAuthHeader(request, authHeader);
 
@@ -53,12 +53,12 @@ public class Escher {
             URI uri = new URI(url);
             URIBuilder uriBuilder = new URIBuilder(uri);
 
-            Map<String, String> params = helper.calculateSigningParams(accessKeyId, credentialScope, expires);
+            Map<String, String> params = helper.calculateSigningParams(accessKeyId, currentTime, credentialScope, expires);
             params.forEach((key, value) -> uriBuilder.addParameter("X-" + vendorKey + "-" + key, value));
 
             EscherRequest request = new PresignUrlDummyEscherRequest(uriBuilder.build());
 
-            String signature = calculateSignature(request, helper, secret, Arrays.asList("host"));
+            String signature = calculateSignature(helper, request, secret, Arrays.asList("host"), currentTime);
 
             uriBuilder.addParameter("X-" + vendorKey + "-" + "Signature", signature);
 
@@ -69,10 +69,10 @@ public class Escher {
     }
 
 
-    private String calculateSignature(EscherRequest request, Helper helper, String secret, List<String> signedHeaders) throws EscherException {
+    private String calculateSignature(Helper helper, EscherRequest request, String secret, List<String> signedHeaders, Date date) throws EscherException {
         String canonicalizedRequest = helper.canonicalize(request, signedHeaders);
-        String stringToSign = helper.calculateStringToSign(credentialScope, canonicalizedRequest);
-        byte[] signingKey = helper.calculateSigningKey(secret, credentialScope);
+        String stringToSign = helper.calculateStringToSign(date, credentialScope, canonicalizedRequest);
+        byte[] signingKey = helper.calculateSigningKey(secret, date, credentialScope);
         return helper.calculateSignature(signingKey, stringToSign);
     }
 
@@ -83,7 +83,6 @@ public class Escher {
                 .setHashAlgo(hashAlgo)
                 .setDateHeaderName(dateHeaderName)
                 .setAuthHeaderName(authHeaderName)
-                .setDate(currentTime)
                 .setClockSkew(clockSkew);
     }
 
@@ -100,7 +99,7 @@ public class Escher {
 
         validator.validateMandatorySignedHeaders(authHeader.getSignedHeaders());
         validator.validateHashAlgo(authHeader.getHashAlgo());
-        validator.validateDates(requestDate, DateTime.parseShortString(authHeader.getCredentialDate()));
+        validator.validateDates(requestDate, DateTime.parseShortString(authHeader.getCredentialDate()), currentTime);
         validator.validateHost(address, hostHeader);
         validator.validateCredentialScope(credentialScope, authHeader.getCredentialScope());
 
@@ -110,10 +109,9 @@ public class Escher {
             throw new EscherException("Invalid access key id");
         }
 
-        config.setDate(requestDate);
         request = new AuthenticationEscherRequest(request, address);
 
-        String calculatedSignature = calculateSignature(request, helper, secret, authHeader.getSignedHeaders());
+        String calculatedSignature = calculateSignature(helper, request, secret, authHeader.getSignedHeaders(), requestDate);
         validator.validateSignature(calculatedSignature, authHeader.getSignature());
 
         return authHeader.getAccessKeyId();

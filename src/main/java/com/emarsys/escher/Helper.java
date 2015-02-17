@@ -93,16 +93,16 @@ class Helper {
     }
 
 
-    public String calculateStringToSign(String credentialScope, String canonicalizedRequest) throws EscherException {
+    public String calculateStringToSign(Date date, String credentialScope, String canonicalizedRequest) throws EscherException {
         return config.getFullAlgorithm() + NEW_LINE
-                + DateTime.toLongString(config.getDate()) + NEW_LINE
-                + DateTime.toShortString(config.getDate()) + "/" + credentialScope + NEW_LINE
+                + DateTime.toLongString(date) + NEW_LINE
+                + DateTime.toShortString(date) + "/" + credentialScope + NEW_LINE
                 + Hmac.hash(canonicalizedRequest);
     }
 
 
-    public byte[] calculateSigningKey(String secret, String credentialScope) throws EscherException {
-        byte[] key = Hmac.sign(config.getHashAlgo(), (config.getAlgoPrefix() + secret), DateTime.toShortString(config.getDate()));
+    public byte[] calculateSigningKey(String secret, Date date, String credentialScope) throws EscherException {
+        byte[] key = Hmac.sign(config.getHashAlgo(), (config.getAlgoPrefix() + secret), DateTime.toShortString(date));
 
         for (String credentialPart : credentialScope.split("/")) {
             key = Hmac.sign(config.getHashAlgo(), key, credentialPart);
@@ -112,9 +112,9 @@ class Helper {
     }
 
 
-    public String calculateAuthHeader(String accessKeyId, String credentialScope, List<String> signedHeaders, String signature) {
+    public String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, List<String> signedHeaders, String signature) {
         return config.getFullAlgorithm() +
-                " Credential=" + credentials(accessKeyId, credentialScope) +
+                " Credential=" + credentials(accessKeyId, date, credentialScope) +
                 ", SignedHeaders=" + signedHeaders.stream().reduce((s1, s2) -> s1 + ";" + s2).get().toLowerCase() +
                 ", Signature=" + signature;
     }
@@ -125,29 +125,28 @@ class Helper {
     }
 
 
-    private String credentials(String accessKeyId, String credentialScope) {
-        return accessKeyId + "/" + DateTime.toShortString(config.getDate()) + "/" + credentialScope;
+    private String credentials(String accessKeyId, Date date, String credentialScope) {
+        return accessKeyId + "/" + DateTime.toShortString(date) + "/" + credentialScope;
     }
 
 
-    public Map<String, String> calculateSigningParams(String accessKeyId, String credentialScope, int expires) {
+    public Map<String, String> calculateSigningParams(String accessKeyId, Date date, String credentialScope, int expires) {
         Map<String, String> params = new TreeMap<>();
         params.put("SignedHeaders", "host");
         params.put("Expires", Integer.toString(expires));
         params.put("Algorithm", config.getFullAlgorithm());
-        params.put("Credentials", credentials(accessKeyId, credentialScope));
-        params.put("Date", DateTime.toLongString(config.getDate()));
-
+        params.put("Credentials", credentials(accessKeyId, date, credentialScope));
+        params.put("Date", DateTime.toLongString(date));
         return params;
     }
 
 
-    public void addDateHeader(EscherRequest request) {
+    public void addDateHeader(EscherRequest request, Date date) {
         boolean requestHasDateHeader = request.getRequestHeaders()
                 .stream()
                 .anyMatch(header -> header.getFieldName().equals(config.getDateHeaderName()));
         if (!requestHasDateHeader) {
-            request.addHeader(config.getDateHeaderName(), DateTime.toLongString(config.getDate()));
+            request.addHeader(config.getDateHeaderName(), DateTime.toLongString(date));
         }
     }
 

@@ -17,14 +17,13 @@ public class HelperTest extends TestBase {
     public void testCalculateSigningKey() throws Exception {
         Config config = Config.create()
                 .setHashAlgo("sha256")
-                .setAlgoPrefix("AWS4")
-                .setDate(createDate(2011, Calendar.SEPTEMBER, 9));
+                .setAlgoPrefix("AWS4");
 
         Helper helper = new Helper(config);
 
         byte[] signingKey = helper.calculateSigningKey(
                 "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
-                "us-east-1/iam/aws4_request"
+                createDate(2011, Calendar.SEPTEMBER, 9), "us-east-1/iam/aws4_request"
         );
 
         assertThat(
@@ -39,12 +38,11 @@ public class HelperTest extends TestBase {
         Date date = createDate(2011, Calendar.MAY, 11, 12, 0, 0);
         Config config = Config.create()
                 .setAlgoPrefix("EMS")
-                .setHashAlgo("SHA256")
-                .setDate(date);
+                .setHashAlgo("SHA256");
 
         Helper helper = new Helper(config);
 
-        Map<String, String> params = helper.calculateSigningParams("th3K3y", "us-east-1/host/aws4_request", 12345);
+        Map<String, String> params = helper.calculateSigningParams("th3K3y", date, "us-east-1/host/aws4_request", 12345);
 
         Map<String, String> expectedParams = new HashMap<>();
         expectedParams.put("Algorithm", "EMS-HMAC-SHA256");

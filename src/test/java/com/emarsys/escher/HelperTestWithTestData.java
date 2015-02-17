@@ -8,6 +8,7 @@ import org.junit.runners.Parameterized;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,7 +96,8 @@ public class HelperTestWithTestData extends TestBase {
 
     @Test
     public void testCalculateStringToSign() throws Exception {
-        String stringToSign = helper.calculateStringToSign(param.getConfig().getCredentialScope(),
+        String stringToSign = helper.calculateStringToSign(
+                getConfigDate(param), param.getConfig().getCredentialScope(),
                 param.getExpected().getCanonicalizedRequest()
         );
         assertThat(fileName, stringToSign, is(param.getExpected().getStringToSign()));
@@ -104,12 +106,18 @@ public class HelperTestWithTestData extends TestBase {
 
     @Test
     public void testCalculateAuthHeader() throws Exception {
+        Date date = getConfigDate(param);
         byte[] signingKey = helper.calculateSigningKey(
                 param.getConfig().getApiSecret(),
-                param.getConfig().getCredentialScope()
+                date, param.getConfig().getCredentialScope()
         );
         String signature = helper.calculateSignature(signingKey, param.getExpected().getStringToSign());
-        String authHeader = helper.calculateAuthHeader(param.getConfig().getAccessKeyId(), param.getConfig().getCredentialScope(), param.getHeadersToSign(), signature);
+        String authHeader = helper.calculateAuthHeader(
+                param.getConfig().getAccessKeyId(),
+                date, param.getConfig().getCredentialScope(),
+                param.getHeadersToSign(),
+                signature
+        );
         assertThat(fileName, authHeader, is(param.getExpected().getAuthHeader()));
     }
 
