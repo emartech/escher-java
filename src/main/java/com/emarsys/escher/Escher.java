@@ -69,24 +69,6 @@ public class Escher {
     }
 
 
-    private String calculateSignature(Helper helper, EscherRequest request, String secret, List<String> signedHeaders, Date date) throws EscherException {
-        String canonicalizedRequest = helper.canonicalize(request, signedHeaders);
-        String stringToSign = helper.calculateStringToSign(date, credentialScope, canonicalizedRequest);
-        byte[] signingKey = helper.calculateSigningKey(secret, date, credentialScope);
-        return helper.calculateSignature(signingKey, stringToSign);
-    }
-
-
-    private Config createConfig() {
-        return Config.create()
-                .setAlgoPrefix(algoPrefix)
-                .setHashAlgo(hashAlgo)
-                .setDateHeaderName(dateHeaderName)
-                .setAuthHeaderName(authHeaderName)
-                .setClockSkew(clockSkew);
-    }
-
-
     public String authenticate(EscherRequest request, Map<String, String> keyDb, InetSocketAddress address) throws EscherException {
         Config config = createConfig();
         Helper helper = new Helper(config);
@@ -115,6 +97,24 @@ public class Escher {
         validator.validateSignature(calculatedSignature, authHeader.getSignature());
 
         return authHeader.getAccessKeyId();
+    }
+
+
+    private String calculateSignature(Helper helper, EscherRequest request, String secret, List<String> signedHeaders, Date date) throws EscherException {
+        String canonicalizedRequest = helper.canonicalize(request, signedHeaders);
+        String stringToSign = helper.calculateStringToSign(date, credentialScope, canonicalizedRequest);
+        byte[] signingKey = helper.calculateSigningKey(secret, date, credentialScope);
+        return helper.calculateSignature(signingKey, stringToSign);
+    }
+
+
+    private Config createConfig() {
+        return Config.create()
+                .setAlgoPrefix(algoPrefix)
+                .setHashAlgo(hashAlgo)
+                .setDateHeaderName(dateHeaderName)
+                .setAuthHeaderName(authHeaderName)
+                .setClockSkew(clockSkew);
     }
 
 
