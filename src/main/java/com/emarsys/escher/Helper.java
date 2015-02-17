@@ -48,7 +48,7 @@ class Helper {
                 .map(this::queryParameterToString)
                 .sorted()
                 .reduce(byJoiningWith('&'))
-                .orElseGet(() -> "");
+                .orElse("");
     }
 
 
@@ -68,7 +68,7 @@ class Helper {
                 .map(header -> header.getFieldName().toLowerCase() + ":" + header.getFieldValue().trim())
                 .sorted()
                 .reduce(byJoiningWith(NEW_LINE))
-                .orElseGet(() -> "");
+                .orElse("");
     }
 
 
@@ -85,7 +85,7 @@ class Helper {
                 .map(String::toLowerCase)
                 .sorted()
                 .reduce(byJoiningWith(';'))
-                .orElseGet(() -> "");
+                .orElse("");
     }
 
 
