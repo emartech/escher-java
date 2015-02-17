@@ -15,8 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @RunWith(DataProviderRunner.class)
 public class EscherTest extends TestBase {
@@ -77,6 +76,28 @@ public class EscherTest extends TestBase {
 
         EscherRequestImpl expectedSignedRequest = createRequest(param.getExpected().getRequest());
         assertThat(signedRequest.getRequestHeaders(), is(expectedSignedRequest.getRequestHeaders()));
+    }
+
+
+    @Test
+    public void testSignRequestAddsMandatoryHeaderIfItIsNotPresent() throws Exception {
+        TestParam param = parseTestData("get-vanilla");
+
+        TestParam.Config config = param.getConfig();
+
+        param.getRequest().getHeaders().removeIf(header -> header.get(0).equals(config.getDateHeaderName()));
+        EscherRequestImpl request = createRequest(param.getRequest());
+
+        Escher escher = new Escher(config.getCredentialScope())
+                .setAuthHeaderName(config.getAuthHeaderName())
+                .setDateHeaderName(config.getDateHeaderName())
+                .setAlgoPrefix(config.getAlgoPrefix())
+                .setCurrentTime(getConfigDate(param));
+
+        EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
+
+        boolean dateHeaderPresent = signedRequest.getRequestHeaders().stream().anyMatch(header -> header.getFieldName().equals(config.getDateHeaderName()));
+        assertTrue(dateHeaderPresent);
     }
 
 

@@ -8,6 +8,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.function.BinaryOperator;
@@ -141,13 +142,32 @@ class Helper {
     }
 
 
-    public void addDateHeader(EscherRequest request, Date date) {
+    public void addMandatoryHeaders(EscherRequest request, Date date) {
         boolean requestHasDateHeader = request.getRequestHeaders()
                 .stream()
                 .anyMatch(header -> header.getFieldName().equals(config.getDateHeaderName()));
         if (!requestHasDateHeader) {
             request.addHeader(config.getDateHeaderName(), DateTime.toLongString(date));
         }
+
+        boolean requestHasHostHeader = request.getRequestHeaders()
+                .stream()
+                .anyMatch(header -> header.getFieldName().equalsIgnoreCase("host"));
+        if (!requestHasHostHeader) {
+            request.addHeader("host", calculateHost(request.getURI()));
+        }
+
+    }
+
+
+    private String calculateHost(URI uri) {
+        String host = uri.getHost();
+        int port = uri.getPort();
+        int defaultPort = ("https".equals(uri.getScheme()) ? 443 : 80);
+        if (port != -1 && port != defaultPort) {
+            host += ":" + port;
+        }
+        return host;
     }
 
 
