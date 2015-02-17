@@ -85,18 +85,22 @@ public class Escher {
         validator.validateHost(address, hostHeader);
         validator.validateCredentialScope(credentialScope, authHeader.getCredentialScope());
 
-        String secret = keyDb.get(authHeader.getAccessKeyId());
+        String secret = retrieveSecret(keyDb, authHeader.getAccessKeyId());
+        String calculatedSignature = calculateSignature(helper, request, secret, authHeader.getSignedHeaders(), requestDate);
+
+        validator.validateSignature(calculatedSignature, authHeader.getSignature());
+
+        return authHeader.getAccessKeyId();
+    }
+
+
+    private String retrieveSecret(Map<String, String> keyDb, String accessKeyId) throws EscherException {
+        String secret = keyDb.get(accessKeyId);
 
         if (secret == null) {
             throw new EscherException("Invalid access key id");
         }
-
-        request = new AuthenticationEscherRequest(request, address);
-
-        String calculatedSignature = calculateSignature(helper, request, secret, authHeader.getSignedHeaders(), requestDate);
-        validator.validateSignature(calculatedSignature, authHeader.getSignature());
-
-        return authHeader.getAccessKeyId();
+        return secret;
     }
 
 
