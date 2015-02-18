@@ -171,6 +171,23 @@ class Helper {
     }
 
 
+    public void addMandatorySignedHeaders(List<String> signedHeaders) {
+        boolean asDateHeader = signedHeaders
+                .stream()
+                .anyMatch(header -> header.equals(config.getDateHeaderName()));
+        if (!asDateHeader) {
+            signedHeaders.add(config.getDateHeaderName());
+        }
+
+        boolean hasHostHeader = signedHeaders
+                .stream()
+                .anyMatch(header -> header.equalsIgnoreCase("host"));
+        if (!hasHostHeader) {
+            signedHeaders.add("host");
+        }
+    }
+
+
     public void addAuthHeader(EscherRequest request, String fieldValue) {
         request.getRequestHeaders().removeIf(header -> header.getFieldName().equals(config.getAuthHeaderName()));
         request.addHeader(config.getAuthHeaderName(), fieldValue);

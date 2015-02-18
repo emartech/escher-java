@@ -35,6 +35,7 @@ public class Escher {
         Helper helper = new Helper(config);
 
         helper.addMandatoryHeaders(request, currentTime);
+        helper.addMandatorySignedHeaders(signedHeaders);
 
         String signature = calculateSignature(helper, request, secret, signedHeaders, currentTime);
         String authHeader = helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, signedHeaders, signature);

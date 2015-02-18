@@ -48,7 +48,9 @@ public class AuthenticationValidator {
 
 
     public void validateHost(InetSocketAddress address, String hostHeader) throws EscherException {
-        if (!address.getHostName().equals(hostHeader)) {
+        boolean defaultPortInUse = address.getPort() == 80 || address.getPort() == 443;
+        String expectedHost = address.getHostName() + (defaultPortInUse ? "" : ":" + address.getPort());
+        if (!expectedHost.equals(hostHeader)) {
             throw new EscherException("The host header does not match");
         }
     }
