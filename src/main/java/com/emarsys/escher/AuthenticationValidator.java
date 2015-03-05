@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class AuthenticationValidator {
+class AuthenticationValidator {
 
     private Config config;
 

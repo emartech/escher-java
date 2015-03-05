@@ -4,6 +4,7 @@ package com.emarsys.escher;
 import com.emarsys.escher.util.DateTime;
 import org.apache.http.client.utils.URIBuilder;
 
+import javax.xml.bind.DatatypeConverter;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Escher {
 
@@ -109,7 +111,14 @@ public class Escher {
         String canonicalizedRequest = helper.canonicalize(request, signedHeaders);
         String stringToSign = helper.calculateStringToSign(date, credentialScope, canonicalizedRequest);
         byte[] signingKey = helper.calculateSigningKey(secret, date, credentialScope);
-        return helper.calculateSignature(signingKey, stringToSign);
+        String signature = helper.calculateSignature(signingKey, stringToSign);
+
+        Logger.log("Canonicalized request: " + canonicalizedRequest);
+        Logger.log("String to sign: " + stringToSign);
+        Logger.log("Signing key: " + DatatypeConverter.printHexBinary(signingKey));
+        Logger.log("Signature: " + signature);
+
+        return signature;
     }
 
 
@@ -161,6 +170,15 @@ public class Escher {
 
     public Escher setClockSkew(int clockSkew) {
         this.clockSkew = clockSkew;
+        return this;
+    }
+
+
+    public Escher setLogger(Consumer<String> logger) {
+        if (logger == null) {
+            throw new IllegalArgumentException("Logger is null");
+        }
+        Logger.setConsumer(logger);
         return this;
     }
 }
