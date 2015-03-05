@@ -206,6 +206,7 @@ class Helper {
         return findHeader(request, "host").getFieldValue();
     }
 
+
     public AuthHeader parseAuthHeader(EscherRequest request) throws EscherException {
         return AuthHeader.parse(findHeader(request, config.getAuthHeaderName()).getFieldValue());
     }
@@ -228,4 +229,5 @@ class Helper {
             throw new EscherException("Missing header: " + headerName);
         }
     }
+
 }
