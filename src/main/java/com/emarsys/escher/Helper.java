@@ -147,9 +147,9 @@ class Helper {
                 .stream()
                 .anyMatch(header -> header.getFieldName().equals(config.getDateHeaderName()));
         if (!requestHasDateHeader) {
-            String formattedData = DateTime.toLongString(date);
-            request.addHeader(config.getDateHeaderName(), formattedData);
-            Logger.log("Header added - " + config.getDateHeaderName() + ": " + formattedData);
+            String formattedDate = DateTime.toLongString(date);
+            request.addHeader(config.getDateHeaderName(), formattedDate);
+            Logger.log("Header added - " + config.getDateHeaderName() + ": " + formattedDate);
         }
 
         boolean requestHasHostHeader = request.getRequestHeaders()
