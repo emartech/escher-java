@@ -1,4 +1,5 @@
-# escher-java
+EscherJava - HTTP request signing lib [![Build Status](https://travis-ci.org/emartech/escher-java.svg?branch=master)](https://travis-ci.org/emartech/escher-java)
+=====================================
 
 Java implementation of the [Escher](https://github.com/emartech/escher) HTTP request signing library
 
@@ -14,3 +15,7 @@ Run the tests
 
 To run all the tests, use the `mvn test` command.
 
+About Escher
+------------
+
+More details are available at our [Escher documentation site](http://escherauth.io/).
