@@ -76,24 +76,24 @@ public class Escher {
         Config config = createConfig();
         Helper helper = new Helper(config);
 
-        AuthHeader authHeader = helper.parseAuthHeader(request);
+        AuthElements authElements = helper.parseAuthHeader(request);
         Date requestDate = helper.parseDateHeader(request);
         String hostHeader = helper.parseHostHeader(request);
 
         AuthenticationValidator validator = new AuthenticationValidator(config);
 
-        validator.validateMandatorySignedHeaders(authHeader.getSignedHeaders());
-        validator.validateHashAlgo(authHeader.getHashAlgo());
-        validator.validateDates(requestDate, DateTime.parseShortString(authHeader.getCredentialDate()), currentTime);
+        validator.validateMandatorySignedHeaders(authElements.getSignedHeaders());
+        validator.validateHashAlgo(authElements.getHashAlgo());
+        validator.validateDates(requestDate, DateTime.parseShortString(authElements.getCredentialDate()), currentTime);
         validator.validateHost(address, hostHeader);
-        validator.validateCredentialScope(credentialScope, authHeader.getCredentialScope());
+        validator.validateCredentialScope(credentialScope, authElements.getCredentialScope());
 
-        String secret = retrieveSecret(keyDb, authHeader.getAccessKeyId());
-        String calculatedSignature = calculateSignature(helper, request, secret, authHeader.getSignedHeaders(), requestDate);
+        String secret = retrieveSecret(keyDb, authElements.getAccessKeyId());
+        String calculatedSignature = calculateSignature(helper, request, secret, authElements.getSignedHeaders(), requestDate);
 
-        validator.validateSignature(calculatedSignature, authHeader.getSignature());
+        validator.validateSignature(calculatedSignature, authElements.getSignature());
 
-        return authHeader.getAccessKeyId();
+        return authElements.getAccessKeyId();
     }
 
 

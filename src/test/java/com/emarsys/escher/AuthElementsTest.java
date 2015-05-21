@@ -13,36 +13,36 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 @RunWith(DataProviderRunner.class)
-public class AuthHeaderTest {
+public class AuthElementsTest {
 
     @Test
-    public void testParseSuccess() throws Exception {
+    public void testParseHeaderSuccess() throws Exception {
         String textToParse = "EMS-HMAC-SHA256 Credential=AKID-EXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd";
 
-        AuthHeader header = AuthHeader.parse(textToParse);
+        AuthElements elements = AuthElements.parseHeader(textToParse);
 
-        assertThat("algoPrefix", header.getAlgoPrefix(), is("EMS"));
-        assertThat("hashAlgo", header.getHashAlgo(), is("SHA256"));
-        assertThat("accessKeyId", header.getAccessKeyId(), is("AKID-EXAMPLE"));
-        assertThat("date", header.getCredentialDate(), is("20110909"));
-        assertThat("credentialScope", header.getCredentialScope(), is("us-east-1/iam/aws4_request"));
-        assertThat("signedHeaders", Arrays.asList("content-type", "host", "x-ems-date"), is(header.getSignedHeaders()));
-        assertThat("signature", header.getSignature(), is("f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"));
+        assertThat("algoPrefix", elements.getAlgoPrefix(), is("EMS"));
+        assertThat("hashAlgo", elements.getHashAlgo(), is("SHA256"));
+        assertThat("accessKeyId", elements.getAccessKeyId(), is("AKID-EXAMPLE"));
+        assertThat("date", elements.getCredentialDate(), is("20110909"));
+        assertThat("credentialScope", elements.getCredentialScope(), is("us-east-1/iam/aws4_request"));
+        assertThat("signedHeaders", Arrays.asList("content-type", "host", "x-ems-date"), is(elements.getSignedHeaders()));
+        assertThat("signature", elements.getSignature(), is("f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"));
     }
 
 
     @Test
-    @UseDataProvider("getParseMailFormatCases")
-    public void testParseMalFormat(String textToParse, String problem) throws Exception {
+    @UseDataProvider("getParseHeaderMailFormatCases")
+    public void testParseHeaderMalFormat(String textToParse, String problem) throws Exception {
         try {
-            AuthHeader.parse(textToParse);
+            AuthElements.parseHeader(textToParse);
             fail("excpetion should have been thrown - " + problem);
         } catch (EscherException ignored) {}
     }
 
 
     @DataProvider
-    public static Object[][] getParseMailFormatCases() {
+    public static Object[][] getParseHeaderMailFormatCases() {
         return new Object[][] {
 //              { "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd", "OK" },
                 { "E?S-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd", "'?' in algoPrefix" },

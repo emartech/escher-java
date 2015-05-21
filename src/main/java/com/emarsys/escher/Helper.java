@@ -207,8 +207,8 @@ class Helper {
     }
 
 
-    public AuthHeader parseAuthHeader(EscherRequest request) throws EscherException {
-        return AuthHeader.parse(findHeader(request, config.getAuthHeaderName()).getFieldValue());
+    public AuthElements parseAuthHeader(EscherRequest request) throws EscherException {
+        return AuthElements.parseHeader(findHeader(request, config.getAuthHeaderName()).getFieldValue());
     }
 
 

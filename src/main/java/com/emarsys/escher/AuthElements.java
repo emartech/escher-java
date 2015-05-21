@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class AuthHeader {
+class AuthElements {
 
     private String algoPrefix;
     private String hashAlgo;
@@ -17,23 +17,23 @@ class AuthHeader {
     private String signature;
 
 
-    public static AuthHeader parse(String text) throws EscherException {
+    public static AuthElements parseHeader(String text) throws EscherException {
 
         Pattern pattern = Pattern.compile("^(?<algoPrefix>\\w+)-HMAC-(?<hashAlgo>[A-Z0-9,]+) Credential=(?<accessKeyId>[\\w\\-]+)/(?<date>\\d{8})/(?<credentialScope>[\\w\\-/]+), SignedHeaders=(?<signedHeaders>[A-Za-z\\-;]+), Signature=(?<signature>[0-9a-f]+)$");
         Matcher matcher = pattern.matcher(text);
 
         if (matcher.matches()) {
-            AuthHeader header = new AuthHeader();
+            AuthElements elements = new AuthElements();
 
-            header.algoPrefix = matcher.group("algoPrefix");
-            header.hashAlgo = matcher.group("hashAlgo");
-            header.accessKeyId = matcher.group("accessKeyId");
-            header.credentialDate = matcher.group("date");
-            header.credentialScope = matcher.group("credentialScope");
-            header.signedHeaders.addAll(Arrays.asList(matcher.group("signedHeaders").split(";")));
-            header.signature = matcher.group("signature");
+            elements.algoPrefix = matcher.group("algoPrefix");
+            elements.hashAlgo = matcher.group("hashAlgo");
+            elements.accessKeyId = matcher.group("accessKeyId");
+            elements.credentialDate = matcher.group("date");
+            elements.credentialScope = matcher.group("credentialScope");
+            elements.signedHeaders.addAll(Arrays.asList(matcher.group("signedHeaders").split(";")));
+            elements.signature = matcher.group("signature");
 
-            return header;
+            return elements;
         } else {
             throw new EscherException("Malformed authorization header");
         }
