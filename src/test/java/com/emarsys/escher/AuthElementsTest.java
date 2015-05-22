@@ -18,11 +18,12 @@ public class AuthElementsTest {
 
     @Test
     public void testParseHeaderSuccess() throws Exception {
+        Config config = Config.create()
+                .setAlgoPrefix("EMS");
         String textToParse = "EMS-HMAC-SHA256 Credential=AKID-EXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd";
 
-        AuthElements elements = AuthElements.parseHeader(textToParse);
+        AuthElements elements = AuthElements.parseHeader(textToParse, config);
 
-        assertThat("algoPrefix", elements.getAlgoPrefix(), is("EMS"));
         assertThat("hashAlgo", elements.getHashAlgo(), is("SHA256"));
         assertThat("accessKeyId", elements.getAccessKeyId(), is("AKID-EXAMPLE"));
         assertThat("date", elements.getCredentialDate(), is("20110909"));
@@ -35,8 +36,11 @@ public class AuthElementsTest {
     @Test
     @UseDataProvider("getParseHeaderMailFormatCases")
     public void testParseHeaderMalFormat(String textToParse, String problem) throws Exception {
+        Config config = Config.create()
+                .setAlgoPrefix("EMS");
+
         try {
-            AuthElements.parseHeader(textToParse);
+            AuthElements.parseHeader(textToParse, config);
             fail("excpetion should have been thrown - " + problem);
         } catch (EscherException ignored) {}
     }
@@ -46,6 +50,7 @@ public class AuthElementsTest {
     public static Object[][] getParseHeaderMailFormatCases() {
         return new Object[][] {
 //              { "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd", "OK" },
+                { "XXX-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd", "wrong algo prefix" },
                 { "E?S-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd", "'?' in algoPrefix" },
                 { "EMS-CAMH-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd", "missing 'HMAC'" },
                 { "EMS-HMAC-SHA-256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd", "'/' in hashAlgo" },

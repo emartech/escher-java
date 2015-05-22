@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 class AuthElements {
 
-    private String algoPrefix;
     private String hashAlgo;
     private String accessKeyId;
     private String credentialDate;
@@ -18,15 +17,14 @@ class AuthElements {
     private String signature;
 
 
-    public static AuthElements parseHeader(String text) throws EscherException {
+    public static AuthElements parseHeader(String text, Config config) throws EscherException {
 
-        Pattern pattern = Pattern.compile("^(?<algoPrefix>\\w+)-HMAC-(?<hashAlgo>[A-Z0-9,]+) Credential=(?<accessKeyId>[\\w\\-]+)/(?<date>\\d{8})/(?<credentialScope>[\\w\\-/]+), SignedHeaders=(?<signedHeaders>[A-Za-z\\-;]+), Signature=(?<signature>[0-9a-f]+)$");
+        Pattern pattern = Pattern.compile("^" + config.getAlgoPrefix() + "-HMAC-(?<hashAlgo>[A-Z0-9,]+) Credential=(?<accessKeyId>[\\w\\-]+)/(?<date>\\d{8})/(?<credentialScope>[\\w\\-/]+), SignedHeaders=(?<signedHeaders>[A-Za-z\\-;]+), Signature=(?<signature>[0-9a-f]+)$");
         Matcher matcher = pattern.matcher(text);
 
         if (matcher.matches()) {
             AuthElements elements = new AuthElements();
 
-            elements.algoPrefix = matcher.group("algoPrefix");
             elements.hashAlgo = matcher.group("hashAlgo");
             elements.accessKeyId = matcher.group("accessKeyId");
             elements.credentialDate = matcher.group("date");
@@ -92,11 +90,6 @@ class AuthElements {
         elements.accessKeyId = matcher.group("accessKeyId");
         elements.credentialDate = matcher.group("date");
         elements.credentialScope = matcher.group("credentialScope");
-    }
-
-
-    public String getAlgoPrefix() {
-        return algoPrefix;
     }
 
 
