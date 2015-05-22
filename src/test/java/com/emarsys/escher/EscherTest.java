@@ -181,7 +181,7 @@ public class EscherTest extends TestBase {
         return new Object[][] {
                 { "Host", "Missing header: host" },
                 { "X-Escher-Date", "Missing header: X-Escher-Date" },
-                { "X-Escher-Auth", "Missing header: X-Escher-Auth" },
+                { "X-Escher-Auth", "Request has not been signed." },
         };
     }
 

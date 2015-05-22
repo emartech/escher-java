@@ -203,31 +203,42 @@ class Helper {
 
 
     public String parseHostHeader(EscherRequest request) throws EscherException {
-        return findHeader(request, "host").getFieldValue();
+        try {
+            return findHeader(request, "host").getFieldValue();
+        } catch (NoSuchElementException e) {
+            throw new EscherException("Missing header: host");
+        }
     }
 
 
-    public AuthElements parseAuthHeader(EscherRequest request) throws EscherException {
-        return AuthElements.parseHeader(findHeader(request, config.getAuthHeaderName()).getFieldValue(), config);
+    public AuthElements parseAuthElements(EscherRequest request) throws EscherException {
+        try {
+            return AuthElements.parseHeader(findHeader(request, config.getAuthHeaderName()).getFieldValue(), config);
+        } catch (NoSuchElementException e) {
+            try {
+                return AuthElements.parseQuery(request.getURI(), config);
+            } catch (NoSuchElementException ex) {
+                throw new EscherException("Request has not been signed.");
+            }
+        }
     }
 
 
     public Date parseDateHeader(EscherRequest request) throws EscherException {
-        return DateTime.parseLongString(findHeader(request, config.getDateHeaderName()).getFieldValue());
+        try {
+            return DateTime.parseLongString(findHeader(request, config.getDateHeaderName()).getFieldValue());
+        } catch (NoSuchElementException e) {
+            throw new EscherException("Missing header: " + config.getDateHeaderName());
+        }
     }
 
 
-    private EscherRequest.Header findHeader(EscherRequest request, String headerName) throws EscherException {
-        try {
-
-            return request.getRequestHeaders()
-                    .stream()
-                    .filter(header -> header.getFieldName().replace('_', '-').equalsIgnoreCase(headerName))
-                    .findFirst().get();
-
-        } catch (NoSuchElementException e) {
-            throw new EscherException("Missing header: " + headerName);
-        }
+    private EscherRequest.Header findHeader(EscherRequest request, String headerName) throws NoSuchElementException {
+        return request.getRequestHeaders()
+                .stream()
+                .filter(header -> header.getFieldName().replace('_', '-').equalsIgnoreCase(headerName))
+                .findFirst()
+                .get();
     }
 
 }

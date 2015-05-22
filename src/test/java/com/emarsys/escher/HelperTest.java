@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 @RunWith(DataProviderRunner.class)
 public class HelperTest extends TestBase {
@@ -155,6 +156,70 @@ public class HelperTest extends TestBase {
                 { "https://example.com:443/something", "example.com" },
                 { "https://example.com:80/something", "example.com:80" }
         };
+    }
+
+
+    @Test
+    public void testParseAuthElementsWithAuthHeaderAndSignatureQueryParam() throws Exception {
+        Config config = Config.create();
+        String authHeader = "ESR-HMAC-SHA256 Credential=AKID-EXAMPLE-HEADER/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd";
+        String url = "http://example.com?X-TEST-Algorithm=ESR-HMAC-SHA256&X-TEST-Credentials=AKID-EXAMPLE-QUERY%2F20110909%2Fus-east-1%2Fiam%2Faws4_request&X-TEST-Date=20111009T000000Z&X-TEST-Expires=10&X-TEST-SignedHeaders=host&X-TEST-Signature=191c13fb57e5ff0b8c0ad30fe94f4f0be40b3865916cf6ef084fffd67bae6239";
+
+        EscherRequest request = new EscherRequestImpl("GET", new URI(url), new ArrayList<>(), "");
+        request.addHeader(config.getAuthHeaderName(), authHeader);
+
+        Helper helper = new Helper(config);
+        AuthElements authElements = helper.parseAuthElements(request);
+
+        assertThat(authElements.getAccessKeyId(), is("AKID-EXAMPLE-HEADER"));
+    }
+
+
+    @Test
+    public void testParseAuthElementsWithAuthHeaderOnly() throws Exception {
+        Config config = Config.create();
+        String authHeader = "ESR-HMAC-SHA256 Credential=AKID-EXAMPLE-HEADER/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-ems-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd";
+        String url = "http://example.com";
+
+        EscherRequest request = new EscherRequestImpl("GET", new URI(url), new ArrayList<>(), "");
+        request.addHeader(config.getAuthHeaderName(), authHeader);
+
+        Helper helper = new Helper(config);
+        AuthElements authElements = helper.parseAuthElements(request);
+
+        assertThat(authElements.getAccessKeyId(), is("AKID-EXAMPLE-HEADER"));
+    }
+
+
+    @Test
+    public void testParseAuthElementsWithSignatureQueryOnly() throws Exception {
+        Config config = Config.create();
+        String url = "http://example.com?X-Escher-Algorithm=ESR-HMAC-SHA256&X-Escher-Credentials=AKID-EXAMPLE-QUERY%2F20110909%2Fus-east-1%2Fiam%2Faws4_request&X-Escher-Date=20111009T000000Z&X-Escher-Expires=10&X-Escher-SignedHeaders=host&X-Escher-Signature=191c13fb57e5ff0b8c0ad30fe94f4f0be40b3865916cf6ef084fffd67bae6239";
+
+        EscherRequest request = new EscherRequestImpl("GET", new URI(url), new ArrayList<>(), "");
+
+        Helper helper = new Helper(config);
+        AuthElements authElements = helper.parseAuthElements(request);
+
+        assertThat(authElements.getAccessKeyId(), is("AKID-EXAMPLE-QUERY"));
+    }
+
+
+    @Test
+    public void testParseAuthElementsWithoutAnySignatures() throws Exception {
+        Config config = Config.create();
+        String url = "http://example.com";
+
+        EscherRequest request = new EscherRequestImpl("GET", new URI(url), new ArrayList<>(), "");
+
+        Helper helper = new Helper(config);
+
+        try {
+            helper.parseAuthElements(request);
+            fail("exception should have been thrown");
+        } catch (EscherException e) {
+            assertThat(e.getMessage(), is("Request has not been signed."));
+        }
     }
 
 }

@@ -76,7 +76,7 @@ public class Escher {
         Config config = createConfig();
         Helper helper = new Helper(config);
 
-        AuthElements authElements = helper.parseAuthHeader(request);
+        AuthElements authElements = helper.parseAuthElements(request);
         Date requestDate = helper.parseDateHeader(request);
         String hostHeader = helper.parseHostHeader(request);
 

@@ -45,10 +45,10 @@ class AuthElements {
 
         AuthElements elements = new AuthElements();
 
+        elements.signature = getParam(config, parameters, "Signature");
         parseAlgorithm(elements, getParam(config, parameters, "Algorithm"), config.getAlgoPrefix());
         parseCredentials(elements, getParam(config, parameters, "Credentials"));
         elements.signedHeaders.add("host");
-        elements.signature = getParam(config, parameters, "Signature");
 
         return elements;
     }
@@ -66,7 +66,11 @@ class AuthElements {
         String fullParamName = "X-" + config.getVendorKey() + "-" + paramName;
         String paramValue = parameters.get(fullParamName);
         if (paramValue == null) {
-            throw new EscherException("Missing authorization parameter: " + fullParamName);
+            String message = "Missing authorization parameter: " + fullParamName;
+            if (paramName.equals("Signature")) {
+                throw new NoSuchElementException(message);
+            }
+            throw new EscherException(message);
         }
         return paramValue;
     }
