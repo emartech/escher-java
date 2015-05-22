@@ -1,8 +1,9 @@
 package com.emarsys.escher;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.apache.http.client.utils.URIBuilder;
+
+import java.net.URI;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +39,59 @@ class AuthElements {
             throw new EscherException("Malformed authorization header");
         }
 
+    }
+
+
+    public static AuthElements parseQuery(URI uri, Config config) throws EscherException {
+        Map<String, String> parameters = findQueryParameters(uri);
+
+        AuthElements elements = new AuthElements();
+
+        parseAlgorithm(elements, getParam(config, parameters, "Algorithm"), config.getAlgoPrefix());
+        parseCredentials(elements, getParam(config, parameters, "Credentials"));
+        elements.signedHeaders.add("host");
+        elements.signature = getParam(config, parameters, "Signature");
+
+        return elements;
+    }
+
+
+    private static Map<String, String> findQueryParameters(URI uri) {
+        URIBuilder uriBuilder = new URIBuilder(uri);
+        Map<String, String> parameters = new HashMap<>();
+        uriBuilder.getQueryParams().forEach(nameValuePair -> parameters.put(nameValuePair.getName(), nameValuePair.getValue()));
+        return parameters;
+    }
+
+
+    private static String getParam(Config config, Map<String, String> parameters, String paramName) throws EscherException {
+        String fullParamName = "X-" + config.getVendorKey() + "-" + paramName;
+        String paramValue = parameters.get(fullParamName);
+        if (paramValue == null) {
+            throw new EscherException("Missing authorization parameter: " + fullParamName);
+        }
+        return paramValue;
+    }
+
+
+    private static void parseAlgorithm(AuthElements elements, String algorithm, String algoPrefix) throws EscherException {
+        Pattern pattern = Pattern.compile("^" + algoPrefix + "-HMAC-(?<hashAlgo>[A-Z0-9,]+)$");
+        Matcher matcher = pattern.matcher(algorithm);
+        if (!matcher.matches()) {
+            throw new EscherException("Malformed Algorithm parameter");
+        }
+        elements.hashAlgo = matcher.group("hashAlgo");
+    }
+
+
+    private static void parseCredentials(AuthElements elements, String credentials) throws EscherException {
+        Matcher matcher = Pattern.compile("(?<accessKeyId>[\\w\\-]+)/(?<date>\\d{8})/(?<credentialScope>[\\w\\-/]+)").matcher(credentials);
+        if (!matcher.matches()) {
+            throw new EscherException("Malformed Credentials parameter");
+        }
+        elements.accessKeyId = matcher.group("accessKeyId");
+        elements.credentialDate = matcher.group("date");
+        elements.credentialScope = matcher.group("credentialScope");
     }
 
 
