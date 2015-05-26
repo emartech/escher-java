@@ -71,7 +71,7 @@ public class DateTime {
     }
 
 
-    private static Calendar toCalendar(Date date) {
+    public static Calendar toCalendar(Date date) {
         Calendar calendar = Calendar.getInstance(DateTime.TIMEZONE);
         calendar.setTime(date);
         return calendar;

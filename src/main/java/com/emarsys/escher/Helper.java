@@ -222,11 +222,26 @@ class Helper {
     }
 
 
-    public Date parseDateHeader(EscherRequest request) throws EscherException {
-        try {
-            return DateTime.parseLongString(findHeader(request, config.getDateHeaderName()).getFieldValue());
-        } catch (NoSuchElementException e) {
-            throw new EscherException("Missing header: " + config.getDateHeaderName());
+    public Date parseDate(EscherRequest request) throws EscherException {
+        if (hasAuthHeader(request)) {
+            try {
+                return DateTime.parseLongString(findHeader(request, config.getDateHeaderName()).getFieldValue());
+            } catch (NoSuchElementException e) {
+                throw new EscherException("Missing header: " + config.getDateHeaderName());
+            }
+        } else {
+            String dateParamName = "X-" + config.getVendorKey() + "-Date";
+            try {
+                String date = new URIBuilder(request.getURI()).getQueryParams()
+                        .stream()
+                        .filter(nameValuePair -> nameValuePair.getName().equals(dateParamName))
+                        .map(NameValuePair::getValue)
+                        .findFirst()
+                        .get();
+                return DateTime.parseLongString(date);
+            } catch (NoSuchElementException e) {
+                throw new EscherException("Missing authorization parameter: " + dateParamName);
+            }
         }
     }
 

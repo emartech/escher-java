@@ -1,6 +1,7 @@
 package com.emarsys.escher;
 
 
+import com.emarsys.escher.util.DateTime;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -220,6 +221,70 @@ public class HelperTest extends TestBase {
         } catch (EscherException e) {
             assertThat(e.getMessage(), is("Request has not been signed."));
         }
+    }
+
+
+    @Test
+    public void testParseDateFromHeader() throws Exception {
+        Config config = Config.create();
+        config.setDateHeaderName("DATE");
+        String url = "http://example.com";
+
+        EscherRequest request = new EscherRequestImpl("GET", new URI(url), new ArrayList<>(), "");
+        request.addHeader("DATE", "20111009T000000Z");
+        request.addHeader(config.getAuthHeaderName(), "whatever");
+
+        Helper helper = new Helper(config);
+        Date date = helper.parseDate(request);
+
+        assertThat(DateTime.toCalendar(date).get(Calendar.YEAR), is(2011));
+    }
+
+
+    @Test
+    public void testParseDateFromHeaderWhenThereIsNoDate() throws Exception {
+        Config config = Config.create();
+        String url = "http://example.com";
+
+        EscherRequest request = new EscherRequestImpl("GET", new URI(url), new ArrayList<>(), "");
+        request.addHeader(config.getAuthHeaderName(), "whatever");
+
+        Helper helper = new Helper(config);
+
+        try {
+            helper.parseDate(request);
+            fail("exception should have been thrown");
+        } catch (EscherException ignored) {}
+    }
+
+
+    @Test
+    public void testParseDateFromQueryString() throws Exception {
+        Config config = Config.create();
+        String url = "http://example.com?X-Escher-Date=20111009T000000Z";
+
+        EscherRequest request = new EscherRequestImpl("GET", new URI(url), new ArrayList<>(), "");
+
+        Helper helper = new Helper(config);
+        Date date = helper.parseDate(request);
+
+        assertThat(DateTime.toCalendar(date).get(Calendar.YEAR), is(2011));
+    }
+
+
+    @Test
+    public void testParseDateFromQueryStringWhenThereIsNoDate() throws Exception {
+        Config config = Config.create();
+        String url = "http://example.com";
+
+        EscherRequest request = new EscherRequestImpl("GET", new URI(url), new ArrayList<>(), "");
+
+        Helper helper = new Helper(config);
+
+        try {
+            helper.parseDate(request);
+            fail("exception should have been thrown");
+        } catch (EscherException ignored) {}
     }
 
 }
