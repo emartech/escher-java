@@ -29,14 +29,20 @@ class Helper {
 
 
     public String canonicalize(EscherRequest request, List<String> signedHeaders) throws EscherException {
+        return request.getHttpMethod() + NEW_LINE +
+                canonicalizePath(request) + NEW_LINE +
+                canonicalizeQueryParameters(request) + NEW_LINE +
+                canonicalizeHeaders(request.getRequestHeaders(), signedHeaders) + NEW_LINE +
+                NEW_LINE +
+                signedHeaders(signedHeaders) + NEW_LINE +
+                Hmac.hash(request.getBody());
+    }
+
+
+    private String canonicalizePath(EscherRequest request) throws EscherException {
         try {
-            return request.getHttpMethod() + NEW_LINE +
-                    request.getURI().toURL().getPath() + NEW_LINE +
-                    canonicalizeQueryParameters(request) + NEW_LINE +
-                    canonicalizeHeaders(request.getRequestHeaders(), signedHeaders) + NEW_LINE +
-                    NEW_LINE +
-                    signedHeaders(signedHeaders) + NEW_LINE +
-                    Hmac.hash(request.getBody());
+            String path = request.getURI().toURL().getPath();
+            return path.equals("") ? "/" : path;
         } catch (MalformedURLException e) {
             throw new EscherException(e);
         }

@@ -71,10 +71,45 @@ public class AcceptanceTests extends TestBase {
 
     @Test
     public void testPresignUrlSuccess() throws Exception {
-        client.getEscher().setCurrentTime(createDate(2015, Calendar.MAY, 26, 14,  0, 0));
-        server.getEscher().setCurrentTime(createDate(2015, Calendar.MAY, 26, 14, 20, 0));
+        setClientTime(createDate(2015, Calendar.MAY, 26, 14,  0, 0));
+        setServerTime(createDate(2015, Calendar.MAY, 26, 14, 20, 0));
         String url = client.presignUrl("http://localhost:" + server.getPort() + "/", 1200);
 
+        HttpRequestBase get = new HttpGet(url);
+
+        String response = client.sendRequest(get);
+
+        assertThat(response, is("OK"));
+    }
+
+
+    @Test
+    public void testPresignUrlOutdated() throws Exception {
+        setClientTime(createDate(2015, Calendar.JANUARY, 26, 14, 0, 0));
+        setServerTime(createDate(2015, Calendar.MAY, 26, 14, 0, 0));
+        String url = client.presignUrl("http://localhost:" + server.getPort() + "/", 0);
+
+        HttpRequestBase get = new HttpGet(url);
+
+        String response = client.sendRequest(get);
+
+        assertThat(response, is("Request date is not within the accepted time interval"));
+    }
+
+
+    private void setClientTime(Date date) {
+        client.getEscher().setCurrentTime(date);
+    }
+
+
+    private void setServerTime(Date date) {
+        server.getEscher().setCurrentTime(date);
+    }
+
+
+    @Test
+    public void testPresignUrlWithAnotherUrlInParameter() throws Exception {
+        String url = client.presignUrl("http://localhost:" + server.getPort() + "?url=http%3A%2F%2Fexample.com%2Ftest");
         HttpRequestBase get = new HttpGet(url);
 
         String response = client.sendRequest(get);

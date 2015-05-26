@@ -53,6 +53,11 @@ public class Client {
     }
 
 
+    public String presignUrl(String url) throws EscherException {
+        return escher.presignUrl(url, ESCHER_ACCESS_KEY_ID, ESCHER_SECRET);
+    }
+
+
     public Escher getEscher() {
         return escher;
     }
