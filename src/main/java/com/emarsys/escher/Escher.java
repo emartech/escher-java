@@ -82,13 +82,14 @@ public class Escher {
 
         AuthenticationValidator validator = new AuthenticationValidator(config);
 
-        validator.validateMandatorySignedHeaders(authElements.getSignedHeaders());
+        validator.validateMandatorySignedHeaders(authElements.getSignedHeaders(), authElements.isFromHeaders());
         validator.validateHashAlgo(authElements.getHashAlgo());
-        validator.validateDates(requestDate, DateTime.parseShortString(authElements.getCredentialDate()), currentTime);
+        validator.validateDates(requestDate, DateTime.parseShortString(authElements.getCredentialDate()), currentTime, authElements.getExpires());
         validator.validateHost(address, hostHeader);
         validator.validateCredentialScope(credentialScope, authElements.getCredentialScope());
 
         String secret = retrieveSecret(keyDb, authElements.getAccessKeyId());
+        request = authElements.isFromHeaders() ? request : new PresignUrlEscherRequestWrapper(request);
         String calculatedSignature = calculateSignature(helper, request, secret, authElements.getSignedHeaders(), requestDate);
 
         validator.validateSignature(calculatedSignature, authElements.getSignature());
@@ -124,6 +125,7 @@ public class Escher {
 
     private Config createConfig() {
         return Config.create()
+                .setVendorKey(vendorKey)
                 .setAlgoPrefix(algoPrefix)
                 .setHashAlgo(hashAlgo)
                 .setDateHeaderName(dateHeaderName)

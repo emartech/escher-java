@@ -15,6 +15,8 @@ class AuthElements {
     private String credentialScope;
     private List<String> signedHeaders = new ArrayList<>();
     private String signature;
+    private boolean fromHeaders;
+    private int expires;
 
 
     public static AuthElements parseHeader(String text, Config config) throws EscherException {
@@ -31,6 +33,8 @@ class AuthElements {
             elements.credentialScope = matcher.group("credentialScope");
             elements.signedHeaders.addAll(Arrays.asList(matcher.group("signedHeaders").split(";")));
             elements.signature = matcher.group("signature");
+            elements.fromHeaders = true;
+            elements.expires = 0;
 
             return elements;
         } else {
@@ -49,6 +53,8 @@ class AuthElements {
         parseAlgorithm(elements, getParam(config, parameters, "Algorithm"), config.getAlgoPrefix());
         parseCredentials(elements, getParam(config, parameters, "Credentials"));
         elements.signedHeaders.add("host");
+        elements.fromHeaders = false;
+        elements.expires = Integer.parseInt(getParam(config, parameters, "Expires"));
 
         return elements;
     }
@@ -120,5 +126,15 @@ class AuthElements {
 
     public String getSignature() {
         return signature;
+    }
+
+
+    public boolean isFromHeaders() {
+        return fromHeaders;
+    }
+
+
+    public int getExpires() {
+        return expires;
     }
 }

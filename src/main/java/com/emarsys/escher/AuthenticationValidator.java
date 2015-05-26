@@ -17,12 +17,12 @@ class AuthenticationValidator {
     }
 
 
-    public void validateMandatorySignedHeaders(List<String> signedHeaders) throws EscherException {
+    public void validateMandatorySignedHeaders(List<String> signedHeaders, boolean fromHeaders) throws EscherException {
         if (signedHeaders.stream().noneMatch(header -> header.equalsIgnoreCase("host"))) {
             throw new EscherException("Host header is not signed");
         }
 
-        if (signedHeaders.stream().noneMatch(header -> header.equalsIgnoreCase(config.getDateHeaderName()))) {
+        if (fromHeaders && signedHeaders.stream().noneMatch(header -> header.equalsIgnoreCase(config.getDateHeaderName()))) {
             throw new EscherException("Date header is not signed");
         }
     }
@@ -35,12 +35,12 @@ class AuthenticationValidator {
     }
 
 
-    public void validateDates(Date requestDate, Date credentialDate, Date currentTime) throws EscherException {
+    public void validateDates(Date requestDate, Date credentialDate, Date currentTime, int expires) throws EscherException {
         if (!DateTime.sameDay(requestDate, credentialDate)) {
             throw new EscherException("The request date and credential date do not match");
         }
 
-        if (requestDate.before(DateTime.subtractSeconds(currentTime, config.getClockSkew())) ||
+        if (requestDate.before(DateTime.subtractSeconds(currentTime, config.getClockSkew() + expires)) ||
                 requestDate.after(DateTime.addSeconds(currentTime, config.getClockSkew()))) {
             throw new EscherException("Request date is not within the accepted time interval");
         }

@@ -46,6 +46,7 @@ class Helper {
     private String canonicalizeQueryParameters(EscherRequest request) {
         return URLEncodedUtils.parse(request.getURI(), CHARSET)
                 .stream()
+                .filter(entry -> !entry.getName().equals("X-" + config.getVendorKey() + "-Signature"))
                 .map(this::queryParameterToString)
                 .sorted()
                 .reduce(byJoiningWith('&'))

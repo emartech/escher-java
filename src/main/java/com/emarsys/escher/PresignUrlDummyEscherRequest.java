@@ -28,7 +28,18 @@ class PresignUrlDummyEscherRequest implements EscherRequest {
 
     @Override
     public List<Header> getRequestHeaders() {
-        return Arrays.asList(new Header("host", uri.getHost()));
+        return Arrays.asList(new Header("host", calculateHost(uri)));
+    }
+
+
+    private String calculateHost(URI uri) {
+        String host = uri.getHost();
+        int port = uri.getPort();
+        int defaultPort = ("https".equals(uri.getScheme()) ? 443 : 80);
+        if (port != -1 && port != defaultPort) {
+            host += ":" + port;
+        }
+        return host;
     }
 
 

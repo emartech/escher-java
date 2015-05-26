@@ -20,6 +20,12 @@ import java.util.stream.Collectors;
 
 public class Client {
 
+    private static final String ESCHER_ACCESS_KEY_ID = "ACCESS_KEY_ID";
+    private static final String ESCHER_SECRET = "SECRET";
+
+    private Escher escher = new Escher("test/credential/scope");
+
+
     public String sendRequest(HttpRequestBase request) throws IOException, EscherException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpResponse response = client.execute(request);
@@ -37,9 +43,18 @@ public class Client {
 
     public HttpRequestBase signRequest(HttpRequestBase request) throws EscherException {
         EscherRequestClientImpl escherRequest = new EscherRequestClientImpl(request, "");
-        Escher escher = new Escher("test/credential/scope");
-        escher.signRequest(escherRequest, "ACCESS_KEY_ID", "SECRET", new ArrayList<>());
+        escher.signRequest(escherRequest, ESCHER_ACCESS_KEY_ID, ESCHER_SECRET, new ArrayList<>());
         return escherRequest.getHttpRequest();
+    }
+
+
+    public String presignUrl(String url, int expires) throws EscherException {
+        return escher.presignUrl(url, ESCHER_ACCESS_KEY_ID, ESCHER_SECRET, expires);
+    }
+
+
+    public Escher getEscher() {
+        return escher;
     }
 
 

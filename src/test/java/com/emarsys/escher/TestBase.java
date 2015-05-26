@@ -27,12 +27,12 @@ public class TestBase {
     }
 
 
-    protected Date createDate(int year, int month, int day) {
+    protected static Date createDate(int year, int month, int day) {
         return createDate(year, month, day, 0, 0, 0);
     }
 
 
-    protected Date createDate(int year, int month, int day, int hourOfDay, int minute, int second) {
+    protected static Date createDate(int year, int month, int day, int hourOfDay, int minute, int second) {
         Calendar calendar = Calendar.getInstance(DateTime.TIMEZONE);
         calendar.set(year, month, day, hourOfDay, minute, second);
         return calendar.getTime();

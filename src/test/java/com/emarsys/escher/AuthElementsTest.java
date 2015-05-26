@@ -30,6 +30,8 @@ public class AuthElementsTest {
         assertThat("credentialScope", elements.getCredentialScope(), is("us-east-1/iam/aws4_request"));
         assertThat("signedHeaders", Arrays.asList("content-type", "host", "x-ems-date"), is(elements.getSignedHeaders()));
         assertThat("signature", elements.getSignature(), is("f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"));
+        assertThat("fromHeaders", elements.isFromHeaders(), is(true));
+        assertThat("expires", elements.getExpires(), is(0));
     }
 
 
@@ -81,6 +83,8 @@ public class AuthElementsTest {
         assertThat("credentialScope", elements.getCredentialScope(), is("us-east-1/iam/aws4_request"));
         assertThat("signedHeaders", Arrays.asList("host"), is(elements.getSignedHeaders()));
         assertThat("signature", elements.getSignature(), is("191c13fb57e5ff0b8c0ad30fe94f4f0be40b3865916cf6ef084fffd67bae6239"));
+        assertThat("fromHeaders", elements.isFromHeaders(), is(false));
+        assertThat("expires", elements.getExpires(), is(10));
     }
 
 

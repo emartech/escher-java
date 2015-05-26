@@ -23,6 +23,8 @@ public class Server {
 
     private HttpServer server;
 
+    private Escher escher = new Escher("test/credential/scope");
+
 
     public void start() throws IOException {
         if (server != null) {
@@ -46,7 +48,6 @@ public class Server {
 
     private void authenticate(HttpExchange exchange) throws EscherException {
         EscherRequest request = new EscherRequestServerImpl(exchange);
-        Escher escher = new Escher("test/credential/scope");
 
         Map<String, String> keyDb = new HashMap<>();
         keyDb.put("ACCESS_KEY_ID", "SECRET");
@@ -71,6 +72,11 @@ public class Server {
 
     public int getPort() {
         return server.getAddress().getPort();
+    }
+
+
+    public Escher getEscher() {
+        return escher;
     }
 
 
