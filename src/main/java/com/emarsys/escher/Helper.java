@@ -3,6 +3,7 @@ package com.emarsys.escher;
 import com.emarsys.escher.util.DateTime;
 import com.emarsys.escher.util.Hmac;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 
 import javax.xml.bind.DatatypeConverter;
@@ -212,15 +213,12 @@ class Helper {
 
 
     public AuthElements parseAuthElements(EscherRequest request) throws EscherException {
-        try {
+        if (hasAuthHeader(request)) {
             return AuthElements.parseHeader(findHeader(request, config.getAuthHeaderName()).getFieldValue(), config);
-        } catch (NoSuchElementException e) {
-            try {
-                return AuthElements.parseQuery(request.getURI(), config);
-            } catch (NoSuchElementException ex) {
-                throw new EscherException("Request has not been signed.");
-            }
+        } else if (hasSignatureQueryParam(request.getURI())) {
+            return AuthElements.parseQuery(request.getURI(), config);
         }
+        throw new EscherException("Request has not been signed.");
     }
 
 
@@ -230,6 +228,25 @@ class Helper {
         } catch (NoSuchElementException e) {
             throw new EscherException("Missing header: " + config.getDateHeaderName());
         }
+    }
+
+
+    private boolean hasAuthHeader(EscherRequest request) {
+        try {
+            findHeader(request, config.getAuthHeaderName());
+            return true;
+        } catch (NoSuchElementException e) {
+            return false;
+        }
+    }
+
+
+    private boolean hasSignatureQueryParam(URI uri) {
+        String paramName = "X-" + config.getVendorKey() + "-Signature";
+        URIBuilder uriBuilder = new URIBuilder(uri);
+        return uriBuilder.getQueryParams()
+                .stream()
+                .anyMatch(nameValuePair -> nameValuePair.getName().equals(paramName));
     }
 
 

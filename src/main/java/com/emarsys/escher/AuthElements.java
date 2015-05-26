@@ -66,11 +66,7 @@ class AuthElements {
         String fullParamName = "X-" + config.getVendorKey() + "-" + paramName;
         String paramValue = parameters.get(fullParamName);
         if (paramValue == null) {
-            String message = "Missing authorization parameter: " + fullParamName;
-            if (paramName.equals("Signature")) {
-                throw new NoSuchElementException(message);
-            }
-            throw new EscherException(message);
+            throw new EscherException("Missing authorization parameter: " + fullParamName);
         }
         return paramValue;
     }

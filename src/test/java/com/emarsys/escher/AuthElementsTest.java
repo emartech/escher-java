@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -86,19 +85,6 @@ public class AuthElementsTest {
 
 
     @Test
-    public void testParseQueryMissingSignature() throws Exception {
-        Config config = Config.create()
-                .setVendorKey("TEST")
-                .setAlgoPrefix("EMS");
-
-        try {
-            AuthElements.parseQuery(new URI("http://example.com"), config);
-            fail("excpetion should have been thrown");
-        } catch (NoSuchElementException ignored) {}
-    }
-
-
-    @Test
     @UseDataProvider("getParseQueryMailFormatCases")
     public void testParseQueryMalFormat(String url, String problem) throws Exception {
         Config config = Config.create()
@@ -116,6 +102,7 @@ public class AuthElementsTest {
     public static Object[][] getParseQueryMailFormatCases() {
         return new Object[][] {
 //              { "http://example.com?X-TEST-Algorithm=EMS-HMAC-SHA256&X-TEST-Credentials=AKID-EXAMPLE%2F20110909%2Fus-east-1%2Fiam%2Faws4_request&X-TEST-Date=20111009T000000Z&X-TEST-Expires=10&X-TEST-SignedHeaders=host&X-TEST-Signature=191c13fb57e5ff0b8c0ad30fe94f4f0be40b3865916cf6ef084fffd67bae6239", "OK" },
+                { "http://example.com?X-TEST-Algorithm=EMS-HMAC-SHA256&X-TEST-Credentials=AKID-EXAMPLE%2F20110909%2Fus-east-1%2Fiam%2Faws4_request&X-TEST-Date=20111009T000000Z&X-TEST-Expires=10&X-TEST-SignedHeaders=host", "missing signature" },
                 { "http://example.com?X-OTHER-Algorithm=EMS-HMAC-SHA256&X-OTHER-Credentials=AKID-EXAMPLE%2F20110909%2Fus-east-1%2Fiam%2Faws4_request&X-OTHER-Date=20111009T000000Z&X-OTHER-Expires=10&X-OTHER-SignedHeaders=host&X-TEST-Signature=191c13fb57e5ff0b8c0ad30fe94f4f0be40b3865916cf6ef084fffd67bae6239", "wrong vendor key" },
                 { "http://example.com?X-TEST-Algorithm=XXX-HMAC-SHA256&X-TEST-Credentials=AKID-EXAMPLE%2F20110909%2Fus-east-1%2Fiam%2Faws4_request&X-TEST-Date=20111009T000000Z&X-TEST-Expires=10&X-TEST-SignedHeaders=host&X-TEST-Signature=191c13fb57e5ff0b8c0ad30fe94f4f0be40b3865916cf6ef084fffd67bae6239", "wrong algo prefix" },
                 { "http://example.com?X-TEST-Algorithm=EMS-HMAC-SHA256&X-TEST-Credentials=AKID-EXAMPLE-20110909-us-east-1-iam-aws4_request&X-TEST-Date=20111009T000000Z&X-TEST-Expires=10&X-TEST-SignedHeaders=host&X-TEST-Signature=191c13fb57e5ff0b8c0ad30fe94f4f0be40b3865916cf6ef084fffd67bae6239", "malformed credentials" }
