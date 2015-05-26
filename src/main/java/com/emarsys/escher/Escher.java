@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 public class Escher {
 
     public static final String UNSIGNED_PAYLOAD = "UNSIGNED-PAYLOAD";
+    public static final int DEFAULT_EXPIRES = 86400;
 
     private String credentialScope;
     private String algoPrefix = "ESR";
@@ -45,6 +46,11 @@ public class Escher {
         helper.addAuthHeader(request, authHeader);
 
         return request;
+    }
+
+
+    public String presignUrl(String url, String accessKeyId, String secret) throws EscherException{
+        return presignUrl(url, accessKeyId, secret, DEFAULT_EXPIRES);
     }
 
 
