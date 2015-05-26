@@ -353,7 +353,7 @@ public class EscherTest extends TestBase {
 
             fail("exception should have been thrown");
         } catch (EscherException e) {
-            assertThat(e.getMessage(), is(expectedErrorMessage));
+            assertThat(e.getMessage(), startsWith(expectedErrorMessage));
         }
     }
 

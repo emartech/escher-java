@@ -51,7 +51,7 @@ class AuthenticationValidator {
         boolean defaultPortInUse = address.getPort() == 80 || address.getPort() == 443;
         String expectedHost = address.getHostName() + (defaultPortInUse ? "" : ":" + address.getPort());
         if (!expectedHost.equals(hostHeader)) {
-            throw new EscherException("The host header does not match");
+            throw new EscherException("The host header does not match (provided: " + hostHeader + ", expected: " + expectedHost + ")");
         }
     }
 
