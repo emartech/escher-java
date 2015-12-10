@@ -7,7 +7,7 @@ class Config {
     private String hashAlgo = "SHA256";
     private String authHeaderName = "X-Escher-Auth";
     private String dateHeaderName = "X-Escher-Date";
-    private int clockSkew = 900;
+    private int clockSkew = 300;
 
 
     private Config() {}
