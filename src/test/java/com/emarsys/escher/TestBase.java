@@ -1,15 +1,13 @@
 package com.emarsys.escher;
 
 
-import com.emarsys.escher.util.DateTime;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 public class TestBase {
 
@@ -20,22 +18,17 @@ public class TestBase {
     }
 
 
-    protected Date getConfigDate(TestParam param) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        dateFormat.setTimeZone(DateTime.TIMEZONE);
-        return dateFormat.parse(param.getConfig().getDate());
+    protected Instant getConfigDate(TestParam param) {
+        return Instant.parse(param.getConfig().getDate());
+    }
+
+    protected static Instant createInstant(int year, int month, int day) {
+        return createInstant(year, month, day, 0, 0, 0);
     }
 
 
-    protected static Date createDate(int year, int month, int day) {
-        return createDate(year, month, day, 0, 0, 0);
-    }
-
-
-    protected static Date createDate(int year, int month, int day, int hourOfDay, int minute, int second) {
-        Calendar calendar = Calendar.getInstance(DateTime.TIMEZONE);
-        calendar.set(year, month, day, hourOfDay, minute, second);
-        return calendar.getTime();
+    protected static Instant createInstant(int year, int month, int day, int hourOfDay, int minute, int second) {
+        return LocalDateTime.of(year, month, day, hourOfDay, minute, second).toInstant(ZoneOffset.UTC);
     }
 
 

@@ -6,9 +6,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -106,7 +106,7 @@ public class HelperTestWithTestData extends TestBase {
 
     @Test
     public void testCalculateAuthHeader() throws Exception {
-        Date date = getConfigDate(param);
+        Instant date = getConfigDate(param);
         byte[] signingKey = helper.calculateSigningKey(
                 param.getConfig().getApiSecret(),
                 date, param.getConfig().getCredentialScope()

@@ -8,8 +8,8 @@ import javax.xml.bind.DatatypeConverter;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -23,7 +23,7 @@ public class Escher {
     private String algoPrefix = "ESR";
     private String vendorKey = "Escher";
     private String hashAlgo = "SHA256";
-    private Date currentTime = new Date();
+    private Instant currentTime = Instant.now();
     private String authHeaderName = "X-Escher-Auth";
     private String dateHeaderName = "X-Escher-Date";
     private int clockSkew = 900;
@@ -83,7 +83,7 @@ public class Escher {
         Helper helper = new Helper(config);
 
         AuthElements authElements = helper.parseAuthElements(request);
-        Date requestDate = helper.parseDate(request);
+        Instant requestDate = helper.parseDate(request);
         String hostHeader = helper.parseHostHeader(request);
 
         AuthenticationValidator validator = new AuthenticationValidator(config);
@@ -114,7 +114,7 @@ public class Escher {
     }
 
 
-    private String calculateSignature(Helper helper, EscherRequest request, String secret, List<String> signedHeaders, Date date) throws EscherException {
+    private String calculateSignature(Helper helper, EscherRequest request, String secret, List<String> signedHeaders, Instant date) throws EscherException {
         String canonicalizedRequest = helper.canonicalize(request, signedHeaders);
         String stringToSign = helper.calculateStringToSign(date, credentialScope, canonicalizedRequest);
         byte[] signingKey = helper.calculateSigningKey(secret, date, credentialScope);
@@ -158,7 +158,7 @@ public class Escher {
     }
 
 
-    public Escher setCurrentTime(Date currentTime) {
+    public Escher setCurrentTime(Instant currentTime) {
         this.currentTime = currentTime;
         return this;
     }

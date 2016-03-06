@@ -1,7 +1,6 @@
 package com.emarsys.escher;
 
 
-import com.emarsys.escher.util.DateTime;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -10,6 +9,8 @@ import org.junit.runner.RunWith;
 
 import javax.xml.bind.DatatypeConverter;
 import java.net.URI;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public class HelperTest extends TestBase {
 
         byte[] signingKey = helper.calculateSigningKey(
                 "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY",
-                createDate(2011, Calendar.SEPTEMBER, 9), "us-east-1/iam/aws4_request"
+                createInstant(2011, 9, 9), "us-east-1/iam/aws4_request"
         );
 
         assertThat(
@@ -42,7 +43,7 @@ public class HelperTest extends TestBase {
 
     @Test
     public void testSigningParams() throws Exception {
-        Date date = createDate(2011, Calendar.MAY, 11, 12, 0, 0);
+        Instant date = createInstant(2011, 5, 11, 12, 0, 0);
         Config config = Config.create()
                 .setAlgoPrefix("EMS")
                 .setHashAlgo("SHA256");
@@ -101,7 +102,7 @@ public class HelperTest extends TestBase {
 
         Helper helper = new Helper(config);
 
-        helper.addMandatoryHeaders(request, createDate(2011, Calendar.MAY, 11, 12, 0, 0));
+        helper.addMandatoryHeaders(request, createInstant(2011, 5, 11, 12, 0, 0));
 
         Collections.sort(headers, (h1, h2) -> h1.getFieldName().compareTo(h2.getFieldName()));
         assertThat(headers.size(), is(2));
@@ -133,7 +134,7 @@ public class HelperTest extends TestBase {
 
         Helper helper = new Helper(config);
 
-        helper.addMandatoryHeaders(request, new Date());
+        helper.addMandatoryHeaders(request, Instant.now());
 
         EscherRequest.Header hostHeader = headers
                 .stream()
@@ -235,9 +236,9 @@ public class HelperTest extends TestBase {
         request.addHeader(config.getAuthHeaderName(), "whatever");
 
         Helper helper = new Helper(config);
-        Date date = helper.parseDate(request);
+        Instant date = helper.parseDate(request);
 
-        assertThat(DateTime.toCalendar(date).get(Calendar.YEAR), is(2011));
+        assertThat(date.atOffset(ZoneOffset.UTC).getYear(), is(2011));
     }
 
 
@@ -266,9 +267,9 @@ public class HelperTest extends TestBase {
         EscherRequest request = new EscherRequestImpl("GET", new URI(url), new ArrayList<>(), "");
 
         Helper helper = new Helper(config);
-        Date date = helper.parseDate(request);
+        Instant date = helper.parseDate(request);
 
-        assertThat(DateTime.toCalendar(date).get(Calendar.YEAR), is(2011));
+        assertThat(date.atOffset(ZoneOffset.UTC).getYear(), is(2011));
     }
 
 

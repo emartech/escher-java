@@ -11,9 +11,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
+
 
 class Helper {
 
@@ -102,7 +104,7 @@ class Helper {
     }
 
 
-    public String calculateStringToSign(Date date, String credentialScope, String canonicalizedRequest) throws EscherException {
+    public String calculateStringToSign(Instant date, String credentialScope, String canonicalizedRequest) throws EscherException {
         return config.getFullAlgorithm() + NEW_LINE
                 + DateTime.toLongString(date) + NEW_LINE
                 + DateTime.toShortString(date) + "/" + credentialScope + NEW_LINE
@@ -110,7 +112,7 @@ class Helper {
     }
 
 
-    public byte[] calculateSigningKey(String secret, Date date, String credentialScope) throws EscherException {
+    public byte[] calculateSigningKey(String secret, Instant date, String credentialScope) throws EscherException {
         byte[] key = Hmac.sign(config.getHashAlgo(), (config.getAlgoPrefix() + secret), DateTime.toShortString(date));
 
         for (String credentialPart : credentialScope.split("/")) {
@@ -121,7 +123,7 @@ class Helper {
     }
 
 
-    public String calculateAuthHeader(String accessKeyId, Date date, String credentialScope, List<String> signedHeaders, String signature) {
+    public String calculateAuthHeader(String accessKeyId, Instant date, String credentialScope, List<String> signedHeaders, String signature) {
         return config.getFullAlgorithm() +
                 " Credential=" + credentials(accessKeyId, date, credentialScope) +
                 ", SignedHeaders=" + signedHeaders.stream().reduce((s1, s2) -> s1 + ";" + s2).get().toLowerCase() +
@@ -134,12 +136,12 @@ class Helper {
     }
 
 
-    private String credentials(String accessKeyId, Date date, String credentialScope) {
+    private String credentials(String accessKeyId, Instant date, String credentialScope) {
         return accessKeyId + "/" + DateTime.toShortString(date) + "/" + credentialScope;
     }
 
 
-    public Map<String, String> calculateSigningParams(String accessKeyId, Date date, String credentialScope, int expires) {
+    public Map<String, String> calculateSigningParams(String accessKeyId, Instant date, String credentialScope, int expires) {
         Map<String, String> params = new TreeMap<>();
         params.put("SignedHeaders", "host");
         params.put("Expires", Integer.toString(expires));
@@ -150,7 +152,7 @@ class Helper {
     }
 
 
-    public void addMandatoryHeaders(EscherRequest request, Date date) {
+    public void addMandatoryHeaders(EscherRequest request, Instant date) {
         boolean requestHasDateHeader = request.getRequestHeaders()
                 .stream()
                 .anyMatch(header -> header.getFieldName().equals(config.getDateHeaderName()));
@@ -229,7 +231,7 @@ class Helper {
     }
 
 
-    public Date parseDate(EscherRequest request) throws EscherException {
+    public Instant parseDate(EscherRequest request) throws EscherException {
         String date;
         if (hasAuthHeader(request)) {
             try {

@@ -3,8 +3,8 @@ package com.emarsys.escher;
 import com.emarsys.escher.util.DateTime;
 
 import java.net.InetSocketAddress;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 class AuthenticationValidator {
@@ -35,13 +35,13 @@ class AuthenticationValidator {
     }
 
 
-    public void validateDates(Date requestDate, Date credentialDate, Date currentTime, int expires) throws EscherException {
+    public void validateDates(Instant requestDate, Instant credentialDate, Instant currentTime, int expires) throws EscherException {
         if (!DateTime.sameDay(requestDate, credentialDate)) {
             throw new EscherException("The request date and credential date do not match");
         }
 
-        if (requestDate.before(DateTime.subtractSeconds(currentTime, config.getClockSkew() + expires)) ||
-                requestDate.after(DateTime.addSeconds(currentTime, config.getClockSkew()))) {
+        if (requestDate.isBefore(currentTime.minusSeconds(config.getClockSkew() + expires)) ||
+                requestDate.isAfter(currentTime.plusSeconds(config.getClockSkew()))) {
             throw new EscherException("Request date is not within the accepted time interval");
         }
     }

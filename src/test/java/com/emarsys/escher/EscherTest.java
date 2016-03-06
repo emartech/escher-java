@@ -27,7 +27,7 @@ public class EscherTest extends TestBase {
     @Before
     public void setUp() throws Exception {
         escher = new Escher("us-east-1/iam/aws4_request");
-        escher.setCurrentTime(createDate(2011, Calendar.SEPTEMBER, 9, 23, 40, 0))
+        escher.setCurrentTime(createInstant(2011, 9, 9, 23, 40, 0))
                 .setAlgoPrefix("EMS");
     }
 
@@ -121,7 +121,7 @@ public class EscherTest extends TestBase {
                 .setVendorKey("EMS")
                 .setAuthHeaderName("X-Ems-Auth")
                 .setDateHeaderName("X-Ems-Date")
-                .setCurrentTime(createDate(2011, Calendar.MAY, 11, 12, 0, 0));
+                .setCurrentTime(createInstant(2011, 5, 11, 12, 0, 0));
 
         int expires = 123456;
         String signedUrl = escher.presignUrl("http://example.com/something?foo=bar&baz=barbaz", "th3K3y", "very_secure", expires);
@@ -263,7 +263,7 @@ public class EscherTest extends TestBase {
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
         escher.setClockSkew(clockSkew);
-        escher.setCurrentTime(createDate(2011, Calendar.SEPTEMBER, 9, 23, minute, 0));
+        escher.setCurrentTime(createInstant(2011, 9, 9, 23, minute, 0));
 
         assertAuthenticationError("Request date is not within the accepted time interval", request);
     }
