@@ -26,7 +26,7 @@ public class Client {
     private Escher escher = new Escher("test/credential/scope");
 
 
-    public String sendRequest(HttpRequestBase request) throws IOException, EscherException {
+    public String sendRequest(HttpRequestBase request) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpResponse response = client.execute(request);
         return fetchResponse(response);
@@ -34,10 +34,9 @@ public class Client {
 
 
     private String fetchResponse(HttpResponse response) throws IOException {
-        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        return rd.lines()
-                .reduce((line1, line2) -> line1 + "\n" + line2)
-                .orElse("");
+        try (BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
+            return rd.lines().collect(Collectors.joining("\n"));
+        }
     }
 
 
@@ -63,7 +62,7 @@ public class Client {
     }
 
 
-    private class EscherRequestClientImpl implements EscherRequest {
+    private static class EscherRequestClientImpl implements EscherRequest {
 
         private HttpRequestBase httpRequest;
         private String body;
