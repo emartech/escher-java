@@ -9,8 +9,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.Instant;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
@@ -39,7 +38,7 @@ public class AcceptanceTests extends TestBase {
     @Before
     public void setUp() throws Exception {
         client = new Client();
-        server.getEscher().setCurrentTime(new Date());
+        server.getEscher().setCurrentTime(Instant.now());
     }
 
 
@@ -71,8 +70,8 @@ public class AcceptanceTests extends TestBase {
 
     @Test
     public void testPresignUrlSuccess() throws Exception {
-        setClientTime(createDate(2015, Calendar.MAY, 26, 14,  0, 0));
-        setServerTime(createDate(2015, Calendar.MAY, 26, 14, 20, 0));
+        setClientTime(createInstant(2015, 5, 26, 14,  0, 0));
+        setServerTime(createInstant(2015, 5, 26, 14, 20, 0));
         String url = client.presignUrl("http://localhost:" + server.getPort() + "/", 1200);
 
         HttpRequestBase get = new HttpGet(url);
@@ -85,8 +84,8 @@ public class AcceptanceTests extends TestBase {
 
     @Test
     public void testPresignUrlOutdated() throws Exception {
-        setClientTime(createDate(2015, Calendar.JANUARY, 26, 14, 0, 0));
-        setServerTime(createDate(2015, Calendar.MAY, 26, 14, 0, 0));
+        setClientTime(createInstant(2015, 1, 26, 14, 0, 0));
+        setServerTime(createInstant(2015, 5, 26, 14, 0, 0));
         String url = client.presignUrl("http://localhost:" + server.getPort() + "/", 0);
 
         HttpRequestBase get = new HttpGet(url);
@@ -97,12 +96,12 @@ public class AcceptanceTests extends TestBase {
     }
 
 
-    private void setClientTime(Date date) {
+    private void setClientTime(Instant date) {
         client.getEscher().setCurrentTime(date);
     }
 
 
-    private void setServerTime(Date date) {
+    private void setServerTime(Instant date) {
         server.getEscher().setCurrentTime(date);
     }
 

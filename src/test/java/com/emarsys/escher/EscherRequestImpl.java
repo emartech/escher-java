@@ -44,6 +44,7 @@ public class EscherRequestImpl implements EscherRequest {
     }
 
 
+    @Override
     public String getBody() {
         return body;
     }

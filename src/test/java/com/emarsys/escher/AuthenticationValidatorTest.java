@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Date;
+import java.time.Instant;
 
 import static org.junit.Assert.fail;
 
@@ -16,19 +16,19 @@ import static org.junit.Assert.fail;
 public class AuthenticationValidatorTest extends TestBase {
 
     private Config config;
-    private Date currentTime;
+    private Instant currentTime;
 
 
     @Before
     public void setUp() throws Exception {
         config = Config.create().setClockSkew(10);
-        currentTime = createDate(2011, 9, 9, 12, 0, 25);
+        currentTime = createInstant(2011, 9, 9, 12, 0, 25);
     }
 
 
     @Test
     @UseDataProvider("getDatesInValidTimeRange")
-    public void testValidateDates(Date date) throws Exception {
+    public void testValidateDates(Instant date) throws Exception {
         AuthenticationValidator validator = new AuthenticationValidator(config);
         validator.validateDates(date, date, currentTime, 0);
     }
@@ -37,16 +37,16 @@ public class AuthenticationValidatorTest extends TestBase {
     @DataProvider
     public static Object[][] getDatesInValidTimeRange() {
         return new Object[][] {
-                { createDate(2011, 9, 9, 12, 0, 25) },     // same as current time
-                { createDate(2011, 9, 9, 12, 0, 34) },     // just below the upper border
-                { createDate(2011, 9, 9, 12, 0, 16) },     // just above the lower border
+                { createInstant(2011, 9, 9, 12, 0, 25) },     // same as current time
+                { createInstant(2011, 9, 9, 12, 0, 34) },     // just below the upper border
+                { createInstant(2011, 9, 9, 12, 0, 16) },     // just above the lower border
         };
     }
 
 
     @Test
     @UseDataProvider("getDatesOutOfValidTimeRange")
-    public void testValidateDatesOutSiteValidRange(Date date) throws Exception {
+    public void testValidateDatesOutSiteValidRange(Instant date) throws Exception {
         AuthenticationValidator validator = new AuthenticationValidator(config);
         try {
             validator.validateDates(date, date, currentTime, 0);
@@ -58,17 +58,17 @@ public class AuthenticationValidatorTest extends TestBase {
     @DataProvider
     public static Object[][] getDatesOutOfValidTimeRange() {
         return new Object[][] {
-                { createDate(2011, 9,  9, 12, 0, 36) },     // just above the upper border
-                { createDate(2011, 9,  9, 12, 0, 14) },     // just below the lower border
-                { createDate(2011, 9, 10, 12, 0, 25) },     // good time, but other day
+                { createInstant(2011, 9,  9, 12, 0, 36) },     // just above the upper border
+                { createInstant(2011, 9,  9, 12, 0, 14) },     // just below the lower border
+                { createInstant(2011, 9, 10, 12, 0, 25) },     // good time, but other day
         };
     }
 
 
     @Test
     public void testValidateWhenRequestAndCredentialDatesDoNotMatch() throws Exception {
-        Date requestDate = createDate(2011, 9, 9, 12, 0, 25);
-        Date credentialDate = createDate(2011, 9, 10);
+        Instant requestDate = createInstant(2011, 9, 9, 12, 0, 25);
+        Instant credentialDate = createInstant(2011, 9, 10);
 
         AuthenticationValidator validator = new AuthenticationValidator(config);
         try {
@@ -80,8 +80,8 @@ public class AuthenticationValidatorTest extends TestBase {
 
     @Test
     public void testValidateDatesWithExpirationGiven() throws Exception {
-        Date requestDate = createDate(2011, 9, 9, 12, 0, 6);
-        Date credentialDate = createDate(2011, 9, 9);
+        Instant requestDate = createInstant(2011, 9, 9, 12, 0, 6);
+        Instant credentialDate = createInstant(2011, 9, 9);
 
         AuthenticationValidator validator = new AuthenticationValidator(config);
         validator.validateDates(requestDate, credentialDate, currentTime, 10);
@@ -90,8 +90,8 @@ public class AuthenticationValidatorTest extends TestBase {
 
     @Test
     public void testValidateDatesWithExpirationPassed() throws Exception {
-        Date requestDate = createDate(2011, 9, 9, 12, 0, 46);
-        Date credentialDate = createDate(2012, 9, 9);
+        Instant requestDate = createInstant(2011, 9, 9, 12, 0, 46);
+        Instant credentialDate = createInstant(2012, 9, 9);
 
         AuthenticationValidator validator = new AuthenticationValidator(config);
         try {

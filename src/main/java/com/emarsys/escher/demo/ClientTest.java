@@ -63,15 +63,10 @@ public class ClientTest {
 
 
     private static String fetchResponse(HttpResponse response) throws IOException {
-        BufferedReader rd = new BufferedReader(
-                new InputStreamReader(response.getEntity().getContent()));
-
-        String result = "";
-        String line;
-        while ((line = rd.readLine()) != null) {
-            result += line + "\n";
+        try (BufferedReader rd = new BufferedReader(
+                new InputStreamReader(response.getEntity().getContent()))) {
+            return rd.lines().collect(Collectors.joining("\n"));
         }
-        return result;
     }
 }
 

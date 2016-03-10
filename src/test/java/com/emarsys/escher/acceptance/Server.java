@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Server {
 
@@ -59,9 +60,9 @@ public class Server {
     private void print(HttpExchange exchange, String message) throws IOException {
         exchange.sendResponseHeaders(200, message.length());
 
-        OutputStream os = exchange.getResponseBody();
-        os.write(message.getBytes());
-        os.close();
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(message.getBytes());
+        }
     }
 
 
@@ -80,7 +81,7 @@ public class Server {
     }
 
 
-    private class EscherRequestServerImpl implements EscherRequest {
+    private static class EscherRequestServerImpl implements EscherRequest {
 
         private HttpExchange exchange;
 
@@ -128,14 +129,8 @@ public class Server {
 
         @Override
         public String getBody() {
-            try {
-                String body = "";
-                BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
-                for(String line = br.readLine(); line != null; line = br.readLine()) {
-                    body += line + "\n";
-                }
-                br.close();
-                return body;
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody()))) {
+                return br.lines().collect(Collectors.joining("\n"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

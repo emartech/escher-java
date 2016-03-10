@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ServerTest {
 
@@ -40,9 +41,10 @@ public class ServerTest {
 
             exchange.sendResponseHeaders(200, response.length());
 
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response.getBytes());
+            }
+
         });
         server.setExecutor(null);
         server.start();
@@ -114,14 +116,8 @@ class MyServerEscherRequest implements EscherRequest {
 
     @Override
     public String getBody() {
-        try {
-            String body = "";
-            BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
-            for(String line = br.readLine(); line != null; line = br.readLine()) {
-                body += line + "\n";
-            }
-            br.close();
-            return body;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody()))) {
+            return br.lines().collect(Collectors.joining("\n"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
