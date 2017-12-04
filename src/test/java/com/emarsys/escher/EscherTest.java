@@ -130,7 +130,6 @@ public class EscherTest extends TestBase {
         assertThat(signedUrl, is(expectedSignedUrl));
     }
 
-
     @Test
     public void testAuthenticateSuccess() throws Exception {
         List<EscherRequest.Header> headers = Arrays.asList(
@@ -152,6 +151,30 @@ public class EscherTest extends TestBase {
         String accessKey = escher.authenticate(request, keyDb, new InetSocketAddress("iam.amazonaws.com", 80));
 
         assertThat(accessKey, is("AKIDEXAMPLE"));
+    }
+
+
+    @Test
+    public void testAuthenticatePresignedUrl() throws Exception {
+        Escher escher = new Escher("us-east-1/host/aws4_request")
+                .setAlgoPrefix("EMS")
+                .setVendorKey("EMS")
+                .setAuthHeaderName("X-Ems-Auth")
+                .setDateHeaderName("X-Ems-Date")
+                .setCurrentTime(createInstant(2011, 5, 11, 12, 0, 0));
+
+        String key = "accesskey";
+        String secret = "very_secure";
+        String signedUrl = escher.presignUrl("https://example.com/something?foo=bar&baz=barbaz", key, secret, 123456);
+
+        List<EscherRequest.Header> headers = Collections.singletonList(new EscherRequest.Header("Host", "example.com"));
+        EscherRequest request = new EscherRequestImpl("GET", new URI(signedUrl), headers, "");
+
+        Map<String, String> keyDb = new HashMap<>();
+        keyDb.put(key, secret);
+        String accessKey = escher.authenticate(request, keyDb, new InetSocketAddress("example.com", 443));
+
+        assertThat(accessKey, is(key));
     }
 
 
