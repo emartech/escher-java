@@ -6,7 +6,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -15,6 +14,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
+
+import static org.apache.commons.codec.binary.Hex.encodeHexString;
 
 
 class Helper {
@@ -132,7 +133,7 @@ class Helper {
 
 
     public String calculateSignature(byte[] signingKey, String stringToSign) throws EscherException {
-        return DatatypeConverter.printHexBinary(Hmac.sign(config.getHashAlgo(), signingKey, stringToSign)).toLowerCase();
+        return encodeHexString(Hmac.sign(config.getHashAlgo(), signingKey, stringToSign), true);
     }
 
 

@@ -7,13 +7,13 @@ import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.xml.bind.DatatypeConverter;
 import java.net.URI;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.codec.binary.Hex.encodeHexString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -35,7 +35,7 @@ public class HelperTest extends TestBase {
         );
 
         assertThat(
-                DatatypeConverter.printHexBinary(signingKey).toLowerCase(),
+                encodeHexString(signingKey, true),
                 is("98f1d889fec4f4421adc522bab0ce1f82e6929c262ed15e5a94c90efd1e3b0e7")
         );
     }
