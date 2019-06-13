@@ -14,7 +14,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -84,6 +84,26 @@ public class HelperTest extends TestBase {
         String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
 
         assertThat(canonicalized, is(param.getExpected().getCanonicalizedRequest()));
+    }
+
+
+    @Test
+    public void testCanonicalizeWithUrlParamNameContainingCharactersThatShouldBeUrlEncoded() throws Exception {
+        TestParam param = parseTestData("get-vanilla");
+        TestParam.Request paramRequest = param.getRequest();
+        paramRequest.setUrl(paramRequest.getUrl() + "?array[]=value1&array[]=value2");
+
+        URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
+
+        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, new ArrayList<>(), paramRequest.getBody());
+
+        Helper helper = new Helper(createConfig(param));
+
+        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
+
+        System.out.println(canonicalized);
+        assertThat(canonicalized, containsString("array%5B%5D=value1"));
+        assertThat(canonicalized, containsString("array%5B%5D=value2"));
     }
 
 

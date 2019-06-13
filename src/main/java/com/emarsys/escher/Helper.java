@@ -64,7 +64,7 @@ class Helper {
 
     private String queryParameterToString(NameValuePair entry) {
         try {
-            return entry.getName() + "=" + URLEncoder.encode(entry.getValue(), CHARSET);
+            return URLEncoder.encode(entry.getName(), CHARSET) + "=" + URLEncoder.encode(entry.getValue(), CHARSET);
         } catch (UnsupportedEncodingException shouldNeverHappen) {
             throw new RuntimeException(shouldNeverHappen);
         }
