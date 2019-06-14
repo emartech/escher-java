@@ -101,7 +101,6 @@ public class HelperTest extends TestBase {
 
         String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
 
-        System.out.println(canonicalized);
         assertThat(canonicalized, containsString("array%5B%5D=value1"));
         assertThat(canonicalized, containsString("array%5B%5D=value2"));
     }
