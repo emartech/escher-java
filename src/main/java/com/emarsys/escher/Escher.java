@@ -4,7 +4,6 @@ package com.emarsys.escher;
 import com.emarsys.escher.util.DateTime;
 import org.apache.http.client.utils.URIBuilder;
 
-import javax.xml.bind.DatatypeConverter;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+
+import static org.apache.commons.codec.binary.Hex.encodeHexString;
 
 public class Escher {
 
@@ -122,7 +123,7 @@ public class Escher {
 
         Logger.log("Canonicalized request: " + canonicalizedRequest);
         Logger.log("String to sign: " + stringToSign);
-        Logger.log("Signing key: " + DatatypeConverter.printHexBinary(signingKey));
+        Logger.log("Signing key: " + encodeHexString(signingKey, true));
         Logger.log("Signature: " + signature);
 
         return signature;
