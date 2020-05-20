@@ -1,13 +1,13 @@
 package com.emarsys.escher;
 
 
-import org.codehaus.jackson.map.ObjectMapper;
-
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestBase {
 
