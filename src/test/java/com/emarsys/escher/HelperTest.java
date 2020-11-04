@@ -107,6 +107,24 @@ public class HelperTest extends TestBase {
 
 
     @Test
+    public void testCanonicalizeWithUrlParamNameContainingSpace() throws Exception {
+        TestParam param = parseTestData("get-vanilla");
+        TestParam.Request paramRequest = param.getRequest();
+        paramRequest.setUrl(paramRequest.getUrl() + "?name=John%20Wick");
+
+        URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
+
+        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, new ArrayList<>(), paramRequest.getBody());
+
+        Helper helper = new Helper(createConfig(param));
+
+        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
+
+        assertThat(canonicalized, containsString("name=John%20Wick"));
+    }
+
+
+    @Test
     @UseDataProvider("getAddMandatoryHeadersCases")
     public void testAddMandatoryHeaders(List<String> missingHeaders, String expectedHost, String expectedDate) throws Exception {
         Config config = Config.create();

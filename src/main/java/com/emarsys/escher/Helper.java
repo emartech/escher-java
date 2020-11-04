@@ -64,7 +64,10 @@ class Helper {
 
     private String queryParameterToString(NameValuePair entry) {
         try {
-            return URLEncoder.encode(entry.getName(), CHARSET) + "=" + URLEncoder.encode(entry.getValue(), CHARSET);
+            String formUrlEncodedParameter = URLEncoder.encode(entry.getName(), CHARSET) + "=" + URLEncoder.encode(entry.getValue(), CHARSET);
+            // We need this to be uri encoded (' ' => '%20') not x-www-form-urlencoded (' ' => '+') which is used by URLEncoder.
+            // This will result an encoding method similar to other escher libs.
+            return formUrlEncodedParameter.replace("+", "%20");
         } catch (UnsupportedEncodingException shouldNeverHappen) {
             throw new RuntimeException(shouldNeverHappen);
         }
