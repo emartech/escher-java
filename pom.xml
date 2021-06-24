@@ -6,7 +6,7 @@
 
     <groupId>com.emarsys</groupId>
     <artifactId>escher</artifactId>
-    <version>0.3.4</version>
+    <version>0.3.5</version>
     <packaging>jar</packaging>
 
     <name>Escher</name>
@@ -72,7 +72,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.12</version>
+            <version>4.5.13</version>
         </dependency>
 
         <dependency>
@@ -98,7 +98,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
 
