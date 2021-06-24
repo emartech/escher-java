@@ -59,8 +59,7 @@ public class Escher {
             Config config = createConfig();
             Helper helper = new Helper(config);
 
-            URI uri = new URI(url);
-            URIBuilder uriBuilder = new URIBuilder(uri);
+            URIBuilder uriBuilder = new URIBuilder(new URI(url));
 
             Map<String, String> params = helper.calculateSigningParams(accessKeyId, currentTime, credentialScope, expires);
             params.forEach((key, value) -> uriBuilder.addParameter("X-" + vendorKey + "-" + key, value));

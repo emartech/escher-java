@@ -270,11 +270,10 @@ class Helper {
 
 
     private boolean hasSignatureQueryParam(URI uri) {
-        String paramName = "X-" + config.getVendorKey() + "-Signature";
         URIBuilder uriBuilder = new URIBuilder(uri);
         return uriBuilder.getQueryParams()
                 .stream()
-                .anyMatch(nameValuePair -> nameValuePair.getName().equals(paramName));
+                .anyMatch(nameValuePair -> nameValuePair.getName().equals("X-" + config.getVendorKey() + "-Signature"));
     }
 
 
