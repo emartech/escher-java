@@ -13,7 +13,7 @@ To check if maven is configured properly, run the `mvn --version` command and lo
 Run the tests
 -------------
 
-To run all the tests, use the `mvn test` command.
+To run all the tests, use the `mvn test` command or `make test` if you have Docker installed.
 
 About Escher
 ------------
