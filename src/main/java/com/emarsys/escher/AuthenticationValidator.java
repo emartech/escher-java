@@ -2,7 +2,6 @@ package com.emarsys.escher;
 
 import com.emarsys.escher.util.DateTime;
 
-import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -43,15 +42,6 @@ class AuthenticationValidator {
         if (requestDate.isBefore(currentTime.minusSeconds(config.getClockSkew() + expires)) ||
                 requestDate.isAfter(currentTime.plusSeconds(config.getClockSkew()))) {
             throw new EscherException("Request date is not within the accepted time interval");
-        }
-    }
-
-
-    public void validateHost(InetSocketAddress address, String hostHeader) throws EscherException {
-        boolean defaultPortInUse = address.getPort() == 80 || address.getPort() == 443;
-        String expectedHost = address.getHostName() + (defaultPortInUse ? "" : ":" + address.getPort());
-        if (!expectedHost.equals(hostHeader)) {
-            throw new EscherException("The host header does not match (provided: " + hostHeader + ", expected: " + expectedHost + ")");
         }
     }
 

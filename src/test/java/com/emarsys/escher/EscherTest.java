@@ -10,12 +10,18 @@ import org.junit.runner.RunWith;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(DataProviderRunner.class)
 public class EscherTest extends TestBase {
@@ -300,20 +306,6 @@ public class EscherTest extends TestBase {
                 {  60, 38 },     // clockSkew:  1 min; request is  2 min old
                 {  60, 34 },     // clockSkew:  1 min; request is  2 min from the future
         };
-    }
-
-
-    @Test
-    public void testAuthenticateInvalidHost() throws Exception {
-        List<EscherRequest.Header> headers = Arrays.asList(
-                new EscherRequest.Header("X-Escher-Date", "20110909T233600Z"),
-                new EscherRequest.Header("X-Escher-Auth", "EMS-HMAC-SHA256 Credential=AKIDEXAMPLE/20110909/us-east-1/iam/aws4_request, SignedHeaders=content-type;host;x-escher-date, Signature=f36c21c6e16a71a6e8dc56673ad6354aeef49c577a22fd58a190b5fcf8891dbd"),
-                new EscherRequest.Header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
-                new EscherRequest.Header("Host", "iam.not.amazonaws.com")
-        );
-        EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
-
-        assertAuthenticationError("The host header does not match", request);
     }
 
 

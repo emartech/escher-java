@@ -90,7 +90,6 @@ public class Escher {
         validator.validateMandatorySignedHeaders(authElements.getSignedHeaders(), authElements.isFromHeaders());
         validator.validateHashAlgo(authElements.getHashAlgo());
         validator.validateDates(requestDate, DateTime.parseShortString(authElements.getCredentialDate()), currentTime, authElements.getExpires());
-        validator.validateHost(address, hostHeader);
         validator.validateCredentialScope(credentialScope, authElements.getCredentialScope());
 
         String secret = retrieveSecret(keyDb, authElements.getAccessKeyId());
