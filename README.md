@@ -1,4 +1,4 @@
-EscherJava - HTTP request signing lib [![Build Status](https://travis-ci.org/emartech/escher-java.svg?branch=master)](https://travis-ci.org/emartech/escher-java)
+EscherJava - HTTP request signing lib ![Build Status](https://github.com/emartech/escher-java/actions/workflows/java.yml/badge.svg)
 =====================================
 
 Java implementation of the [Escher](https://github.com/emartech/escher) HTTP request signing library
