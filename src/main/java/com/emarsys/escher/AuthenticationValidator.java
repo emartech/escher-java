@@ -55,7 +55,7 @@ class AuthenticationValidator {
 
     public void validateSignature(String calculatedSignature, String signature) throws EscherException {
         if (!calculatedSignature.equals(signature)) {
-            throw new EscherException("The signatures do not match (provided: " + signature + ", calculated: " + calculatedSignature + ")");
+            throw new EscherException("The signatures do not match");
         }
     }
 
