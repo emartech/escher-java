@@ -5,3 +5,6 @@ services:
     working_dir: /home/app/src
     volumes:
       - .:/home/app/src
+    env_file:
+      - .env
+

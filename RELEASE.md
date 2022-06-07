@@ -2,46 +2,31 @@
 
 ## Preparation
 
-- Make sure version was package incremented in `pom.xml`
-- Compile and package by running `mvn clean package source:jar`
-
-## Import GPG key
-
-You can find the private key file [here](https://secret.emarsys.net/cred/detail/2542/)
-
-```bash
-gpg --import sonatype_emartech_gpg_private.key
-```
-
-## Sign files
-
-Signing will prompt you for a key passphrase which can be found [here](https://secret.emarsys.net/cred/detail/2542/)
-
-```bash
-cp pom.xml target
-cd target
-
-gpg -ab --default-key 41EBF74D9F93DA29 pom.xml
-gpg -ab --default-key 41EBF74D9F93DA29 escher-${NEW_VERSION_NUMBER}.jar
-gpg -ab --default-key 41EBF74D9F93DA29 escher-${NEW_VERSION_NUMBER}-javadoc.jar
-gpg -ab --default-key 41EBF74D9F93DA29 escher-${NEW_VERSION_NUMBER}-sources.jar
-```
+- fetch necessary information from [here](https://secret.emarsys.net/cred/detail/2542/)
+- add private key file to the project root named as `sonatype_emartech_gpg_private.key`
+- set required environment variables
+  - `cp .env.example .env`
+  - update passphrase
+  - update package version
 
 ## Create bundle.jar
 
-```bash
-jar -cvf bundle.jar pom.xml pom.xml.asc escher-${NEW_VERSION_NUMBER}.jar escher-${NEW_VERSION_NUMBER}.jar.asc escher-${NEW_VERSION_NUMBER}-javadoc.jar escher-${NEW_VERSION_NUMBER}-javadoc.jar.asc escher-${NEW_VERSION_NUMBER}-sources.jar escher-${NEW_VERSION_NUMBER}-sources.jar.asc
+```
+make bundle
 ```
 
 ## Upload bundle.jar
 
-- Log in to [Nexus](https://oss.sonatype.org/) with [these creds](https://secret.emarsys.net/cred/detail/2473/)
-- Upload `bundle.jar` at [stating upload](https://oss.sonatype.org/#staging-upload), 
+- Log in to [Nexus](https://oss.sonatype.org/) with [these credentials](https://secret.emarsys.net/cred/detail/2473/)
+- Upload `bundle.jar` at [staging upload](https://oss.sonatype.org/#staging-upload)
   - change upload mode to "Artifact Bundle"
-- go to [staging repositories](https://oss.sonatype.org/#stagingRepositories)
-- wait a bit until the "release" button becomes available
-- press release on the staging repo created for the bundle
-- wait until is it automatically deployed to maven central (it can take up to 2 hours to appear in MC)
+  - select `bundle.jar` in the "Select Bundle to Upload" dialogue
+  - click "Upload Bundle"
+- Release new bundle
+  - go to [staging repositories](https://oss.sonatype.org/#stagingRepositories)
+  - wait a bit until the "release" button becomes available
+  - press release on the staging repo created for the bundle
+  - wait until is it automatically deployed to maven central (it can take up to 2 hours to appear in MC)
 
 ## More info
 
@@ -53,3 +38,4 @@ jar -cvf bundle.jar pom.xml pom.xml.asc escher-${NEW_VERSION_NUMBER}.jar escher-
 - [Jira ticket for adding Escher-java](https://issues.sonatype.org/browse/OSSRH-13682)
 - [Emarsys public keys on mit.edu](https://pgp.mit.edu/pks/lookup?search=emarsys&op=index)
   - [Sonatype Emartech public key](https://pgp.mit.edu/pks/lookup?op=get&search=0x41EBF74D9F93DA29)
+

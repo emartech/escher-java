@@ -5,3 +5,5 @@ escher.iml
 .project
 .settings
 target
+.env
+*.key
