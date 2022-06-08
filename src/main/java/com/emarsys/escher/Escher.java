@@ -83,7 +83,7 @@ public class Escher {
 
         AuthElements authElements = helper.parseAuthElements(request);
         Instant requestDate = helper.parseDate(request);
-        String hostHeader = helper.parseHostHeader(request);
+        helper.parseHostHeader(request);
 
         AuthenticationValidator validator = new AuthenticationValidator(config);
 
