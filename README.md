@@ -15,6 +15,11 @@ Run the tests
 
 To run all the tests, use the `mvn test` command or `make test` if you have Docker installed.
 
+Release to Central Repository
+-------------
+
+To release the bundle.jar to the central maven repository check the [RELEASE.md file](./RELEASE.md)
+
 About Escher
 ------------
 
