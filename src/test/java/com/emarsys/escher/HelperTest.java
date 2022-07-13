@@ -123,6 +123,23 @@ public class HelperTest extends TestBase {
         assertThat(canonicalized, containsString("name=John%20Wick"));
     }
 
+    @Test
+    public void testCanonicalizeWithUrlParamsContainingSpecialCharacters() throws Exception {
+        TestParam param = parseTestData("get-vanilla");
+        TestParam.Request paramRequest = param.getRequest();
+        paramRequest.setUrl(paramRequest.getUrl() + "?specialchars=-_.~");
+
+        URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
+
+        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, new ArrayList<>(), paramRequest.getBody());
+
+        Helper helper = new Helper(createConfig(param));
+
+        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
+
+        assertThat(canonicalized, containsString("specialchars=-_.~"));
+    }
+
 
     @Test
     @UseDataProvider("getAddMandatoryHeadersCases")

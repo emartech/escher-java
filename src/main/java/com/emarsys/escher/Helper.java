@@ -25,7 +25,7 @@ class Helper {
     private final Config config;
 
 
-    public Helper (Config config) {
+    public Helper(Config config) {
         this.config = config;
     }
 
@@ -64,13 +64,23 @@ class Helper {
 
     private String queryParameterToString(NameValuePair entry) {
         try {
-            String formUrlEncodedParameter = URLEncoder.encode(entry.getName(), CHARSET) + "=" + URLEncoder.encode(entry.getValue(), CHARSET);
-            // We need this to be uri encoded (' ' => '%20') not x-www-form-urlencoded (' ' => '+') which is used by URLEncoder.
-            // This will result an encoding method similar to other escher libs.
-            return formUrlEncodedParameter.replace("+", "%20");
+            return encodeURIComponent(entry.getName()) + "=" + encodeURIComponent(entry.getValue());
         } catch (UnsupportedEncodingException shouldNeverHappen) {
             throw new RuntimeException(shouldNeverHappen);
         }
+    }
+
+
+    public static String encodeURIComponent(String s) throws UnsupportedEncodingException {
+        // We need this to be uri encoded (' ' => '%20') not x-www-form-urlencoded (' ' => '+') with 
+        // some of the RFC3986 reserved characters kept as they were (-._~) which is used by URLEncoder.
+        // This will result an encoding method similar to other escher libs.
+        return URLEncoder.encode(s, "UTF-8")
+                .replaceAll("\\+", "%20")
+                .replaceAll("\\%2D", "-")
+                .replaceAll("\\%2E", ".")
+                .replaceAll("\\%5F", "_")
+                .replaceAll("\\%7E", "~");
     }
 
 
