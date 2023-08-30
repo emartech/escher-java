@@ -1,5 +1,6 @@
 package com.emarsys.escher;
 
+import com.emarsys.escher.acceptance.StubClock;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -27,14 +28,14 @@ import static org.junit.Assert.fail;
 public class EscherTest extends TestBase {
 
 
+    private StubClock clock = new StubClock();
     private Escher escher;
 
 
     @Before
     public void setUp() throws Exception {
-        escher = new Escher("us-east-1/iam/aws4_request");
-        escher.setCurrentTime(createInstant(2011, 9, 9, 23, 40, 0))
-                .setAlgoPrefix("EMS");
+        clock.setInstant(createInstant(2011, 9, 9, 23, 40, 0));
+        escher = new Escher("us-east-1/iam/aws4_request", clock).setAlgoPrefix("EMS");
     }
 
 
@@ -46,11 +47,11 @@ public class EscherTest extends TestBase {
 
         TestParam.Config config = param.getConfig();
 
-        Escher escher = new Escher(config.getCredentialScope())
+        clock.setInstant(getConfigDate(param));
+        Escher escher = new Escher(config.getCredentialScope(), clock)
                 .setAuthHeaderName(config.getAuthHeaderName())
                 .setDateHeaderName(config.getDateHeaderName())
-                .setAlgoPrefix(config.getAlgoPrefix())
-                .setCurrentTime(getConfigDate(param));
+                .setAlgoPrefix(config.getAlgoPrefix());
 
         EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
 
@@ -73,11 +74,11 @@ public class EscherTest extends TestBase {
         EscherRequestImpl request = createRequest(param.getRequest());
         request.addHeader(config.getAuthHeaderName(), "this should be overwritten");
 
-        Escher escher = new Escher(config.getCredentialScope())
+        clock.setInstant(getConfigDate(param));
+        Escher escher = new Escher(config.getCredentialScope(), clock)
                 .setAuthHeaderName(config.getAuthHeaderName())
                 .setDateHeaderName(config.getDateHeaderName())
-                .setAlgoPrefix(config.getAlgoPrefix())
-                .setCurrentTime(getConfigDate(param));
+                .setAlgoPrefix(config.getAlgoPrefix());
 
         EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
 
@@ -95,11 +96,11 @@ public class EscherTest extends TestBase {
         param.getRequest().getHeaders().removeIf(header -> header.get(0).equals(config.getDateHeaderName()));
         EscherRequestImpl request = createRequest(param.getRequest());
 
-        Escher escher = new Escher(config.getCredentialScope())
+        clock.setInstant(getConfigDate(param));
+        Escher escher = new Escher(config.getCredentialScope(), clock)
                 .setAuthHeaderName(config.getAuthHeaderName())
                 .setDateHeaderName(config.getDateHeaderName())
-                .setAlgoPrefix(config.getAlgoPrefix())
-                .setCurrentTime(getConfigDate(param));
+                .setAlgoPrefix(config.getAlgoPrefix());
 
         EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
 
@@ -122,12 +123,12 @@ public class EscherTest extends TestBase {
 
     @Test
     public void testPresignUrl() throws Exception {
-        Escher escher = new Escher("us-east-1/host/aws4_request")
+        clock.setInstant(createInstant(2011, 5, 11, 12, 0, 0));
+        Escher escher = new Escher("us-east-1/host/aws4_request", clock)
                 .setAlgoPrefix("EMS")
                 .setVendorKey("EMS")
                 .setAuthHeaderName("X-Ems-Auth")
-                .setDateHeaderName("X-Ems-Date")
-                .setCurrentTime(createInstant(2011, 5, 11, 12, 0, 0));
+                .setDateHeaderName("X-Ems-Date");
 
         int expires = 123456;
         String signedUrl = escher.presignUrl("http://example.com/something?foo=bar&baz=barbaz", "th3K3y", "very_secure", expires);
@@ -162,12 +163,12 @@ public class EscherTest extends TestBase {
 
     @Test
     public void testAuthenticatePresignedUrl() throws Exception {
-        Escher escher = new Escher("us-east-1/host/aws4_request")
+        clock.setInstant(createInstant(2011, 5, 11, 12, 0, 0));
+        Escher escher = new Escher("us-east-1/host/aws4_request", clock)
                 .setAlgoPrefix("EMS")
                 .setVendorKey("EMS")
                 .setAuthHeaderName("X-Ems-Auth")
-                .setDateHeaderName("X-Ems-Date")
-                .setCurrentTime(createInstant(2011, 5, 11, 12, 0, 0));
+                .setDateHeaderName("X-Ems-Date");
 
         String key = "accesskey";
         String secret = "very_secure";
@@ -292,7 +293,7 @@ public class EscherTest extends TestBase {
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
         escher.setClockSkew(clockSkew);
-        escher.setCurrentTime(createInstant(2011, 9, 9, 23, minute, 0));
+        clock.setInstant(createInstant(2011, 9, 9, 23, minute, 0));
 
         assertAuthenticationError("Request date is not within the accepted time interval", request);
     }

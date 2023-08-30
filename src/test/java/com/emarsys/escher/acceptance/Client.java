@@ -23,7 +23,9 @@ public class Client {
     private static final String ESCHER_ACCESS_KEY_ID = "ACCESS_KEY_ID";
     private static final String ESCHER_SECRET = "SECRET";
 
-    private Escher escher = new Escher("test/credential/scope");
+    private final StubClock clock = new StubClock();
+
+    private Escher escher = new Escher("test/credential/scope", clock);
 
 
     public String sendRequest(HttpRequestBase request) throws IOException {
@@ -59,6 +61,10 @@ public class Client {
 
     public Escher getEscher() {
         return escher;
+    }
+
+    public StubClock getClock() {
+        return clock;
     }
 
 
