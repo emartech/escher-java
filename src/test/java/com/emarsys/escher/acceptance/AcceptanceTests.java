@@ -38,7 +38,8 @@ public class AcceptanceTests extends TestBase {
     @Before
     public void setUp() throws Exception {
         client = new Client();
-        server.getEscher().setCurrentTime(Instant.now());
+        setClientTime(Instant.now());
+        setServerTime(Instant.now());
     }
 
 
@@ -97,12 +98,12 @@ public class AcceptanceTests extends TestBase {
 
 
     private void setClientTime(Instant date) {
-        client.getEscher().setCurrentTime(date);
+        client.getClock().setInstant(date);
     }
 
 
     private void setServerTime(Instant date) {
-        server.getEscher().setCurrentTime(date);
+        server.getClock().setInstant(date);
     }
 
 

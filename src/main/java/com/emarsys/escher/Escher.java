@@ -8,6 +8,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -19,21 +20,27 @@ public class Escher {
     public static final String UNSIGNED_PAYLOAD = "UNSIGNED-PAYLOAD";
     public static final int DEFAULT_EXPIRES = 86400;
 
-    private String credentialScope;
+    private final String credentialScope;
+    private final Clock clock;
     private String algoPrefix = "ESR";
     private String vendorKey = "Escher";
     private String hashAlgo = "SHA256";
-    private Instant currentTime = Instant.now();
     private String authHeaderName = "X-Escher-Auth";
     private String dateHeaderName = "X-Escher-Date";
     private int clockSkew = 900;
 
     public Escher(String credentialScope) {
+        this(credentialScope, Clock.systemUTC());
+    }
+
+    public Escher(String credentialScope, Clock clock) {
         this.credentialScope = credentialScope;
+        this.clock = clock;
     }
 
 
     public EscherRequest signRequest(EscherRequest request, String accessKeyId, String secret, List<String> signedHeaders) throws EscherException {
+        Instant currentTime = this.clock.instant();
         Config config = createConfig();
         Helper helper = new Helper(config);
 
@@ -56,6 +63,7 @@ public class Escher {
 
     public String presignUrl(String url, String accessKeyId, String secret, int expires) throws EscherException{
         try {
+            Instant currentTime = this.clock.instant();
             Config config = createConfig();
             Helper helper = new Helper(config);
 
@@ -78,6 +86,7 @@ public class Escher {
 
 
     public String authenticate(EscherRequest request, Map<String, String> keyDb, InetSocketAddress address) throws EscherException {
+        Instant currentTime = this.clock.instant();
         Config config = createConfig();
         Helper helper = new Helper(config);
 
@@ -152,12 +161,6 @@ public class Escher {
 
     public Escher setHashAlgo(String hashAlgo) {
         this.hashAlgo = hashAlgo;
-        return this;
-    }
-
-
-    public Escher setCurrentTime(Instant currentTime) {
-        this.currentTime = currentTime;
         return this;
     }
 
