@@ -24,9 +24,8 @@ public class Server {
 
     private HttpServer server;
 
-    private final StubClock clock = new StubClock();
+    private Escher escher = new Escher("test/credential/scope");
 
-    private Escher escher = new Escher("test/credential/scope", clock);
 
     public void start() throws IOException {
         if (server != null) {
@@ -81,9 +80,6 @@ public class Server {
         return escher;
     }
 
-    public StubClock getClock() {
-        return clock;
-    }
 
     private static class EscherRequestServerImpl implements EscherRequest {
 
