@@ -41,13 +41,9 @@ class Helper {
     }
 
 
-    private String canonicalizePath(EscherRequest request) throws EscherException {
-        try {
-            String path = request.getURI().toURL().getPath();
-            return path.equals("") ? "/" : path;
-        } catch (MalformedURLException e) {
-            throw new EscherException(e);
-        }
+    private String canonicalizePath(EscherRequest request) {
+        String path = request.getURI().getRawPath();
+        return path.isEmpty() ? "/" : path;
     }
 
 
@@ -72,7 +68,7 @@ class Helper {
 
 
     public static String encodeURIComponent(String s) throws UnsupportedEncodingException {
-        // We need this to be uri encoded (' ' => '%20') not x-www-form-urlencoded (' ' => '+') with 
+        // We need this to be uri encoded (' ' => '%20') not x-www-form-urlencoded (' ' => '+') with
         // some of the RFC3986 reserved characters kept as they were (-._~) which is used by URLEncoder.
         // This will result an encoding method similar to other escher libs.
         return URLEncoder.encode(s, "UTF-8")
