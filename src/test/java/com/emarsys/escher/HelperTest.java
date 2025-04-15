@@ -140,6 +140,23 @@ public class HelperTest extends TestBase {
         assertThat(canonicalized, containsString("specialchars=-_.~"));
     }
 
+    @Test
+    public void testCanonicalizeWithRelativeUri() throws Exception {
+        TestParam param = parseTestData("get-vanilla");
+        TestParam.Request paramRequest = param.getRequest();
+        paramRequest.setUrl(paramRequest.getUrl() + "?name=John%2BWick");
+
+        URI relativeUri = new URI(paramRequest.getUrl());
+
+        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), relativeUri, new ArrayList<>(), paramRequest.getBody());
+
+        Helper helper = new Helper(createConfig(param));
+
+        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
+
+        assertThat(canonicalized, containsString("name=John%2BWick"));
+    }
+
 
     @Test
     @UseDataProvider("getAddMandatoryHeadersCases")
