@@ -17,21 +17,19 @@ make bundle
 
 ## Upload bundle.jar
 
-- Log in to [Nexus](https://oss.sonatype.org/) with [these credentials](https://secret.emarsys.net/cred/detail/2473/)
-- Upload `bundle.jar` at [staging upload](https://oss.sonatype.org/#staging-upload)
-  - change upload mode to "Artifact Bundle"
-  - select `bundle.jar` in the "Select Bundle to Upload" dialogue
-  - click "Upload Bundle"
-- Release new bundle
-  - go to [staging repositories](https://oss.sonatype.org/#stagingRepositories)
-  - wait a bit until the "release" button becomes available
-  - press release on the staging repo created for the bundle
+- Log in to [Central Portal](https://central.sonatype.com) with [these credentials](https://secret.emarsys.net/cred/detail/2473/)
+- Upload `bundle.jar` at [Deployments](https://central.sonatype.com/publishing/deployments) under `com.escher` namespace manually
+  - click on "Publish Component" under "com.escher" namespace
+  - name the deployment as `com.emarsys:escher:{NEW_VERSION}` (example: `com.emarsys:escher:1.1.1`)
+  - scroll down and click "Upload Your File" and upload the `bundle.jar`
+- Release new bundle with clicking the "Publish" button
   - wait until is it automatically deployed to maven central (it can take up to 2 hours to appear in MC)
 
 ## More info
 
-- [OSS hosting intro](http://central.sonatype.org/pages/ossrh-guide.html)
-- [Requirements (Sonatype)](http://central.sonatype.org/pages/requirements.html)
+- [Escher versions](https://central.sonatype.com/artifact/com.emarsys/escher/versions)
+- [Escher Maven Central](https://mvnrepository.com/artifact/com.emarsys/escher)
+- [Central Publisher Portal hosting intro](https://central.sonatype.org/publish/publish-portal-guide/)
 - [Working with GPG Signature](https://central.sonatype.org/publish/requirements/gpg/#distributing-your-public-key)
   - [Dealing with Expired Keys](https://central.sonatype.org/publish/requirements/gpg/#dealing-with-expired-keys)
   - [Distributing Public key](https://central.sonatype.org/publish/requirements/gpg/#distributing-your-public-key)
