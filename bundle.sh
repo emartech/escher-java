@@ -2,6 +2,7 @@
 
 GPG_PRI_KEY_FILE=sonatype_emartech_gpg_private.key
 DEFAULT_KEY=41EBF74D9F93DA29
+BUNDLE_DIRECTORY="com/emarsys/escher/${NEW_VERSION_NUMBER}"
 
 if [[ -z "${NEW_VERSION_NUMBER}" ]] ; then
   echo "ERROR: New version number environment variable must be set!"
@@ -28,19 +29,29 @@ mvn clean package source:jar -q
 echo Importing gpg key...
 gpg --pinentry-mode=loopback --passphrase ${GPG_PASSPHRASE} --import ${GPG_PRI_KEY_FILE}
 
-cp pom.xml target
+cp pom.xml target/escher-${NEW_VERSION_NUMBER}.pom
 cd target
 
 echo Sign files...
-gpg -ab --pinentry-mode=loopback --passphrase ${GPG_PASSPHRASE} --default-key ${DEFAULT_KEY} pom.xml
+gpg -ab --pinentry-mode=loopback --passphrase ${GPG_PASSPHRASE} --default-key ${DEFAULT_KEY} escher-${NEW_VERSION_NUMBER}.pom
 gpg -ab --pinentry-mode=loopback --passphrase ${GPG_PASSPHRASE} --default-key ${DEFAULT_KEY} escher-${NEW_VERSION_NUMBER}.jar
 gpg -ab --pinentry-mode=loopback --passphrase ${GPG_PASSPHRASE} --default-key ${DEFAULT_KEY} escher-${NEW_VERSION_NUMBER}-javadoc.jar
 gpg -ab --pinentry-mode=loopback --passphrase ${GPG_PASSPHRASE} --default-key ${DEFAULT_KEY} escher-${NEW_VERSION_NUMBER}-sources.jar
+sha1sum escher-${NEW_VERSION_NUMBER}.pom | cut -d ' ' -f 1 > escher-${NEW_VERSION_NUMBER}.pom.sha1
+sha1sum escher-${NEW_VERSION_NUMBER}.jar | cut -d ' ' -f 1 > escher-${NEW_VERSION_NUMBER}.jar.sha1
+sha1sum escher-${NEW_VERSION_NUMBER}-javadoc.jar | cut -d ' ' -f 1 > escher-${NEW_VERSION_NUMBER}-javadoc.jar.sha1
+sha1sum escher-${NEW_VERSION_NUMBER}-sources.jar | cut -d ' ' -f 1 > escher-${NEW_VERSION_NUMBER}-sources.jar.sha1
+md5sum escher-${NEW_VERSION_NUMBER}.pom | cut -d ' ' -f 1 > escher-${NEW_VERSION_NUMBER}.pom.md5
+md5sum escher-${NEW_VERSION_NUMBER}.jar | cut -d ' ' -f 1 > escher-${NEW_VERSION_NUMBER}.jar.md5
+md5sum escher-${NEW_VERSION_NUMBER}-javadoc.jar | cut -d ' ' -f 1 > escher-${NEW_VERSION_NUMBER}-javadoc.jar.md5
+md5sum escher-${NEW_VERSION_NUMBER}-sources.jar | cut -d ' ' -f 1 > escher-${NEW_VERSION_NUMBER}-sources.jar.md5
+
+echo Setting up bundle directory...
+mkdir -p ${BUNDLE_DIRECTORY}
+cp escher-${NEW_VERSION_NUMBER}.pom* ${BUNDLE_DIRECTORY}
+cp escher-${NEW_VERSION_NUMBER}.jar* ${BUNDLE_DIRECTORY}
+cp escher-${NEW_VERSION_NUMBER}-javadoc.jar* ${BUNDLE_DIRECTORY}
+cp escher-${NEW_VERSION_NUMBER}-sources.jar* ${BUNDLE_DIRECTORY}
 
 echo Create bundle...
-jar -cvf bundle.jar \
-  pom.xml pom.xml.asc \
-  escher-${NEW_VERSION_NUMBER}.jar escher-${NEW_VERSION_NUMBER}.jar.asc \
-  escher-${NEW_VERSION_NUMBER}-javadoc.jar escher-${NEW_VERSION_NUMBER}-javadoc.jar.asc \
-  escher-${NEW_VERSION_NUMBER}-sources.jar escher-${NEW_VERSION_NUMBER}-sources.jar.asc
-
+jar -cvfM bundle.jar com
