@@ -6,14 +6,13 @@ import java.util.List;
 
 public interface EscherRequest {
 
-    public String getHttpMethod();
-    public URI getURI();
-    public List<Header> getRequestHeaders();
-    public void addHeader(String fieldName, String fieldValue);
-    public String getBody();
+    String getHttpMethod();
+    URI getURI();
+    List<Header> getRequestHeaders();
+    void addHeader(String fieldName, String fieldValue);
+    String getBody();
 
-
-    public static class Header {
+    class Header {
         private String fieldName;
         private String fieldValue;
 

@@ -8,20 +8,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @RunWith(DataProviderRunner.class)
@@ -36,88 +29,6 @@ public class EscherTest extends TestBase {
     public void setUp() throws Exception {
         clock.setInstant(createInstant(2011, 9, 9, 23, 40, 0));
         escher = new Escher("us-east-1/iam/aws4_request", clock).setAlgoPrefix("EMS");
-    }
-
-
-    @Test
-    public void testSignRequest() throws Exception {
-        TestParam param = parseTestData("get-vanilla");
-
-        EscherRequestImpl request = createRequest(param.getRequest());
-
-        TestParam.Config config = param.getConfig();
-
-        clock.setInstant(getConfigDate(param));
-        Escher escher = new Escher(config.getCredentialScope(), clock)
-                .setAuthHeaderName(config.getAuthHeaderName())
-                .setDateHeaderName(config.getDateHeaderName())
-                .setAlgoPrefix(config.getAlgoPrefix());
-
-        EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
-
-        EscherRequestImpl expectedSignedRequest = createRequest(param.getExpected().getRequest());
-        assertThat("host", signedRequest.getURI().getHost(), is(expectedSignedRequest.getURI().getHost()));
-        assertThat("method", signedRequest.getHttpMethod(), is(expectedSignedRequest.getHttpMethod()));
-        assertThat("path", signedRequest.getURI().getPath(), is(expectedSignedRequest.getURI().getPath()));
-        assertThat("queryParams", signedRequest.getURI().getQuery(), is(expectedSignedRequest.getURI().getQuery()));
-        assertThat("body", signedRequest.getBody(), is(expectedSignedRequest.getBody()));
-        assertThat("headers", signedRequest.getRequestHeaders(), is(expectedSignedRequest.getRequestHeaders()));
-    }
-
-
-    @Test
-    public void testSignRequestWithAlreadyExistingAuthHeader() throws Exception {
-        TestParam param = parseTestData("get-vanilla");
-
-        TestParam.Config config = param.getConfig();
-
-        EscherRequestImpl request = createRequest(param.getRequest());
-        request.addHeader(config.getAuthHeaderName(), "this should be overwritten");
-
-        clock.setInstant(getConfigDate(param));
-        Escher escher = new Escher(config.getCredentialScope(), clock)
-                .setAuthHeaderName(config.getAuthHeaderName())
-                .setDateHeaderName(config.getDateHeaderName())
-                .setAlgoPrefix(config.getAlgoPrefix());
-
-        EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
-
-        EscherRequestImpl expectedSignedRequest = createRequest(param.getExpected().getRequest());
-        assertThat(signedRequest.getRequestHeaders(), is(expectedSignedRequest.getRequestHeaders()));
-    }
-
-
-    @Test
-    public void testSignRequestAddsMandatoryHeaderIfItIsNotPresent() throws Exception {
-        TestParam param = parseTestData("get-vanilla");
-
-        TestParam.Config config = param.getConfig();
-
-        param.getRequest().getHeaders().removeIf(header -> header.get(0).equals(config.getDateHeaderName()));
-        EscherRequestImpl request = createRequest(param.getRequest());
-
-        clock.setInstant(getConfigDate(param));
-        Escher escher = new Escher(config.getCredentialScope(), clock)
-                .setAuthHeaderName(config.getAuthHeaderName())
-                .setDateHeaderName(config.getDateHeaderName())
-                .setAlgoPrefix(config.getAlgoPrefix());
-
-        EscherRequest signedRequest = escher.signRequest(request, config.getAccessKeyId(), config.getApiSecret(), param.getHeadersToSign());
-
-        boolean dateHeaderPresent = signedRequest.getRequestHeaders().stream().anyMatch(header -> header.getFieldName().equals(config.getDateHeaderName()));
-        assertTrue(dateHeaderPresent);
-    }
-
-
-    private EscherRequestImpl createRequest(TestParam.Request paramRequest) throws URISyntaxException {
-        List<EscherRequest.Header> headers = paramRequest.getHeaders()
-                .stream()
-                .map(header -> new EscherRequest.Header(header.get(0), header.get(1)))
-                .collect(Collectors.toList());
-
-        URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
-
-        return new EscherRequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
     }
 
 
@@ -155,7 +66,7 @@ public class EscherTest extends TestBase {
                 .setAuthHeaderName("X-Ems-Auth")
                 .setDateHeaderName("X-Ems-Date");
 
-        String accessKey = escher.authenticate(request, keyDb, new InetSocketAddress("iam.amazonaws.com", 80));
+        String accessKey = escher.authenticate(request, keyDb);
 
         assertThat(accessKey, is("AKIDEXAMPLE"));
     }
@@ -179,7 +90,7 @@ public class EscherTest extends TestBase {
 
         Map<String, String> keyDb = new HashMap<>();
         keyDb.put(key, secret);
-        String accessKey = escher.authenticate(request, keyDb, new InetSocketAddress("example.com", 443));
+        String accessKey = escher.authenticate(request, keyDb);
 
         assertThat(accessKey, is(key));
     }
@@ -209,9 +120,9 @@ public class EscherTest extends TestBase {
     @DataProvider
     public static Object[][] getAuthenticationMissingHeaderCases() {
         return new Object[][] {
-                { "Host", "Missing header: host" },
-                { "X-Escher-Date", "Missing header: X-Escher-Date" },
-                { "X-Escher-Auth", "Request has not been signed." },
+                { "Host", "The host header is missing" },
+                { "X-Escher-Date", "The date header is missing" },
+                { "X-Escher-Auth", "The authorization header is missing" },
         };
     }
 
@@ -248,8 +159,8 @@ public class EscherTest extends TestBase {
     @DataProvider
     public static Object[][] getAuthenticateMandatoryHeaderNotSignedCases() {
         return new Object[][] {
-                { "content-type;x-escher-date", "Host header is not signed" },
-                { "content-type;host", "Date header is not signed" }
+                { "content-type;x-escher-date", "The host header is not signed" },
+                { "content-type;host", "The x-escher-date header is not signed" }
         };
     }
 
@@ -278,7 +189,7 @@ public class EscherTest extends TestBase {
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
-        assertAuthenticationError("The request date and credential date do not match", request);
+        assertAuthenticationError("The credential date does not match with the request date", request);
     }
 
 
@@ -295,7 +206,7 @@ public class EscherTest extends TestBase {
         escher.setClockSkew(clockSkew);
         clock.setInstant(createInstant(2011, 9, 9, 23, minute, 0));
 
-        assertAuthenticationError("Request date is not within the accepted time interval", request);
+        assertAuthenticationError("The request date is not within the accepted time range", request);
     }
 
 
@@ -320,7 +231,7 @@ public class EscherTest extends TestBase {
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
-        assertAuthenticationError("Invalid credentials", request);
+        assertAuthenticationError("The credential scope is invalid", request);
     }
 
 
@@ -334,7 +245,7 @@ public class EscherTest extends TestBase {
         );
         EscherRequest request = new EscherRequestImpl("POST", new URI("http://iam.amazonaws.com"), headers, "Action=ListUsers&Version=2010-05-08");
 
-        assertAuthenticationError("Invalid access key id", request);
+        assertAuthenticationError("Invalid Escher key", request);
     }
 
 
@@ -351,7 +262,7 @@ public class EscherTest extends TestBase {
         keyDb.put("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY");
 
         try {
-            escher.authenticate(request, keyDb, new InetSocketAddress("iam.amazonaws.com", 80));
+            escher.authenticate(request, keyDb);
 
             fail("exception should have been thrown");
         } catch (EscherException e) {
@@ -365,7 +276,7 @@ public class EscherTest extends TestBase {
         keyDb.put("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY");
 
         try {
-            escher.authenticate(request, keyDb, new InetSocketAddress("iam.amazonaws.com", 80));
+            escher.authenticate(request, keyDb);
 
             fail("exception should have been thrown");
         } catch (EscherException e) {

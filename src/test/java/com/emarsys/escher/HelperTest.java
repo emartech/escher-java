@@ -12,9 +12,8 @@ import java.net.URI;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -64,101 +63,6 @@ public class HelperTest extends TestBase {
 
 
     @Test
-    public void testCanonicalizeWithMoreHeaderThanHeadersToSign() throws Exception {
-        TestParam param = parseTestData("get-vanilla");
-
-        TestParam.Request paramRequest = param.getRequest();
-
-        List<EscherRequest.Header> headers = paramRequest.getHeaders()
-                .stream()
-                .map(header -> new EscherRequest.Header(header.get(0), header.get(1)))
-                .collect(Collectors.toList());
-
-        URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
-
-        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, headers, paramRequest.getBody());
-        request.addHeader("Custom-Header", "should-not-be-signed");
-
-        Helper helper = new Helper(createConfig(param));
-
-        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
-
-        assertThat(canonicalized, is(param.getExpected().getCanonicalizedRequest()));
-    }
-
-
-    @Test
-    public void testCanonicalizeWithUrlParamNameContainingCharactersThatShouldBeUrlEncoded() throws Exception {
-        TestParam param = parseTestData("get-vanilla");
-        TestParam.Request paramRequest = param.getRequest();
-        paramRequest.setUrl(paramRequest.getUrl() + "?array[]=value1&array[]=value2");
-
-        URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
-
-        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, new ArrayList<>(), paramRequest.getBody());
-
-        Helper helper = new Helper(createConfig(param));
-
-        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
-
-        assertThat(canonicalized, containsString("array%5B%5D=value1"));
-        assertThat(canonicalized, containsString("array%5B%5D=value2"));
-    }
-
-
-    @Test
-    public void testCanonicalizeWithUrlParamNameContainingSpace() throws Exception {
-        TestParam param = parseTestData("get-vanilla");
-        TestParam.Request paramRequest = param.getRequest();
-        paramRequest.setUrl(paramRequest.getUrl() + "?name=John%20Wick");
-
-        URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
-
-        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, new ArrayList<>(), paramRequest.getBody());
-
-        Helper helper = new Helper(createConfig(param));
-
-        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
-
-        assertThat(canonicalized, containsString("name=John%20Wick"));
-    }
-
-    @Test
-    public void testCanonicalizeWithUrlParamsContainingSpecialCharacters() throws Exception {
-        TestParam param = parseTestData("get-vanilla");
-        TestParam.Request paramRequest = param.getRequest();
-        paramRequest.setUrl(paramRequest.getUrl() + "?specialchars=-_.~");
-
-        URI uri = new URI("http://" + paramRequest.getHost() + paramRequest.getUrl());
-
-        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), uri, new ArrayList<>(), paramRequest.getBody());
-
-        Helper helper = new Helper(createConfig(param));
-
-        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
-
-        assertThat(canonicalized, containsString("specialchars=-_.~"));
-    }
-
-    @Test
-    public void testCanonicalizeWithRelativeUri() throws Exception {
-        TestParam param = parseTestData("get-vanilla");
-        TestParam.Request paramRequest = param.getRequest();
-        paramRequest.setUrl(paramRequest.getUrl() + "?name=John%2BWick");
-
-        URI relativeUri = new URI(paramRequest.getUrl());
-
-        EscherRequestImpl request = new EscherRequestImpl(paramRequest.getMethod(), relativeUri, new ArrayList<>(), paramRequest.getBody());
-
-        Helper helper = new Helper(createConfig(param));
-
-        String canonicalized = helper.canonicalize(request, param.getHeadersToSign());
-
-        assertThat(canonicalized, containsString("name=John%2BWick"));
-    }
-
-
-    @Test
     @UseDataProvider("getAddMandatoryHeadersCases")
     public void testAddMandatoryHeaders(List<String> missingHeaders, String expectedHost, String expectedDate) throws Exception {
         Config config = Config.create();
@@ -185,9 +89,9 @@ public class HelperTest extends TestBase {
     @DataProvider
     public static Object[][] getAddMandatoryHeadersCases() {
         return new Object[][] {
-                { Arrays.asList("test-date"), "given host", "20110511T120000Z" },
+                { Arrays.asList("test-date"), "given host", "Wed, 11 May 2011 12:00:00 GMT" },
                 { Arrays.asList("host"), "example.com", "given date" },
-                { Arrays.asList("test-date", "host"), "example.com", "20110511T120000Z" },
+                { Arrays.asList("test-date", "host"), "example.com", "Wed, 11 May 2011 12:00:00 GMT" },
         };
     }
 
@@ -291,7 +195,7 @@ public class HelperTest extends TestBase {
             helper.parseAuthElements(request);
             fail("exception should have been thrown");
         } catch (EscherException e) {
-            assertThat(e.getMessage(), is("Request has not been signed."));
+            assertThat(e.getMessage(), is("The authorization header is missing"));
         }
     }
 

@@ -93,7 +93,7 @@ public class AcceptanceTests extends TestBase {
 
         String response = client.sendRequest(get);
 
-        assertThat(response, is("Request date is not within the accepted time interval"));
+        assertThat(response, is("The request date is not within the accepted time range"));
     }
 
 

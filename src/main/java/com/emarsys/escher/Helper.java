@@ -4,23 +4,25 @@ import com.emarsys.escher.util.DateTime;
 import com.emarsys.escher.util.Hmac;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 
 class Helper {
 
     private static final char NEW_LINE = '\n';
-    private static final String CHARSET = "UTF-8";
 
     private final Config config;
 
@@ -31,7 +33,7 @@ class Helper {
 
 
     public String canonicalize(EscherRequest request, List<String> signedHeaders) throws EscherException {
-        return request.getHttpMethod() + NEW_LINE +
+        return request.getHttpMethod().toUpperCase() + NEW_LINE +
                 canonicalizePath(request) + NEW_LINE +
                 canonicalizeQueryParameters(request) + NEW_LINE +
                 canonicalizeHeaders(request.getRequestHeaders(), signedHeaders) + NEW_LINE +
@@ -42,14 +44,35 @@ class Helper {
 
 
     private String canonicalizePath(EscherRequest request) {
-        String path = request.getURI().getRawPath();
+        String path = normalizePath(request.getURI().getRawPath());
         return path.isEmpty() ? "/" : path;
     }
 
+    private String normalizePath(String path) {
+        String normalizedPath;
+        String originalPath = path;
+        while (true) {
+            normalizedPath = originalPath.replaceFirst("([^/]+/\\.\\./?|/\\./|//|/\\.$|/\\.\\.$)", "/");
+            if (normalizedPath.equals(originalPath)) {
+                return normalizedPath;
+            }
+            originalPath = normalizedPath;
+        }
+    }
 
     private String canonicalizeQueryParameters(EscherRequest request) {
-        return URLEncodedUtils.parse(request.getURI(), CHARSET)
-                .stream()
+        String rawQuery = request.getURI().getRawQuery();
+        if (rawQuery == null) {
+            return "";
+        }
+        return Arrays.stream(rawQuery.split("&"))
+                .filter(pair -> !pair.isEmpty())
+                .map(pair -> {
+                    String[] keyValue = pair.split("=", 2);
+                    String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                    String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8) : "";
+                    return new BasicNameValuePair(key, value);
+                })
                 .filter(entry -> !entry.getName().equals("X-" + config.getVendorKey() + "-Signature"))
                 .map(this::queryParameterToString)
                 .sorted()
@@ -71,12 +94,13 @@ class Helper {
         // We need this to be uri encoded (' ' => '%20') not x-www-form-urlencoded (' ' => '+') with
         // some of the RFC3986 reserved characters kept as they were (-._~) which is used by URLEncoder.
         // This will result an encoding method similar to other escher libs.
-        return URLEncoder.encode(s, "UTF-8")
+        return URLEncoder.encode(Objects.toString(s, ""), "UTF-8")
                 .replaceAll("\\+", "%20")
                 .replaceAll("\\%2D", "-")
                 .replaceAll("\\%2E", ".")
                 .replaceAll("\\%5F", "_")
-                .replaceAll("\\%7E", "~");
+                .replaceAll("\\%7E", "~")
+                .replaceAll("\\%21", "!");
     }
 
 
@@ -84,12 +108,28 @@ class Helper {
         return headers
                 .stream()
                 .filter(shouldHeaderBeSigned(signedHeaders))
-                .map(header -> header.getFieldName().toLowerCase() + ":" + header.getFieldValue().trim())
+                .collect(Collectors.groupingBy(
+                        header -> header.getFieldName().toLowerCase(),
+                        Collectors.mapping(
+                                header -> normalizeWhiteSpaces(header.getFieldValue().trim()),
+                                Collectors.joining(",")
+                        )))
+                .entrySet()
+                .stream()
+                .map(header -> header.getKey() + ":" + header.getValue())
                 .sorted()
                 .reduce(byJoiningWith(NEW_LINE))
                 .orElse("");
     }
 
+    private String normalizeWhiteSpaces(String headerValue) {
+        AtomicInteger index = new AtomicInteger(0);
+        return Arrays.stream(headerValue.trim().split("\"", -1)).map(piece -> {
+            boolean isInsideOfQuotes = index.getAndIncrement() % 2 == 1;
+            return isInsideOfQuotes ? piece : piece.replaceAll("\\p{javaSpaceChar}{2,}"," ");
+        }).collect(Collectors.joining("\""));
+
+    }
 
     private Predicate<EscherRequest.Header> shouldHeaderBeSigned(List<String> signedHeaders) {
         return header -> signedHeaders
@@ -135,7 +175,7 @@ class Helper {
     public String calculateAuthHeader(String accessKeyId, Instant date, String credentialScope, List<String> signedHeaders, String signature) {
         return config.getFullAlgorithm() +
                 " Credential=" + credentials(accessKeyId, date, credentialScope) +
-                ", SignedHeaders=" + signedHeaders.stream().reduce((s1, s2) -> s1 + ";" + s2).get().toLowerCase() +
+                ", SignedHeaders=" + this.signedHeaders(signedHeaders) +
                 ", Signature=" + signature;
     }
 
@@ -164,9 +204,9 @@ class Helper {
     public void addMandatoryHeaders(EscherRequest request, Instant date) {
         boolean requestHasDateHeader = request.getRequestHeaders()
                 .stream()
-                .anyMatch(header -> header.getFieldName().equals(config.getDateHeaderName()));
+                .anyMatch(header -> header.getFieldName().equalsIgnoreCase(config.getDateHeaderName()));
         if (!requestHasDateHeader) {
-            String formattedDate = DateTime.toLongString(date);
+            String formattedDate = DateTime.toHeaderString(date);
             request.addHeader(config.getDateHeaderName(), formattedDate);
             Logger.log("Header added - " + config.getDateHeaderName() + ": " + formattedDate);
         }
@@ -197,7 +237,7 @@ class Helper {
     public void addMandatorySignedHeaders(List<String> signedHeaders) {
         boolean asDateHeader = signedHeaders
                 .stream()
-                .anyMatch(header -> header.equals(config.getDateHeaderName()));
+                .anyMatch(header -> header.equalsIgnoreCase(config.getDateHeaderName()));
         if (!asDateHeader) {
             signedHeaders.add(config.getDateHeaderName());
         }
@@ -225,7 +265,7 @@ class Helper {
         try {
             return findHeader(request, "host").getFieldValue();
         } catch (NoSuchElementException e) {
-            throw new EscherException("Missing header: host");
+            throw new EscherException("The host header is missing");
         }
     }
 
@@ -236,7 +276,7 @@ class Helper {
         } else if (hasSignatureQueryParam(request.getURI())) {
             return AuthElements.parseQuery(request.getURI(), config);
         }
-        throw new EscherException("Request has not been signed.");
+        throw new EscherException("The authorization header is missing");
     }
 
 
@@ -246,7 +286,7 @@ class Helper {
             try {
                 date = findHeader(request, config.getDateHeaderName()).getFieldValue();
             } catch (NoSuchElementException e) {
-                throw new EscherException("Missing header: " + config.getDateHeaderName());
+                throw new EscherException("The date header is missing");
             }
         } else {
             String dateParamName = "X-" + config.getVendorKey() + "-Date";

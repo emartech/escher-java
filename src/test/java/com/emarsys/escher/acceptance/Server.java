@@ -54,7 +54,7 @@ public class Server {
         Map<String, String> keyDb = new HashMap<>();
         keyDb.put("ACCESS_KEY_ID", "SECRET");
 
-        escher.authenticate(request, keyDb, new InetSocketAddress("localhost", getPort()));
+        escher.authenticate(request, keyDb);
     }
 
 
@@ -88,6 +88,7 @@ public class Server {
     private static class EscherRequestServerImpl implements EscherRequest {
 
         private HttpExchange exchange;
+        private String body;
 
 
         public EscherRequestServerImpl(HttpExchange exchange) {
@@ -133,11 +134,14 @@ public class Server {
 
         @Override
         public String getBody() {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody()))) {
-                return br.lines().collect(Collectors.joining("\n"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            if (body == null) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody()))) {
+                    body = br.lines().collect(Collectors.joining("\n"));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
+            return body;
         }
     }
 

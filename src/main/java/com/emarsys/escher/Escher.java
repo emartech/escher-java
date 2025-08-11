@@ -5,14 +5,11 @@ import com.emarsys.escher.util.DateTime;
 import org.apache.http.client.utils.URIBuilder;
 
 import javax.xml.bind.DatatypeConverter;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class Escher {
@@ -29,6 +26,8 @@ public class Escher {
     private String dateHeaderName = "X-Escher-Date";
     private int clockSkew = 900;
 
+    public Map<String, String> debugInfo = new HashMap<>();
+
     public Escher(String credentialScope) {
         this(credentialScope, Clock.systemUTC());
     }
@@ -44,11 +43,19 @@ public class Escher {
         Config config = createConfig();
         Helper helper = new Helper(config);
 
+        if (!Arrays.asList("GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH").contains(request.getHttpMethod().toUpperCase())) {
+            throw new EscherException("The request method is invalid");
+        }
+
         helper.addMandatoryHeaders(request, currentTime);
         helper.addMandatorySignedHeaders(signedHeaders);
 
+        if (accessKeyId == null || secret == null) {
+            throw new EscherException("Invalid Escher key");
+        }
         String signature = calculateSignature(helper, request, secret, signedHeaders, currentTime);
         String authHeader = helper.calculateAuthHeader(accessKeyId, currentTime, credentialScope, signedHeaders, signature);
+        debugInfo.put("authHeaderValue", authHeader);
 
         helper.addAuthHeader(request, authHeader);
 
@@ -85,7 +92,11 @@ public class Escher {
     }
 
 
-    public String authenticate(EscherRequest request, Map<String, String> keyDb, InetSocketAddress address) throws EscherException {
+    public String authenticate(EscherRequest request, Map<String, String> keyDb) throws EscherException {
+        return authenticate(request, keyDb, new ArrayList<>());
+    }
+
+    public String authenticate(EscherRequest request, Map<String, String> keyDb, List<String> mandatorySignedHeaders) throws EscherException {
         Instant currentTime = this.clock.instant();
         Config config = createConfig();
         Helper helper = new Helper(config);
@@ -96,12 +107,18 @@ public class Escher {
 
         AuthenticationValidator validator = new AuthenticationValidator(config);
 
-        validator.validateMandatorySignedHeaders(authElements.getSignedHeaders(), authElements.isFromHeaders());
+        mandatorySignedHeaders.add("host");
+        if (authElements.isFromHeaders()) {
+            mandatorySignedHeaders.add(config.getDateHeaderName());
+        }
+        validator.validateMandatorySignedHeaders(authElements, mandatorySignedHeaders);
+        validator.validateHTTPMethod(request.getHttpMethod());
+        String secret = retrieveSecret(keyDb, authElements.getAccessKeyId());
+        validator.validateBody(request.getHttpMethod(), request.getBody());
         validator.validateHashAlgo(authElements.getHashAlgo());
         validator.validateDates(requestDate, DateTime.parseShortString(authElements.getCredentialDate()), currentTime, authElements.getExpires());
         validator.validateCredentialScope(credentialScope, authElements.getCredentialScope());
 
-        String secret = retrieveSecret(keyDb, authElements.getAccessKeyId());
         request = authElements.isFromHeaders() ? request : new PresignUrlEscherRequestWrapper(request);
         String calculatedSignature = calculateSignature(helper, request, secret, authElements.getSignedHeaders(), requestDate);
 
@@ -115,7 +132,7 @@ public class Escher {
         String secret = keyDb.get(accessKeyId);
 
         if (secret == null) {
-            throw new EscherException("Invalid access key id");
+            throw new EscherException("Invalid Escher key");
         }
         return secret;
     }
@@ -126,6 +143,9 @@ public class Escher {
         String stringToSign = helper.calculateStringToSign(date, credentialScope, canonicalizedRequest);
         byte[] signingKey = helper.calculateSigningKey(secret, date, credentialScope);
         String signature = helper.calculateSignature(signingKey, stringToSign);
+
+        debugInfo.put("canonicalizedRequest", canonicalizedRequest);
+        debugInfo.put("stringToSign", stringToSign);
 
         Logger.log("Canonicalized request: " + canonicalizedRequest);
         Logger.log("String to sign: " + stringToSign);

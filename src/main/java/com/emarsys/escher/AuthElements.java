@@ -21,7 +21,7 @@ class AuthElements {
 
     public static AuthElements parseHeader(String text, Config config) throws EscherException {
 
-        Pattern pattern = Pattern.compile("^" + config.getAlgoPrefix() + "-HMAC-(?<hashAlgo>[A-Z0-9,]+) Credential=(?<accessKeyId>[\\w\\-]+)/(?<date>\\d{8})/(?<credentialScope>[\\w\\-/]+), SignedHeaders=(?<signedHeaders>[A-Za-z\\-;]+), Signature=(?<signature>[0-9a-f]+)$");
+        Pattern pattern = Pattern.compile("^" + config.getAlgoPrefix() + "-HMAC-(?<hashAlgo>[A-Z0-9,]+) Credential=(?<accessKeyId>[\\w\\-]+)/(?<date>\\d{8})/(?<credentialScope>[\\w\\-/ ]+), SignedHeaders=(?<signedHeaders>[A-Za-z\\-;]+), Signature=(?<signature>[0-9a-f]+)$");
         Matcher matcher = pattern.matcher(text);
 
         if (matcher.matches()) {
@@ -38,7 +38,7 @@ class AuthElements {
 
             return elements;
         } else {
-            throw new EscherException("Malformed authorization header");
+            throw new EscherException("Could not parse auth header");
         }
 
     }

@@ -49,4 +49,18 @@ public class EscherRequestImpl implements EscherRequest {
         return body;
     }
 
+    @Override
+    public boolean equals(Object otherObject) {
+        if (this == otherObject) return true;
+        if (otherObject == null || getClass() != otherObject.getClass()) return false;
+
+        EscherRequestImpl escherRequest = (EscherRequestImpl) otherObject;
+
+        return httpMethod.equals(escherRequest.httpMethod) &&
+                uri.equals(escherRequest.uri) &&
+                headers.equals(escherRequest.headers) &&
+                body.equals(escherRequest.body);
+
+    }
+
 }

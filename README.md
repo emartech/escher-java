@@ -6,7 +6,7 @@ Java implementation of the [Escher](https://github.com/emartech/escher) HTTP req
 Prerequisite
 ------------
 
-In order to compile the project, **Maven** and **JDK 1.8** (or above) are needed.
+In order to compile the project, **Maven** and **JDK 11** (or above) are needed.
 
 To check if maven is configured properly, run the `mvn --version` command and look at the line beginning with *Java version*.
 
