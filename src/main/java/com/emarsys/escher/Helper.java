@@ -208,7 +208,6 @@ class Helper {
         if (!requestHasDateHeader) {
             String formattedDate = DateTime.toHeaderString(date);
             request.addHeader(config.getDateHeaderName(), formattedDate);
-            Logger.log("Header added - " + config.getDateHeaderName() + ": " + formattedDate);
         }
 
         boolean requestHasHostHeader = request.getRequestHeaders()
@@ -217,7 +216,6 @@ class Helper {
         if (!requestHasHostHeader) {
             String host = calculateHost(request.getURI());
             request.addHeader("host", host);
-            Logger.log("Header added - host: " + host);
         }
 
     }
@@ -248,16 +246,12 @@ class Helper {
         if (!hasHostHeader) {
             signedHeaders.add("host");
         }
-
-        Logger.log("Headers to sign: " + signedHeaders.stream().reduce((s1, s2) -> s1 + ", " + s2).orElse(""));
     }
 
 
     public void addAuthHeader(EscherRequest request, String fieldValue) {
         request.getRequestHeaders().removeIf(header -> header.getFieldName().equals(config.getAuthHeaderName()));
         request.addHeader(config.getAuthHeaderName(), fieldValue);
-
-        Logger.log("Auth header added - " + config.getAuthHeaderName() + ": " + fieldValue);
     }
 
 
