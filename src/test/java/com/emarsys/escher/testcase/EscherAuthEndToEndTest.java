@@ -121,14 +121,20 @@ public class EscherAuthEndToEndTest {
         Instant instant = testCase.getConfig().getDateAsInstant();
         ZoneId zoneId = ZoneId.of("Etc/UTC");
         Escher escher = new Escher(testCase.getConfig().getCredentialScope(), Clock.fixed(instant, zoneId));
-        escher.setVendorKey(testCase.getConfig().getVendorKey())
-                .setAlgoPrefix(testCase.getConfig().getAlgoPrefix())
-                .setAuthHeaderName(testCase.getConfig().getAuthHeaderName());
         if (testCase.getConfig().getHashAlgo() != null) {
             escher.setHashAlgo(testCase.getConfig().getHashAlgo());
         }
         if (testCase.getConfig().getDateHeaderName() != null) {
             escher.setDateHeaderName(testCase.getConfig().getDateHeaderName());
+        }
+        if (testCase.getConfig().getAuthHeaderName() != null) {
+            escher.setAuthHeaderName(testCase.getConfig().getAuthHeaderName());
+        }
+        if (testCase.getConfig().getAlgoPrefix() != null) {
+            escher.setAlgoPrefix(testCase.getConfig().getAlgoPrefix());
+        }
+        if (testCase.getConfig().getVendorKey() != null) {
+            escher.setVendorKey(testCase.getConfig().getVendorKey());
         }
         return escher;
     }

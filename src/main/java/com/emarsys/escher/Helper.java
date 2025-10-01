@@ -206,7 +206,13 @@ class Helper {
                 .stream()
                 .anyMatch(header -> header.getFieldName().equalsIgnoreCase(config.getDateHeaderName()));
         if (!requestHasDateHeader) {
-            String formattedDate = DateTime.toHeaderString(date);
+            String formattedDate;
+            if (config.getDateHeaderName().equalsIgnoreCase("date")) {
+                 formattedDate = DateTime.toHeaderString(date);
+            } else {
+                formattedDate = DateTime.toLongString(date);
+            }
+
             request.addHeader(config.getDateHeaderName(), formattedDate);
         }
 

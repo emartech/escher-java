@@ -89,9 +89,9 @@ public class HelperTest extends TestBase {
     @DataProvider
     public static Object[][] getAddMandatoryHeadersCases() {
         return new Object[][] {
-                { Arrays.asList("test-date"), "given host", "Wed, 11 May 2011 12:00:00 GMT" },
+                { Arrays.asList("test-date"), "given host", "20110511T120000Z" },
                 { Arrays.asList("host"), "example.com", "given date" },
-                { Arrays.asList("test-date", "host"), "example.com", "Wed, 11 May 2011 12:00:00 GMT" },
+                { Arrays.asList("test-date", "host"), "example.com", "20110511T120000Z" },
         };
     }
 
