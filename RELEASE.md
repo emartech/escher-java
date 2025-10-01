@@ -7,7 +7,7 @@
 - set required environment variables
   - `cp .env.example .env`
   - update passphrase
-  - update package version
+  - update package version in `.env: NEW_VERSION_NUMBER`
 
 ## Create bundle.jar
 
