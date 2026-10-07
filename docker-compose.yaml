@@ -4,6 +4,10 @@ services:
     working_dir: /home/app/src
     volumes:
       - .:/home/app/src
+      - maven-cache:/root/.m2/repository
     env_file:
       - .env
+
+volumes:
+  maven-cache:
 
