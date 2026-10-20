@@ -1,9 +1,9 @@
 package com.emarsys.escher.acceptance;
 
 import com.emarsys.escher.TestBase;
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -45,7 +45,7 @@ public class AcceptanceTests extends TestBase {
 
     @Test
     public void testWrongSignature() throws Exception {
-        HttpRequestBase get = new HttpGet("http://localhost:" + server.getPort() + "/");
+        HttpUriRequestBase get = new HttpGet("http://localhost:" + server.getPort() + "/");
         get = client.signRequest(get);
 
         Header authHeader = get.getFirstHeader("X-Escher-Auth");
@@ -60,7 +60,7 @@ public class AcceptanceTests extends TestBase {
 
     @Test
     public void testTheSimplestGetRequest() throws Exception {
-        HttpRequestBase get = new HttpGet("http://localhost:" + server.getPort() + "/");
+        HttpUriRequestBase get = new HttpGet("http://localhost:" + server.getPort() + "/");
         get = client.signRequest(get);
 
         String response = client.sendRequest(get);
@@ -75,7 +75,7 @@ public class AcceptanceTests extends TestBase {
         setServerTime(createInstant(2015, 5, 26, 14, 20, 0));
         String url = client.presignUrl("http://localhost:" + server.getPort() + "/", 1200);
 
-        HttpRequestBase get = new HttpGet(url);
+        HttpUriRequestBase get = new HttpGet(url);
 
         String response = client.sendRequest(get);
 
@@ -89,7 +89,7 @@ public class AcceptanceTests extends TestBase {
         setServerTime(createInstant(2015, 5, 26, 14, 0, 0));
         String url = client.presignUrl("http://localhost:" + server.getPort() + "/", 0);
 
-        HttpRequestBase get = new HttpGet(url);
+        HttpUriRequestBase get = new HttpGet(url);
 
         String response = client.sendRequest(get);
 
@@ -110,7 +110,7 @@ public class AcceptanceTests extends TestBase {
     @Test
     public void testPresignUrlWithAnotherUrlInParameter() throws Exception {
         String url = client.presignUrl("http://localhost:" + server.getPort() + "?url=http%3A%2F%2Fexample.com%2Ftest");
-        HttpRequestBase get = new HttpGet(url);
+        HttpUriRequestBase get = new HttpGet(url);
 
         String response = client.sendRequest(get);
 

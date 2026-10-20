@@ -5,7 +5,7 @@ import com.emarsys.escher.EscherException;
 import com.emarsys.escher.EscherRequest;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.hc.core5.net.URIBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -107,6 +107,7 @@ public class Server {
             try {
                 return new URIBuilder(exchange.getRequestURI())
                         .setScheme("http")
+                        .setHost("localhost")
                         .build();
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);

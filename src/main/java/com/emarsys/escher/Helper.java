@@ -2,9 +2,9 @@ package com.emarsys.escher;
 
 import com.emarsys.escher.util.DateTime;
 import com.emarsys.escher.util.Hmac;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.net.URIBuilder;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;

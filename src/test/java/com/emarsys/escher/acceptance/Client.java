@@ -4,15 +4,15 @@ package com.emarsys.escher.acceptance;
 import com.emarsys.escher.Escher;
 import com.emarsys.escher.EscherException;
 import com.emarsys.escher.EscherRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,21 +28,18 @@ public class Client {
     private Escher escher = new Escher("test/credential/scope", clock);
 
 
-    public String sendRequest(HttpRequestBase request) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpResponse response = client.execute(request);
-        return fetchResponse(response);
-    }
-
-
-    private String fetchResponse(HttpResponse response) throws IOException {
-        try (BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
-            return rd.lines().collect(Collectors.joining("\n"));
+    public String sendRequest(HttpUriRequestBase request) throws IOException {
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+            return client.execute(request, response -> {
+                try (BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
+                    return rd.lines().collect(Collectors.joining("\n"));
+                }
+            });
         }
     }
 
 
-    public HttpRequestBase signRequest(HttpRequestBase request) throws EscherException {
+    public HttpUriRequestBase signRequest(HttpUriRequestBase request) throws EscherException {
         EscherRequestClientImpl escherRequest = new EscherRequestClientImpl(request, "");
         escher.signRequest(escherRequest, ESCHER_ACCESS_KEY_ID, ESCHER_SECRET, new ArrayList<>());
         return escherRequest.getHttpRequest();
@@ -70,11 +67,11 @@ public class Client {
 
     private static class EscherRequestClientImpl implements EscherRequest {
 
-        private HttpRequestBase httpRequest;
+        private HttpUriRequestBase httpRequest;
         private String body;
 
 
-        public EscherRequestClientImpl(HttpRequestBase httpRequest, String body) {
+        public EscherRequestClientImpl(HttpUriRequestBase httpRequest, String body) {
             this.httpRequest = httpRequest;
             this.body = body;
         }
@@ -88,13 +85,17 @@ public class Client {
 
         @Override
         public URI getURI() {
-            return httpRequest.getURI();
+            try {
+                return httpRequest.getUri();
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
         }
 
 
         @Override
         public List<Header> getRequestHeaders() {
-            return Arrays.asList(httpRequest.getAllHeaders())
+            return Arrays.asList(httpRequest.getHeaders())
                     .stream()
                     .map(header -> new EscherRequest.Header(header.getName(), header.getValue()))
                     .collect(Collectors.toList());
@@ -113,7 +114,7 @@ public class Client {
         }
 
 
-        public HttpRequestBase getHttpRequest() {
+        public HttpUriRequestBase getHttpRequest() {
             return httpRequest;
         }
 
