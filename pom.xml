@@ -6,7 +6,7 @@
 
     <groupId>com.emarsys</groupId>
     <artifactId>escher</artifactId>
-    <version>2.2.0</version>
+    <version>2.2.1</version>
     <packaging>jar</packaging>
 
     <name>Escher</name>
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.4.4</version>
+            <version>5.6.4</version>
         </dependency>
         <!-- org.apache.httpcomponents:httpclient@4.5.13 would use 1.11 which has a know vulnerability:
             https://issues.apache.org/jira/browse/CODEC-134
@@ -95,7 +95,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.22.3</version>
+            <version>2.22.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
